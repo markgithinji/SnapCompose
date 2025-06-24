@@ -22,49 +22,60 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.example.composegallery.feature.gallery.data.util.Result
+import com.example.composegallery.feature.gallery.domain.model.Photo
 
 @Composable
 fun GalleryScreen(viewModel: GalleryViewModel = hiltViewModel()) {
-    val result by viewModel.photos.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    when (result) {
-        is Result.Loading -> {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
+    uiState.let {
+        when (it) {
+            UiState.Loading -> ProgressIndicator()
+            is UiState.Error -> DataNotFoundAnim(it.message)
+            is UiState.Content -> PhotoGrid(it.data)
         }
+    }
+}
 
-        is Result.Error -> {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(
-                    text = "Failed to load images: ${(result as Result.Error).message}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.error
+@Composable
+fun PhotoGrid(photos: List<Photo>) {
+    LazyVerticalGrid(columns = GridCells.Fixed(2)) {
+        items(photos, key = { it.id }) { photo ->
+            Column(modifier = Modifier.padding(8.dp)) {
+                AsyncImage(
+                    model = photo.imageUrl,
+                    contentDescription = photo.authorName,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(1f)
                 )
-            }
-        }
-
-        is Result.Success -> {
-            val photos = (result as Result.Success).data
-            LazyVerticalGrid(columns = GridCells.Fixed(2)) {
-                items(photos, key = { it.id }) { photo ->
-                    Column(modifier = Modifier.padding(8.dp)) {
-                        AsyncImage(
-                            model = photo.imageUrl,
-                            contentDescription = photo.authorName,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .aspectRatio(1f)
-                        )
-                        Text(photo.authorName, style = MaterialTheme.typography.bodySmall)
-                    }
-                }
+                Text(photo.authorName, style = MaterialTheme.typography.bodySmall)
             }
         }
     }
 }
+
+
+@Composable
+fun ProgressIndicator() {
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator()
+    }
+}
+
+@Composable
+fun DataNotFoundAnim(message: String) {
+    // TODO: add not-found lottie animation
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text(
+            text = "Failed to load images: $message",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.error
+        )
+    }
+}
+
 
 @Preview(showBackground = true)
 @Composable

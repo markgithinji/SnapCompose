@@ -16,17 +16,21 @@ class GalleryViewModel @Inject constructor(
     private val galleryRepository: GalleryRepository
 ) : ViewModel() {
 
-    private val _photos = MutableStateFlow<Result<List<Photo>>>(Result.Loading)
-    val photos: StateFlow<Result<List<Photo>>> = _photos
+    private val _uiState = MutableStateFlow<UiState<List<Photo>>>(UiState.Loading)
+    val uiState: StateFlow<UiState<List<Photo>>> = _uiState
 
     init {
-        loadImages()
+        loadPhotos()
     }
 
-    private fun loadImages() {
+    private fun loadPhotos() {
         viewModelScope.launch {
             galleryRepository.getPhotos().collect { result ->
-                _photos.value = result
+                _uiState.value = when (result) {
+                    is Result.Loading -> UiState.Loading
+                    is Result.Error -> UiState.Error(result.message)
+                    is Result.Success -> UiState.Content(result.data)
+                }
             }
         }
     }
