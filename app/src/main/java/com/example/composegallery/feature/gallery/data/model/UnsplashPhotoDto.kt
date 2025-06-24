@@ -12,14 +12,13 @@ data class UnsplashPhotoDto(
 )
 
 internal fun UnsplashPhotoDto.toDomainModel(): Photo? {
-    // Skip bad URLs or empty fields
-    if (urls.small.isBlank() || user.name.isBlank()) return null
+    if (urls.thumb.isBlank() || urls.regular.isBlank() || user.name.isBlank()) return null
 
     return Photo(
         id = id,
-        imageUrl = urls.small,
-        authorName = user.name,
-        likes = likes
+        thumbUrl = urls.thumb,
+        regularUrl = urls.regular,
+        authorName = user.name
     )
 }
 
