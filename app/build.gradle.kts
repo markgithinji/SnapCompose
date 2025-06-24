@@ -4,6 +4,8 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.hilt)
+    alias(libs.plugins.ksp)
 }
 
 val unsplashApiKey: String = project.findProperty("UNSPLASH_API_KEY") as? String
@@ -49,6 +51,12 @@ android {
     }
 }
 
+hilt {
+    // Disables the aggregating task to work around a known issue with JavaPoet:
+    // "Unable to find method 'java.lang.String com.squareup.javapoet.ClassName.canonicalName()'"
+    enableAggregatingTask = false
+}
+
 dependencies {
 
     implementation(libs.androidx.core.ktx)
@@ -65,6 +73,10 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.retrofit2.kotlinx.serialization.converter)
     implementation (libs.jakewharton.timber)
+    implementation(libs.hilt.android)
+    implementation(libs.androidx.hilt.navigation.compose)
+    ksp(libs.hilt.android.compiler)
+
 
 
     testImplementation(libs.junit)

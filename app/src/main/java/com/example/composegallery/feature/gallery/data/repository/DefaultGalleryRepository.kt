@@ -1,16 +1,16 @@
 package com.example.composegallery.feature.gallery.data.repository
 
-import android.util.Log
 import com.example.composegallery.BuildConfig
 import com.example.composegallery.feature.gallery.data.model.toDomainModel
 import com.example.composegallery.feature.gallery.data.remote.UnsplashApi
 import com.example.composegallery.feature.gallery.domain.model.Photo
-import timber.log.Timber
+import com.example.composegallery.feature.gallery.domain.repository.GalleryRepository
+import javax.inject.Inject
 
-class GalleryRepository(
+class DefaultGalleryRepository @Inject constructor(
     private val api: UnsplashApi
-) {
-    suspend fun getPhotos(page: Int = 1, perPage: Int = 20): List<Photo> {
+) : GalleryRepository {
+    override suspend fun getPhotos(page: Int, perPage: Int): List<Photo> {
         val accessKey = BuildConfig.UNSPLASH_API_KEY
 
         val result = api.getPhotos(page, perPage, accessKey)
