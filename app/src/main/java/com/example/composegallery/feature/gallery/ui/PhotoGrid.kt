@@ -1,15 +1,17 @@
 package com.example.composegallery.feature.gallery.ui
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -24,27 +26,31 @@ import com.example.composegallery.feature.gallery.domain.model.Photo
 
 @Composable
 fun PhotoGrid(photos: LazyPagingItems<Photo>) {
-    LazyVerticalGrid(columns = GridCells.Fixed(2)) {
+    LazyVerticalStaggeredGrid(
+        columns = StaggeredGridCells.Fixed(2),
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(8.dp),
+        verticalItemSpacing = 8.dp,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
         items(photos.itemCount) { index ->
             val photo = photos[index]
-            if (photo != null) PhotoCard(photo = photo)
+            if (photo != null) {
+                PhotoCard(photo)
+            }
         }
 
-        // Footer state for append
+        // Footer for pagination
         when (val appendState = photos.loadState.append) {
-            is LoadState.Loading -> {
-                item(span = { GridItemSpan(maxLineSpan) }) {
-                    BottomLoadingIndicator()
-                }
+            is LoadState.Loading -> item {
+                BottomLoadingIndicator()
             }
 
-            is LoadState.Error -> {
-                item(span = { GridItemSpan(maxLineSpan) }) {
-                    LoadMoreError(
-                        message = appendState.error.localizedMessage ?: "Error loading more",
-                        onRetry = { photos.retry() }
-                    )
-                }
+            is LoadState.Error -> item {
+                LoadMoreError(
+                    message = appendState.error.localizedMessage ?: "Error loading more",
+                    onRetry = { photos.retry() }
+                )
             }
 
             else -> Unit
