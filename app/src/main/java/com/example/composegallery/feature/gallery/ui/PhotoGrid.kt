@@ -20,6 +20,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -34,6 +36,8 @@ fun PhotoGrid(
     onQueryChange: (String) -> Unit,
     onSearch: (String) -> Unit
 ) {
+    val retryKeys = remember { mutableStateMapOf<String, Int>() }
+
     LazyVerticalStaggeredGrid(
         columns = StaggeredGridCells.Fixed(2),
         modifier = Modifier.fillMaxSize(),
@@ -53,10 +57,28 @@ fun PhotoGrid(
             )
         }
 
-        items(photos.itemCount) { index ->
+        items(
+            count = photos.itemCount,
+            key = { index -> photos[index]?.id ?: index },
+            span = { index ->
+                if ((index + 1) % 5 == 0) {
+                    StaggeredGridItemSpan.FullLine
+                } else {
+                    StaggeredGridItemSpan.SingleLane
+                }
+            }
+        ) { index ->
             val photo = photos[index]
             if (photo != null) {
-                PhotoCard(photo = photo)
+                val retryKey = retryKeys[photo.id] ?: 0
+
+                PhotoCard(
+                    imageUrl = "${photo.fullUrl}?retry=$retryKey",
+                    aspectRatio = photo.width.toFloat() / photo.height.toFloat(),
+                    authorName = photo.authorName,
+                    authorImageUrl = "${photo.authorProfileImageUrl}?retry=$retryKey",
+                    onRetry = { retryKeys[photo.id] = retryKey + 1 }
+                )
             }
         }
 

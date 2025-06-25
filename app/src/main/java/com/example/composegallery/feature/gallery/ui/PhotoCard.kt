@@ -14,15 +14,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,26 +27,27 @@ import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
 import coil.compose.SubcomposeAsyncImage
 import coil.compose.SubcomposeAsyncImageContent
-import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.valentinilk.shimmer.ShimmerBounds
 import com.valentinilk.shimmer.rememberShimmer
 import com.valentinilk.shimmer.shimmer
 
 @Composable
-fun PhotoCard(photo: Photo) {
+fun PhotoCard(
+    imageUrl: String,
+    aspectRatio: Float,
+    authorName: String,
+    authorImageUrl: String,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     val shimmer = rememberShimmer(shimmerBounds = ShimmerBounds.View)
 
-    // Trigger to force image reload when user taps retry
-    var retryKey by remember { mutableIntStateOf(0) }
+    Column(modifier = modifier.padding(8.dp)) {
 
-    val aspectRatio = if (photo.height > 0) {
-        photo.width.toFloat() / photo.height.toFloat()
-    } else 1f
-
-    Column(modifier = Modifier.padding(8.dp)) {
+        // Main photo
         SubcomposeAsyncImage(
-            model = photo.fullUrl + "?retry=$retryKey", // Force reload on key change
-            contentDescription = photo.authorName,
+            model = imageUrl,
+            contentDescription = authorName,
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .fillMaxWidth()
@@ -62,16 +58,14 @@ fun PhotoCard(photo: Photo) {
                 is AsyncImagePainter.State.Loading,
                 is AsyncImagePainter.State.Empty -> {
                     Box(
-                        modifier = Modifier
+                        Modifier
                             .fillMaxSize()
                             .shimmer(shimmer)
                             .background(MaterialTheme.colorScheme.surfaceVariant)
                     )
                 }
 
-                is AsyncImagePainter.State.Success -> {
-                    SubcomposeAsyncImageContent()
-                }
+                is AsyncImagePainter.State.Success -> SubcomposeAsyncImageContent()
 
                 is AsyncImagePainter.State.Error -> {
                     Column(
@@ -79,24 +73,14 @@ fun PhotoCard(photo: Photo) {
                             .fillMaxSize()
                             .clip(RoundedCornerShape(12.dp))
                             .background(MaterialTheme.colorScheme.errorContainer)
-                            .clickable {
-                                retryKey++
-                            }
+                            .clickable { onRetry() }
                             .padding(16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
-                        Text(
-                            text = "⚠",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = MaterialTheme.colorScheme.onErrorContainer
-                        )
+                        Text("⚠", style = MaterialTheme.typography.headlineMedium)
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Tap to retry",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onErrorContainer
-                        )
+                        Text("Tap to retry", style = MaterialTheme.typography.bodyMedium)
                     }
                 }
             }
@@ -104,22 +88,23 @@ fun PhotoCard(photo: Photo) {
 
         Spacer(modifier = Modifier.height(4.dp))
 
+        // Author info
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(start = 4.dp)
         ) {
             AsyncImage(
-                model = photo.authorProfileImageUrl + "?retry=$retryKey", // Triggers retry
-                contentDescription = "${photo.authorName}'s profile picture",
+                model = authorImageUrl,
+                contentDescription = "${authorName}'s profile picture",
                 modifier = Modifier
                     .size(20.dp)
-                    .clip(CircleShape)
+                    .clip(RoundedCornerShape(50))
                     .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentScale = ContentScale.Crop
             )
             Spacer(modifier = Modifier.width(6.dp))
             Text(
-                text = photo.authorName,
+                text = authorName,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurface
             )
