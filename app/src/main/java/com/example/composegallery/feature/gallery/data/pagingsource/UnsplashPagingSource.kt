@@ -5,6 +5,8 @@ import androidx.paging.PagingState
 import com.example.composegallery.BuildConfig
 import com.example.composegallery.feature.gallery.data.model.toDomainModel
 import com.example.composegallery.feature.gallery.data.remote.UnsplashApi
+import com.example.composegallery.feature.gallery.data.util.Result
+import com.example.composegallery.feature.gallery.data.util.safeApiCall
 import com.example.composegallery.feature.gallery.domain.model.Photo
 
 class UnsplashPagingSource(
@@ -12,17 +14,25 @@ class UnsplashPagingSource(
 ) : PagingSource<Int, Photo>() {
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Photo> {
         val page = params.key ?: 1
-        return try {
-            val response = api.getPhotos(page, params.loadSize, BuildConfig.UNSPLASH_API_KEY)
-            val photos = response.mapNotNull { it.toDomainModel() }
 
-            LoadResult.Page(
-                data = photos,
-                prevKey = if (page == 1) null else page - 1,
-                nextKey = if (photos.isEmpty()) null else page + 1
-            )
-        } catch (e: Exception) {
-            LoadResult.Error(e)
+        return when (val result = safeApiCall {
+            api.getPhotos(
+                page = page,
+                perPage = params.loadSize,
+                clientId = BuildConfig.UNSPLASH_API_KEY
+            ).mapNotNull { it.toDomainModel() }
+        }) {
+            is Result.Success -> {
+                LoadResult.Page(
+                    data = result.data,
+                    prevKey = if (page == 1) null else page - 1,
+                    nextKey = if (result.data.isEmpty()) null else page + 1
+                )
+            }
+
+            is Result.Error -> {
+                LoadResult.Error(result.throwable ?: Exception(result.message))
+            }
         }
     }
 

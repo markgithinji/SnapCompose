@@ -7,11 +7,20 @@ inline fun <T> safeApiCall(block: () -> T): Result<T> {
     return try {
         Result.Success(block())
     } catch (e: CancellationException) {
-        throw e // Rethrow coroutine cancellation
+        throw e // Important: don't swallow coroutine cancellation
     } catch (e: IOException) {
         Result.Error("No internet connection", e)
     } catch (e: retrofit2.HttpException) {
-        Result.Error("HTTP ${e.code()}: ${e.message()}", e)
+        val message = when (e.code()) {
+            400 -> "Bad request. Something is wrong with the request."
+            401 -> "Unauthorized. Please check your access token."
+            403 -> "Forbidden. You don't have permission to access this resource."
+            404 -> "Not found. The resource you're looking for doesn't exist."
+            500 -> "Server error. Something went wrong on Unsplash's end."
+            503 -> "Service unavailable. Try again later."
+            else -> "HTTP ${e.code()}: ${e.message()}"
+        }
+        Result.Error(message, e)
     } catch (e: Exception) {
         Result.Error("Unexpected error", e)
     }
