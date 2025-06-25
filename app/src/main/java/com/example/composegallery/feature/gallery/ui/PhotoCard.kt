@@ -1,5 +1,10 @@
 package com.example.composegallery.feature.gallery.ui
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -72,20 +77,32 @@ fun PhotoImage(
             .aspectRatio(aspectRatio)
             .clip(RoundedCornerShape(12.dp))
     ) {
-        when (painter.state) {
-            is AsyncImagePainter.State.Loading,
-            is AsyncImagePainter.State.Empty -> {
-                Box(
-                    Modifier
-                        .fillMaxSize()
-                        .shimmer(shimmer)
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                )
+        AnimatedContent(
+            targetState = painter.state,
+            transitionSpec = {
+                fadeIn(tween(500)) togetherWith fadeOut(tween(350))
+            },
+            label = "AsyncImageStateTransition"
+        ) { state ->
+            when (state) {
+                is AsyncImagePainter.State.Loading,
+                is AsyncImagePainter.State.Empty -> {
+                    Box(
+                        Modifier
+                            .fillMaxSize()
+                            .shimmer(shimmer)
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                    )
+                }
+
+                is AsyncImagePainter.State.Success -> {
+                    SubcomposeAsyncImageContent()
+                }
+
+                is AsyncImagePainter.State.Error -> {
+                    PhotoErrorOverlay(onRetry = onRetry)
+                }
             }
-
-            is AsyncImagePainter.State.Success -> SubcomposeAsyncImageContent()
-
-            is AsyncImagePainter.State.Error -> PhotoErrorOverlay(onRetry)
         }
     }
 }
