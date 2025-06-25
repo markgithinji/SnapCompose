@@ -1,7 +1,8 @@
 package com.example.composegallery.feature.gallery.ui
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,10 +14,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,13 +41,16 @@ import com.valentinilk.shimmer.shimmer
 fun PhotoCard(photo: Photo) {
     val shimmer = rememberShimmer(shimmerBounds = ShimmerBounds.View)
 
+    // Trigger to force image reload when user taps retry
+    var retryKey by remember { mutableIntStateOf(0) }
+
     val aspectRatio = if (photo.height > 0) {
         photo.width.toFloat() / photo.height.toFloat()
     } else 1f
 
     Column(modifier = Modifier.padding(8.dp)) {
         SubcomposeAsyncImage(
-            model = photo.fullUrl,
+            model = photo.fullUrl + "?retry=$retryKey", // Force reload on key change
             contentDescription = photo.authorName,
             contentScale = ContentScale.Crop,
             modifier = Modifier
@@ -65,15 +74,27 @@ fun PhotoCard(photo: Photo) {
                 }
 
                 is AsyncImagePainter.State.Error -> {
-                    Box(
+                    Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(MaterialTheme.colorScheme.errorContainer),
-                        contentAlignment = Alignment.Center
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.errorContainer)
+                            .clickable {
+                                retryKey++
+                            }
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
                     ) {
                         Text(
                             text = "⚠",
                             style = MaterialTheme.typography.headlineMedium,
+                            color = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Tap to retry",
+                            style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onErrorContainer
                         )
                     }
@@ -82,16 +103,17 @@ fun PhotoCard(photo: Photo) {
         }
 
         Spacer(modifier = Modifier.height(4.dp))
+
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(start = 4.dp)
         ) {
             AsyncImage(
-                model = photo.authorProfileImageUrl,
+                model = photo.authorProfileImageUrl + "?retry=$retryKey", // Triggers retry
                 contentDescription = "${photo.authorName}'s profile picture",
                 modifier = Modifier
                     .size(20.dp)
-                    .clip(RoundedCornerShape(50))
+                    .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentScale = ContentScale.Crop
             )

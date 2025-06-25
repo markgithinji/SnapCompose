@@ -17,7 +17,6 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -57,7 +56,7 @@ fun PhotoGrid(
         items(photos.itemCount) { index ->
             val photo = photos[index]
             if (photo != null) {
-                PhotoCard(photo)
+                PhotoCard(photo = photo)
             }
         }
 
@@ -87,7 +86,7 @@ fun BottomLoadingIndicator() {
             .navigationBarsPadding(),
         contentAlignment = Alignment.Center
     ) {
-        CircularProgressIndicator()
+        ProgressIndicator()
     }
 }
 

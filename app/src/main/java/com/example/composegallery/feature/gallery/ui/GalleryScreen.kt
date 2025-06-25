@@ -2,7 +2,11 @@ package com.example.composegallery.feature.gallery.ui
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
@@ -14,6 +18,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -41,7 +47,10 @@ fun GalleryScreen(viewModel: GalleryViewModel = hiltViewModel()) {
 
                 is LoadState.Error -> {
                     val error = (photos.loadState.refresh as LoadState.Error).error.localizedMessage
-                    DataNotFoundAnim(message = error ?: "Unknown error")
+                    DataNotFoundAnim(
+                        message = error ?: "Unknown error",
+                        onRetry = { photos.retry() }
+                    )
                 }
 
                 else -> {
@@ -68,20 +77,27 @@ fun ProgressIndicator() {
     ) {
         LoadingIndicator()
     }
-    // TODO: Improve progress indicator
-//    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-//        CircularProgressIndicator()
-//    }
 }
 
 @Composable
-fun DataNotFoundAnim(message: String) {
-    // TODO: add not-found lottie animation
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(
-            text = "Failed to load images: $message",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.error
-        )
+fun DataNotFoundAnim(message: String, onRetry: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = "Failed to load images:\n$message",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(onClick = onRetry) {
+                Text("Retry")
+            }
+        }
     }
 }
