@@ -69,16 +69,19 @@ dependencies {
     implementation(libs.androidx.material3)
 
     implementation(libs.coil.compose)
-    implementation (libs.retrofit)
+    implementation(libs.retrofit)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.retrofit2.kotlinx.serialization.converter)
-    implementation (libs.jakewharton.timber)
+    implementation(libs.jakewharton.timber)
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
     ksp(libs.hilt.android.compiler)
     implementation(libs.androidx.paging.runtime)
     implementation(libs.androidx.paging.compose)
     implementation(libs.compose.shimmer)
+    implementation(libs.accompanist.swiperefresh)
+    implementation(libs.material3) // LoadingIndicator
+
 
 
 
