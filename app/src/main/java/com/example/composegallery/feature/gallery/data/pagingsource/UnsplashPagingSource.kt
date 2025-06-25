@@ -10,13 +10,14 @@ import com.example.composegallery.feature.gallery.domain.model.Photo
 class UnsplashPagingSource(
     private val api: UnsplashApi
 ) : PagingSource<Int, Photo>() {
+    private val seenPhotoIds = mutableSetOf<String>()
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Photo> {
         val page = params.key ?: 1
         return try {
             val response = api.getPhotos(page, params.loadSize, BuildConfig.UNSPLASH_API_KEY)
-            val photos = response
-                .mapNotNull { it.toDomainModel() }
+            val photos = response.mapNotNull { it.toDomainModel() }
+                .filter { seenPhotoIds.add(it.id) } // Filter out duplicates TODO: Find out source of duplicates
 
             LoadResult.Page(
                 data = photos,
