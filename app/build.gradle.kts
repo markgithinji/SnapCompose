@@ -82,9 +82,6 @@ dependencies {
     implementation(libs.accompanist.swiperefresh)
     implementation(libs.material3) // LoadingIndicator
 
-
-
-
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

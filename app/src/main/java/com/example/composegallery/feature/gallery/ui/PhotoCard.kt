@@ -5,6 +5,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,15 +24,18 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
 import coil.compose.SubcomposeAsyncImage
 import coil.compose.SubcomposeAsyncImageContent
+import com.example.composegallery.feature.gallery.ui.util.BlurHashDecoder
 import com.valentinilk.shimmer.ShimmerBounds
 import com.valentinilk.shimmer.rememberShimmer
 import com.valentinilk.shimmer.shimmer
@@ -43,13 +47,14 @@ fun PhotoCard(
     authorName: String,
     authorImageUrl: String,
     onRetry: () -> Unit,
-    modifier: Modifier = Modifier
+    blurHash: String? = null
 ) {
-    Column(modifier = modifier.padding(8.dp)) {
+    Column(modifier = Modifier.padding(8.dp)) {
         PhotoImage(
             imageUrl = imageUrl,
             aspectRatio = aspectRatio,
             contentDescription = authorName,
+            blurHash = blurHash,
             onRetry = onRetry
         )
 
@@ -59,11 +64,13 @@ fun PhotoCard(
     }
 }
 
+
 @Composable
 fun PhotoImage(
     imageUrl: String,
     aspectRatio: Float,
     contentDescription: String,
+    blurHash: String? = null,
     onRetry: () -> Unit
 ) {
     val shimmer = rememberShimmer(shimmerBounds = ShimmerBounds.View)
@@ -87,12 +94,26 @@ fun PhotoImage(
             when (state) {
                 is AsyncImagePainter.State.Loading,
                 is AsyncImagePainter.State.Empty -> {
-                    Box(
-                        Modifier
-                            .fillMaxSize()
-                            .shimmer(shimmer)
-                            .background(MaterialTheme.colorScheme.surfaceVariant)
-                    )
+                    if (!blurHash.isNullOrBlank()) {
+                        val blurBitmap = remember(blurHash) {
+                            BlurHashDecoder.decode(blurHash, 20, 12)?.asImageBitmap()
+                        }
+                        blurBitmap?.let {
+                            Image(
+                                bitmap = it,
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                    } else {
+                        Box(
+                            Modifier
+                                .fillMaxSize()
+                                .shimmer(shimmer)
+                                .background(MaterialTheme.colorScheme.surfaceVariant)
+                        )
+                    }
                 }
 
                 is AsyncImagePainter.State.Success -> {

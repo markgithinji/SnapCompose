@@ -77,7 +77,8 @@ fun PhotoGrid(
                     aspectRatio = photo.width.toFloat() / photo.height.toFloat(),
                     authorName = photo.authorName,
                     authorImageUrl = "${photo.authorProfileImageUrl}?retry=$retryKey",
-                    onRetry = { retryKeys[photo.id] = retryKey + 1 }
+                    onRetry = { retryKeys[photo.id] = retryKey + 1 },
+                    blurHash = photo.blurHash
                 )
             }
         }

@@ -7,5 +7,6 @@ data class Photo(
     val thumbUrl: String,
     val fullUrl: String,
     val authorName: String,
-    val authorProfileImageUrl: String
+    val authorProfileImageUrl: String,
+    val blurHash: String? = null
 )
