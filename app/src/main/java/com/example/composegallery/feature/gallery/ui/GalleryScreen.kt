@@ -1,5 +1,10 @@
 package com.example.composegallery.feature.gallery.ui
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -40,32 +45,39 @@ fun GalleryScreen(viewModel: GalleryViewModel = hiltViewModel()) {
         modifier = Modifier.fillMaxSize()
     ) {
         Column {
-            when (photos.loadState.refresh) {
-                is LoadState.Loading -> {
-                    ProgressIndicator()
-                }
+            AnimatedContent(
+                targetState = photos.loadState.refresh,
+                transitionSpec = {
+                    fadeIn(tween(500)) togetherWith fadeOut(tween(300))
+                },
+                label = "PhotoGridTransition"
+            ) { state ->
+                when (state) {
+                    is LoadState.Loading -> {
+                        ProgressIndicator()
+                    }
 
-                is LoadState.Error -> {
-                    val error = (photos.loadState.refresh as LoadState.Error).error.localizedMessage
-                    DataNotFoundAnim(
-                        message = error ?: "Unknown error",
-                        onRetry = { photos.retry() }
-                    )
-                }
+                    is LoadState.Error -> {
+                        val error = state.error.localizedMessage
+                        DataNotFoundAnim(
+                            message = error ?: "Unknown error",
+                            onRetry = { photos.retry() }
+                        )
+                    }
 
-                else -> {
-                    PhotoGrid(
-                        photos = photos,
-                        query = "",
-                        onQueryChange = {},
-                        onSearch = {}
-                    )
+                    else -> {
+                        PhotoGrid(
+                            photos = photos,
+                            query = query,
+                            onQueryChange = { query = it },
+                            onSearch = { photos.refresh() }
+                        )
+                    }
                 }
             }
         }
     }
 }
-
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable

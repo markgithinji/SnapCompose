@@ -70,10 +70,12 @@ fun PhotoGrid(
         ) { index ->
             val photo = photos[index]
             if (photo != null) {
+
                 val retryKey = retryKeys[photo.id] ?: 0
+                val url = if (retryKey > 0) "${photo.fullUrl}?retry=$retryKey" else photo.fullUrl
 
                 PhotoCard(
-                    imageUrl = "${photo.fullUrl}?retry=$retryKey",
+                    imageUrl = url,
                     aspectRatio = photo.width.toFloat() / photo.height.toFloat(),
                     authorName = photo.authorName,
                     authorImageUrl = "${photo.authorProfileImageUrl}?retry=$retryKey",

@@ -28,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
@@ -64,7 +65,6 @@ fun PhotoCard(
     }
 }
 
-
 @Composable
 fun PhotoImage(
     imageUrl: String,
@@ -74,6 +74,11 @@ fun PhotoImage(
     onRetry: () -> Unit
 ) {
     val shimmer = rememberShimmer(shimmerBounds = ShimmerBounds.View)
+
+    // Decode the blur hash only once per blurHash value
+    val blurBitmap: ImageBitmap? = remember(blurHash) {
+        blurHash?.let { BlurHashDecoder.decode(it, 20, 12)?.asImageBitmap() }
+    }
 
     SubcomposeAsyncImage(
         model = imageUrl,
@@ -94,18 +99,13 @@ fun PhotoImage(
             when (state) {
                 is AsyncImagePainter.State.Loading,
                 is AsyncImagePainter.State.Empty -> {
-                    if (!blurHash.isNullOrBlank()) {
-                        val blurBitmap = remember(blurHash) {
-                            BlurHashDecoder.decode(blurHash, 20, 12)?.asImageBitmap()
-                        }
-                        blurBitmap?.let {
-                            Image(
-                                bitmap = it,
-                                contentDescription = null,
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier.fillMaxSize()
-                            )
-                        }
+                    if (blurBitmap != null) {
+                        Image(
+                            bitmap = blurBitmap,
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
                     } else {
                         Box(
                             Modifier
