@@ -16,7 +16,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 
 
@@ -36,8 +35,8 @@ fun GalleryHeader(
             .padding(horizontal = 16.dp, vertical = 24.dp)
     ) {
         Text(
-            text = "Unsplash",
-            style = MaterialTheme.typography.headlineMedium,
+            text = "Snap",
+            style = MaterialTheme.typography.displayLarge,
             color = MaterialTheme.colorScheme.onBackground
         )
 
@@ -45,7 +44,7 @@ fun GalleryHeader(
 
         Text(
             text = "Beautiful, free photos.",
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.75f)
         )
 
@@ -60,10 +59,15 @@ fun GalleryHeader(
             },
             active = active,
             onActiveChange = { active = it },
-            placeholder = { Text("Search photos") },
+            placeholder = {
+                Text(
+                    "Search photos",
+                    style = MaterialTheme.typography.headlineSmall
+                )
+            },
+            shape = RoundedCornerShape(6.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
         ) {
             // Suggestion area (empty for now)
         }

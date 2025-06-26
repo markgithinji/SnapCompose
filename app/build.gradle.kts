@@ -80,8 +80,9 @@ dependencies {
     implementation(libs.androidx.paging.compose)
     implementation(libs.compose.shimmer)
     implementation(libs.accompanist.swiperefresh)
-    implementation(libs.material3) // LoadingIndicator
+    implementation(libs.material3) // LoadingIndicator, PullToRefreshBox
     implementation(libs.androidx.material3.window.size.class1)
+
 
 
     testImplementation(libs.junit)
