@@ -81,6 +81,8 @@ dependencies {
     implementation(libs.compose.shimmer)
     implementation(libs.accompanist.swiperefresh)
     implementation(libs.material3) // LoadingIndicator
+    implementation(libs.androidx.material3.window.size.class1)
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
