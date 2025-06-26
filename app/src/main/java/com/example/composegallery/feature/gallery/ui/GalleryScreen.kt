@@ -12,11 +12,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,28 +28,49 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GalleryScreen(viewModel: GalleryViewModel = hiltViewModel()) {
     val photos = viewModel.pagedPhotos.collectAsLazyPagingItems()
     val isRefreshing = photos.loadState.refresh is LoadState.Loading
-    val swipeRefreshState = rememberSwipeRefreshState(isRefreshing)
     var query by rememberSaveable { mutableStateOf("") }
 
-    SwipeRefresh(
-        state = swipeRefreshState,
+    val pullRefreshState = rememberPullToRefreshState()
+
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
         onRefresh = { photos.refresh() },
+        state = pullRefreshState,
         modifier = Modifier
             .fillMaxSize()
-            .safeDrawingPadding()
+            .safeDrawingPadding(),
+        indicator = {
+            val progress = pullRefreshState.distanceFraction.coerceIn(0f, 1f)
+
+            // Only show when pulling or refreshing
+            if (progress > 0f || isRefreshing) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .graphicsLayer {
+                            translationY = progress * 100f // move down with drag
+                            alpha = progress // fade in with drag
+                        }
+                        .size(40.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    ProgressIndicator()
+                }
+            }
+        }
     ) {
         Column {
             AnimatedContent(
@@ -62,7 +87,7 @@ fun GalleryScreen(viewModel: GalleryViewModel = hiltViewModel()) {
 
                     is LoadState.Error -> {
                         val error = state.error.localizedMessage
-                        DataNotFoundAnim(
+                        DataNotFoundBox(
                             message = error ?: "Unknown error",
                             onRetry = { photos.retry() }
                         )
@@ -82,6 +107,7 @@ fun GalleryScreen(viewModel: GalleryViewModel = hiltViewModel()) {
     }
 }
 
+
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ProgressIndicator() {
@@ -95,7 +121,7 @@ fun ProgressIndicator() {
 }
 
 @Composable
-fun DataNotFoundAnim(message: String, onRetry: () -> Unit) {
+fun DataNotFoundBox(message: String, onRetry: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()

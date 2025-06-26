@@ -156,12 +156,12 @@ fun AuthorInfoRow(authorName: String, authorImageUrl: String) {
             model = authorImageUrl,
             contentDescription = "$authorName's profile picture",
             modifier = Modifier
-                .size(20.dp)
+                .size(25.dp)
                 .clip(RoundedCornerShape(50))
                 .background(MaterialTheme.colorScheme.surfaceVariant),
             contentScale = ContentScale.Crop
         )
-        Spacer(modifier = Modifier.width(6.dp))
+        Spacer(modifier = Modifier.width(10.dp))
         Text(
             text = authorName,
             style = MaterialTheme.typography.bodySmall,
