@@ -22,8 +22,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -40,10 +42,17 @@ import androidx.paging.compose.collectAsLazyPagingItems
 @Composable
 fun GalleryScreen(viewModel: GalleryViewModel = hiltViewModel()) {
     val photos = viewModel.pagedPhotos.collectAsLazyPagingItems()
-    val isRefreshing = photos.loadState.refresh is LoadState.Loading
     var query by rememberSaveable { mutableStateOf("") }
-
     val pullRefreshState = rememberPullToRefreshState()
+    val hasLoadedOnce = remember { mutableStateOf(false) }
+    val refreshState = photos.loadState.refresh
+    // Only true for pull-to-refresh after first successful load
+    val isRefreshing = hasLoadedOnce.value && refreshState is LoadState.Loading
+    LaunchedEffect(refreshState) {
+        if (refreshState is LoadState.NotLoading) {
+            hasLoadedOnce.value = true
+        }
+    }
 
     PullToRefreshBox(
         isRefreshing = isRefreshing,
@@ -55,14 +64,13 @@ fun GalleryScreen(viewModel: GalleryViewModel = hiltViewModel()) {
         indicator = {
             val progress = pullRefreshState.distanceFraction.coerceIn(0f, 1f)
 
-            // Only show when pulling or refreshing
             if (progress > 0f || isRefreshing) {
                 Box(
                     modifier = Modifier
                         .align(Alignment.TopCenter)
                         .graphicsLayer {
-                            translationY = progress * 100f // move down with drag
-                            alpha = progress // fade in with drag
+                            translationY = progress * 100f
+                            alpha = progress
                         }
                         .size(40.dp),
                     contentAlignment = Alignment.Center
@@ -74,7 +82,7 @@ fun GalleryScreen(viewModel: GalleryViewModel = hiltViewModel()) {
     ) {
         Column {
             AnimatedContent(
-                targetState = photos.loadState.refresh,
+                targetState = refreshState,
                 transitionSpec = {
                     fadeIn(tween(500)) togetherWith fadeOut(tween(300))
                 },
@@ -82,7 +90,11 @@ fun GalleryScreen(viewModel: GalleryViewModel = hiltViewModel()) {
             ) { state ->
                 when (state) {
                     is LoadState.Loading -> {
-                        ProgressIndicator()
+                        // Show only if first load to prevent showing both main ProgressIndicator
+                        // and PullToRefreshBox indicator simultaneously
+                        if (!hasLoadedOnce.value) {
+                            ProgressIndicator()
+                        }
                     }
 
                     is LoadState.Error -> {
@@ -106,7 +118,6 @@ fun GalleryScreen(viewModel: GalleryViewModel = hiltViewModel()) {
         }
     }
 }
-
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
