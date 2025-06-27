@@ -9,7 +9,7 @@ import com.example.composegallery.feature.gallery.data.util.Result
 import com.example.composegallery.feature.gallery.data.util.safeApiCall
 import com.example.composegallery.feature.gallery.domain.model.Photo
 
-class UnsplashPagingSource(
+class UnsplashGetPhotosPagingSource(
     private val api: UnsplashApi
 ) : PagingSource<Int, Photo>() {
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Photo> {

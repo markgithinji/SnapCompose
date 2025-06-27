@@ -25,14 +25,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -40,16 +40,25 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.ui.theme.searchBar
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -57,10 +66,13 @@ import com.example.composegallery.ui.theme.searchBar
 fun SearchScreen(
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedContentScope,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    viewModel: GalleryViewModel = hiltViewModel()
 ) {
     var query by rememberSaveable { mutableStateOf("") }
-    var submittedQuery by rememberSaveable { mutableStateOf<String?>(null) }
+    var firstSearchDone by rememberSaveable { mutableStateOf(false) }
+    val retryKeys = remember { mutableStateMapOf<String, Int>() }
+    val pagedPhotos = viewModel.searchResults.collectAsLazyPagingItems()
 
     Scaffold(
         modifier = Modifier
@@ -70,7 +82,13 @@ fun SearchScreen(
             SearchScreenTopBar(
                 query = query,
                 onQueryChange = { query = it },
-                onSearchSubmit = { submittedQuery = query.trim().takeIf { it.isNotEmpty() } },
+                onSearchSubmit = {
+                    val trimmed = query.trim()
+                    if (trimmed.isNotEmpty()) {
+                        viewModel.submitSearch(trimmed)
+                        firstSearchDone = true
+                    }
+                },
                 onBack = onBack,
                 sharedTransitionScope = sharedTransitionScope,
                 animatedVisibilityScope = animatedVisibilityScope
@@ -78,9 +96,11 @@ fun SearchScreen(
         }
     ) { padding ->
         SearchScreenContent(
-            submittedQuery = submittedQuery,
+            showWelcome = !firstSearchDone,
             animatedVisibilityScope = animatedVisibilityScope,
-            paddingValues = padding
+            paddingValues = padding,
+            photos = pagedPhotos,
+            retryKeys = retryKeys
         )
     }
 }
@@ -96,6 +116,7 @@ fun SearchScreenTopBar(
     animatedVisibilityScope: AnimatedContentScope
 ) {
     val searchBarSharedKey = "searchBarElement"
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     // A transition to manage the alpha of the TextField's placeholder and text
     val textFieldContentTransition = updateTransition(
@@ -157,6 +178,7 @@ fun SearchScreenTopBar(
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                 keyboardActions = KeyboardActions(
                     onSearch = {
+                        keyboardController?.hide()
                         onSearchSubmit()
                     }
                 )
@@ -167,10 +189,14 @@ fun SearchScreenTopBar(
 
 @Composable
 fun SearchScreenContent(
-    submittedQuery: String?,
+    showWelcome: Boolean,
     animatedVisibilityScope: AnimatedContentScope,
-    paddingValues: PaddingValues
+    paddingValues: PaddingValues,
+    photos: LazyPagingItems<Photo>,
+    retryKeys: SnapshotStateMap<String, Int>
 ) {
+    val isLoading = photos.loadState.refresh is LoadState.Loading
+
     with(animatedVisibilityScope) { // Apply animateEnterExit to the content area below the search bar
         Box(
             modifier = Modifier
@@ -187,32 +213,63 @@ fun SearchScreenContent(
                     )
                 )
         ) {
-            if (submittedQuery == null) { // ie. if we haven't submitted a query yet
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
+            when {
+                showWelcome -> { // ie. if we haven't submitted a query yet
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "Let's look for something beautiful",
+                            style = MaterialTheme.typography.headlineMedium,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+
+                isLoading -> {
+                    ProgressIndicator()
+                }
+
+                photos.itemCount == 0 -> {
                     Text(
-                        text = "Let's look for something beautiful",
-                        style = MaterialTheme.typography.headlineMedium,
-                        textAlign = TextAlign.Center
+                        text = "No results found",
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.align(Alignment.Center)
                     )
                 }
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(10) { index ->
-                        ListItem(
-                            headlineContent = {
-                                Text("Result #$index for \"${submittedQuery}\"")
+
+                else -> {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(
+                            count = photos.itemCount,
+                            key = { index -> photos[index]?.id ?: index }
+                        ) { index ->
+                            val photo = photos[index]
+                            if (photo != null) {
+                                val retryKey = retryKeys[photo.id] ?: 0
+                                val url =
+                                    if (retryKey > 0) "${photo.fullUrl}?retry=$retryKey" else photo.fullUrl
+
+                                PhotoCard(
+                                    imageUrl = url,
+                                    aspectRatio = photo.width.toFloat() / photo.height.toFloat(),
+                                    authorName = photo.authorName,
+                                    authorImageUrl = "${photo.authorProfileImageUrl}?retry=$retryKey",
+                                    onRetry = { retryKeys[photo.id] = retryKey + 1 },
+                                    blurHash = photo.blurHash
+                                )
                             }
-                        )
+                        }
                     }
                 }
             }

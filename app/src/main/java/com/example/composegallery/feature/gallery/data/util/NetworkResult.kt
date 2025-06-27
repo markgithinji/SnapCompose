@@ -1,14 +1,16 @@
 package com.example.composegallery.feature.gallery.data.util
 
 import kotlinx.coroutines.CancellationException
+import timber.log.Timber
 import java.io.IOException
 
 inline fun <T> safeApiCall(block: () -> T): Result<T> {
     return try {
         Result.Success(block())
     } catch (e: CancellationException) {
-        throw e // Important: don't swallow coroutine cancellation
+        throw e // Don't swallow coroutine cancellation
     } catch (e: IOException) {
+        Timber.tag("safeApiCall").e(e, "IO Exception: No internet connection")
         Result.Error("No internet connection", e)
     } catch (e: retrofit2.HttpException) {
         val message = when (e.code()) {
@@ -20,8 +22,10 @@ inline fun <T> safeApiCall(block: () -> T): Result<T> {
             503 -> "Service unavailable. Try again later."
             else -> "HTTP ${e.code()}: ${e.message()}"
         }
+        Timber.tag("safeApiCall").e(e, "HTTP Exception: $message")
         Result.Error(message, e)
     } catch (e: Exception) {
+        Timber.tag("safeApiCall").e(e, "Unexpected error")
         Result.Error("Unexpected error", e)
     }
 }

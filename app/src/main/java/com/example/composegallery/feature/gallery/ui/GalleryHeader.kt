@@ -101,7 +101,6 @@ fun DummySearchBar(
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(10.dp)
                 .sharedElement(
                     sharedContentState = rememberSharedContentState(key = searchBarSharedKey),
                     animatedVisibilityScope = animatedVisibilityScope
