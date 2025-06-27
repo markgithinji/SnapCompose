@@ -61,6 +61,40 @@ fun SearchScreen(
 ) {
     var query by rememberSaveable { mutableStateOf("") }
     var submittedQuery by rememberSaveable { mutableStateOf<String?>(null) }
+
+    Scaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .windowInsetsPadding(WindowInsets.systemBars),
+        topBar = {
+            SearchScreenTopBar(
+                query = query,
+                onQueryChange = { query = it },
+                onSearchSubmit = { submittedQuery = query.trim().takeIf { it.isNotEmpty() } },
+                onBack = onBack,
+                sharedTransitionScope = sharedTransitionScope,
+                animatedVisibilityScope = animatedVisibilityScope
+            )
+        }
+    ) { padding ->
+        SearchScreenContent(
+            submittedQuery = submittedQuery,
+            animatedVisibilityScope = animatedVisibilityScope,
+            paddingValues = padding
+        )
+    }
+}
+
+@OptIn(ExperimentalSharedTransitionApi::class)
+@Composable
+fun SearchScreenTopBar(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    onSearchSubmit: () -> Unit,
+    onBack: () -> Unit,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedContentScope
+) {
     val searchBarSharedKey = "searchBarElement"
 
     // A transition to manage the alpha of the TextField's placeholder and text
@@ -76,115 +110,112 @@ fun SearchScreen(
             } else {
                 tween(durationMillis = 0)
             }
-        }, label = "text_field_inner_alpha"
+        }, label = "text_field_alpha"
     ) { state ->
         if (state == EnterExitState.Visible) 1f else 0f
     }
 
-    Scaffold(
+    Row(
         modifier = Modifier
-            .fillMaxSize()
-            .windowInsetsPadding(WindowInsets.systemBars),
-        topBar = {
-            Row(
+            .padding(16.dp)
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(onClick = onBack) {
+            Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+        }
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        with(sharedTransitionScope) {
+            TextField(
+                value = query,
+                onValueChange = onQueryChange,
+                placeholder = {
+                    Text(
+                        "Search Unsplash...",
+                        modifier = Modifier.alpha(textFieldInnerContentAlpha)
+                    )
+                },
+                singleLine = true,
                 modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = onBack) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    .weight(1f)
+                    .height(56.dp)
+                    .sharedElement(
+                        sharedContentState = rememberSharedContentState(key = searchBarSharedKey),
+                        animatedVisibilityScope = animatedVisibilityScope
+                    )
+                    .alpha(textFieldInnerContentAlpha),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    disabledContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent
+                ),
+                shape = RoundedCornerShape(8.dp),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                keyboardActions = KeyboardActions(
+                    onSearch = {
+                        onSearchSubmit()
+                    }
+                )
+            )
+        }
+    }
+}
+
+@Composable
+fun SearchScreenContent(
+    submittedQuery: String?,
+    animatedVisibilityScope: AnimatedContentScope,
+    paddingValues: PaddingValues
+) {
+    with(animatedVisibilityScope) { // Apply animateEnterExit to the content area below the search bar
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .animateEnterExit(
+                    enter = fadeIn(animationSpec = tween(delayMillis = 200)) + slideInVertically(
+                        animationSpec = tween(delayMillis = 200),
+                        initialOffsetY = { fullHeight -> fullHeight / 2 } // Starts from halfway down
+                    ),
+                    exit = fadeOut(animationSpec = tween(durationMillis = 150)) + slideOutVertically(
+                        animationSpec = tween(durationMillis = 150),
+                        targetOffsetY = { fullHeight -> fullHeight / 2 } // Slides out halfway down
+                    )
+                )
+        ) {
+            if (submittedQuery == null) { // ie. if we haven't submitted a query yet
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "Let's look for something beautiful",
+                        style = MaterialTheme.typography.headlineMedium,
+                        textAlign = TextAlign.Center
+                    )
                 }
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                with(sharedTransitionScope) {
-                    TextField(
-                        value = query,
-                        onValueChange = { query = it },
-                        placeholder = {
-                            Text(
-                                "Search Unsplash...",
-                                modifier = Modifier.alpha(textFieldInnerContentAlpha)
-                            )
-                        },
-                        singleLine = true,
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(56.dp)
-                            .sharedElement(
-                                sharedContentState = rememberSharedContentState(key = searchBarSharedKey),
-                                animatedVisibilityScope = animatedVisibilityScope
-                            )
-                            .renderInSharedTransitionScopeOverlay()
-                            .alpha(textFieldInnerContentAlpha),
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = MaterialTheme.colorScheme.surface,
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                            disabledContainerColor = MaterialTheme.colorScheme.surface,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent
-                        ),
-                        shape = RoundedCornerShape(8.dp),
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                        keyboardActions = KeyboardActions(
-                            onSearch = {
-                                submittedQuery = query.trim().takeIf { it.isNotEmpty() }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(10) { index ->
+                        ListItem(
+                            headlineContent = {
+                                Text("Result #$index for \"${submittedQuery}\"")
                             }
                         )
-                    )
-                }
-            }
-        }
-    ) { padding ->
-        with(animatedVisibilityScope) { // Apply animateEnterExit to the content area below the search bar
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .animateEnterExit(
-                        enter = fadeIn(animationSpec = tween(delayMillis = 200)) + slideInVertically(
-                            animationSpec = tween(delayMillis = 200),
-                            initialOffsetY = { fullHeight -> fullHeight / 2 } // Starts from halfway down
-                        ),
-                        exit = fadeOut(animationSpec = tween(durationMillis = 150)) + slideOutVertically(
-                            animationSpec = tween(durationMillis = 150),
-                            targetOffsetY = { fullHeight -> fullHeight / 2 } // Slides out halfway down
-                        )
-                    )
-            ) {
-                if (submittedQuery == null) { // ie. if we haven't submitted a query yet
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Text(
-                            text = "Let's look for something beautiful",
-                            style = MaterialTheme.typography.headlineMedium,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                } else {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(10) { index ->
-                            ListItem(
-                                headlineContent = {
-                                    Text("Result #$index for \"${submittedQuery}\"")
-                                }
-                            )
-                        }
                     }
                 }
             }
         }
     }
 }
-
-
