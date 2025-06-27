@@ -1,6 +1,9 @@
 package com.example.composegallery.feature.gallery.ui
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -35,9 +38,11 @@ import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun GalleryScreen(
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedContentScope,
     viewModel: GalleryViewModel = hiltViewModel(),
     onSearchNavigate: () -> Unit
 ) {
@@ -107,7 +112,9 @@ fun GalleryScreen(
                     else -> {
                         PhotoGrid(
                             photos = photos,
-                            onSearchClick = onSearchNavigate
+                            onSearchClick = onSearchNavigate,
+                            sharedTransitionScope = sharedTransitionScope,
+                            animatedVisibilityScope = animatedVisibilityScope
                         )
                     }
                 }

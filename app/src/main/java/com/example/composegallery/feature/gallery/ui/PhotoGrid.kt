@@ -1,6 +1,9 @@
 package com.example.composegallery.feature.gallery.ui
 
 import android.app.Activity
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,9 +37,12 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import com.example.composegallery.feature.gallery.domain.model.Photo
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun PhotoGrid(
     photos: LazyPagingItems<Photo>,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope,
     onSearchClick: () -> Unit
 ) {
     val retryKeys = remember { mutableStateMapOf<String, Int>() }
@@ -53,8 +59,10 @@ fun PhotoGrid(
                 onSearchClick = onSearchClick,
                 modifier = Modifier
                     .padding(
-                        top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-                    ) // pushes header below status bar
+                        top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()// pushes header below status bar
+                    ),
+                sharedTransitionScope = sharedTransitionScope,
+                animatedVisibilityScope = animatedVisibilityScope
             )
         }
 
@@ -63,7 +71,7 @@ fun PhotoGrid(
             key = { index -> photos[index]?.id ?: index },
             span = { index ->
                 if ((index + 1) % 5 == 0) {
-                    StaggeredGridItemSpan.FullLine
+                    StaggeredGridItemSpan.FullLine // Show a featured photo item in near full size at every 5th position
                 } else {
                     StaggeredGridItemSpan.SingleLane
                 }
