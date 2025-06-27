@@ -35,7 +35,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.example.composegallery.feature.gallery.domain.model.Photo
 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
@@ -84,39 +86,60 @@ fun GalleryScreen(
             }
         }
     ) {
-        Column {
-            AnimatedContent(
-                targetState = refreshState,
-                transitionSpec = {
-                    fadeIn(tween(500)) togetherWith fadeOut(tween(300))
-                },
-                label = "PhotoGridTransition"
-            ) { state ->
-                when (state) {
-                    is LoadState.Loading -> {
-                        // Show only if first load to prevent showing both main ProgressIndicator
-                        // and PullToRefreshBox indicator simultaneously
-                        if (!hasLoadedOnce.value) {
-                            ProgressIndicator()
-                        }
-                    }
+        PhotoGridWithLoadState(
+            loadState = refreshState,
+            hasLoadedOnce = hasLoadedOnce.value,
+            photos = photos,
+            onSearchClick = onSearchNavigate,
+            onRetry = { photos.retry() },
+            sharedTransitionScope = sharedTransitionScope,
+            animatedVisibilityScope = animatedVisibilityScope
+        )
+    }
+}
 
-                    is LoadState.Error -> {
-                        val error = state.error.localizedMessage
-                        DataNotFoundBox(
-                            message = error ?: "Unknown error",
-                            onRetry = { photos.retry() }
-                        )
+@OptIn(ExperimentalSharedTransitionApi::class)
+@Composable
+private fun PhotoGridWithLoadState(
+    loadState: LoadState,
+    hasLoadedOnce: Boolean,
+    photos: LazyPagingItems<Photo>,
+    onSearchClick: () -> Unit,
+    onRetry: () -> Unit,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedContentScope
+) {
+    Column {
+        AnimatedContent(
+            targetState = loadState,
+            transitionSpec = {
+                fadeIn(tween(500)) togetherWith fadeOut(tween(300))
+            },
+            label = "PhotoGridTransition"
+        ) { state ->
+            when (state) {
+                is LoadState.Loading -> {
+                    // Show only if first load to prevent showing both main ProgressIndicator
+                    // and PullToRefreshBox indicator simultaneously
+                    if (!hasLoadedOnce) {
+                        ProgressIndicator()
                     }
+                }
 
-                    else -> {
-                        PhotoGrid(
-                            photos = photos,
-                            onSearchClick = onSearchNavigate,
-                            sharedTransitionScope = sharedTransitionScope,
-                            animatedVisibilityScope = animatedVisibilityScope
-                        )
-                    }
+                is LoadState.Error -> {
+                    DataNotFoundBox(
+                        message = state.error.localizedMessage ?: "Unknown error",
+                        onRetry = onRetry
+                    )
+                }
+
+                else -> {
+                    PhotoGrid(
+                        photos = photos,
+                        onSearchClick = onSearchClick,
+                        sharedTransitionScope = sharedTransitionScope,
+                        animatedVisibilityScope = animatedVisibilityScope
+                    )
                 }
             }
         }
