@@ -23,11 +23,8 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -40,14 +37,17 @@ import androidx.paging.compose.collectAsLazyPagingItems
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GalleryScreen(viewModel: GalleryViewModel = hiltViewModel()) {
+fun GalleryScreen(
+    viewModel: GalleryViewModel = hiltViewModel(),
+    onSearchNavigate: () -> Unit
+) {
     val photos = viewModel.pagedPhotos.collectAsLazyPagingItems()
-    var query by rememberSaveable { mutableStateOf("") }
     val pullRefreshState = rememberPullToRefreshState()
     val hasLoadedOnce = remember { mutableStateOf(false) }
     val refreshState = photos.loadState.refresh
     // Only true for pull-to-refresh after first successful load
     val isRefreshing = hasLoadedOnce.value && refreshState is LoadState.Loading
+
     LaunchedEffect(refreshState) {
         if (refreshState is LoadState.NotLoading) {
             hasLoadedOnce.value = true
@@ -63,7 +63,6 @@ fun GalleryScreen(viewModel: GalleryViewModel = hiltViewModel()) {
             .safeDrawingPadding(),
         indicator = {
             val progress = pullRefreshState.distanceFraction.coerceIn(0f, 1f)
-
             if (progress > 0f || isRefreshing) {
                 Box(
                     modifier = Modifier
@@ -108,9 +107,7 @@ fun GalleryScreen(viewModel: GalleryViewModel = hiltViewModel()) {
                     else -> {
                         PhotoGrid(
                             photos = photos,
-                            query = query,
-                            onQueryChange = { query = it },
-                            onSearch = { photos.refresh() }
+                            onSearchClick = onSearchNavigate
                         )
                     }
                 }

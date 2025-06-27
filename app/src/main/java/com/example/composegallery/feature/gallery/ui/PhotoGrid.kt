@@ -37,9 +37,7 @@ import com.example.composegallery.feature.gallery.domain.model.Photo
 @Composable
 fun PhotoGrid(
     photos: LazyPagingItems<Photo>,
-    query: String,
-    onQueryChange: (String) -> Unit,
-    onSearch: (String) -> Unit
+    onSearchClick: () -> Unit
 ) {
     val retryKeys = remember { mutableStateMapOf<String, Int>() }
 
@@ -52,9 +50,7 @@ fun PhotoGrid(
     ) {
         item(span = StaggeredGridItemSpan.FullLine) {
             GalleryHeader(
-                query = query,
-                onQueryChange = onQueryChange,
-                onSearch = onSearch,
+                onSearchClick = onSearchClick,
                 modifier = Modifier
                     .padding(
                         top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
