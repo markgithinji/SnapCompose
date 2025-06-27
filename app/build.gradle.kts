@@ -82,8 +82,8 @@ dependencies {
     implementation(libs.accompanist.swiperefresh)
     implementation(libs.material3) // LoadingIndicator, PullToRefreshBox
     implementation(libs.androidx.material3.window.size.class1)
-    implementation("androidx.navigation:navigation-compose:2.7.7")
-    implementation("androidx.compose.material:material-icons-extended:1.7.8")
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.material.icons.extended)
 
 
 

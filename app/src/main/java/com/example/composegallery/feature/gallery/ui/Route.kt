@@ -1,10 +1,8 @@
 package com.example.composegallery.feature.gallery.ui
 
-import android.net.Uri
+import kotlinx.serialization.Serializable
 
-sealed class Screen(val route: String) {
-    object Gallery : Screen("gallery")
-    object SearchResults : Screen("search?query={query}") {
-        fun createRoute(query: String) = "search?query=${Uri.encode(query)}"
-    }
-}
+@Serializable
+object Gallery
+@Serializable
+object Search

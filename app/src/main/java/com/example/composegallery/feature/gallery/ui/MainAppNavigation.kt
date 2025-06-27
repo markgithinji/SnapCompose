@@ -16,19 +16,19 @@ fun MainAppNavigation() {
             val navController = rememberNavController()
             NavHost(
                 navController = navController,
-                startDestination = "gallery"
+                startDestination = Gallery
             ) {
-                composable("gallery") {
+                composable<Gallery> {
                     GalleryScreen(
                         sharedTransitionScope = this@SharedTransitionLayout,
                         animatedVisibilityScope = this,
                         onSearchNavigate = {
-                            navController.navigate("search")
+                            navController.navigate(Search)
                         }
                     )
                 }
 
-                composable("search") {
+                composable<Search> {
                     SearchScreen(
                         sharedTransitionScope = this@SharedTransitionLayout,
                         animatedVisibilityScope = this,
