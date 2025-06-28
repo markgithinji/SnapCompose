@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,6 +21,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -31,6 +33,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
@@ -90,11 +93,14 @@ fun PhotoGrid(
 
                 PhotoCard(
                     imageUrl = url,
-                    aspectRatio = photo.width.toFloat() / photo.height.toFloat(),
                     authorName = photo.authorName,
                     authorImageUrl = "${photo.authorProfileImageUrl}?retry=$retryKey",
                     onRetry = { retryKeys[photo.id] = retryKey + 1 },
                     blurHash = photo.blurHash,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(photo.width.toFloat() / photo.height)
+                        .clip(RoundedCornerShape(12.dp)),
                     onClick = if (isGridClickable) {
                         { onPhotoClick(photo) }
                     } else null

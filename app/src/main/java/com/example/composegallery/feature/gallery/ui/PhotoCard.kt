@@ -13,9 +13,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -44,27 +42,24 @@ import com.valentinilk.shimmer.shimmer
 @Composable
 fun PhotoCard(
     imageUrl: String,
-    aspectRatio: Float,
     authorName: String,
     authorImageUrl: String,
     onRetry: () -> Unit,
     blurHash: String? = null,
+    modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null
 ) {
-    val modifier = Modifier
+    val clickableModifier = Modifier
+        .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier)
         .padding(8.dp)
-        .then(
-            if (onClick != null) Modifier.clickable { onClick() }
-            else Modifier
-        )
 
-    Column(modifier = modifier) {
+    Column(modifier = clickableModifier) {
         PhotoImage(
             imageUrl = imageUrl,
-            aspectRatio = aspectRatio,
             contentDescription = authorName,
             blurHash = blurHash,
-            onRetry = onRetry
+            onRetry = onRetry,
+            modifier = modifier
         )
 
         Spacer(modifier = Modifier.height(4.dp))
@@ -73,12 +68,11 @@ fun PhotoCard(
     }
 }
 
-
 @Composable
 fun PhotoImage(
     imageUrl: String,
-    aspectRatio: Float,
     contentDescription: String,
+    modifier: Modifier = Modifier,
     blurHash: String? = null,
     onRetry: () -> Unit
 ) {
@@ -93,10 +87,7 @@ fun PhotoImage(
         model = imageUrl,
         contentDescription = contentDescription,
         contentScale = ContentScale.Crop,
-        modifier = Modifier
-            .fillMaxWidth()
-            .aspectRatio(aspectRatio)
-            .clip(RoundedCornerShape(12.dp))
+        modifier = modifier
     ) {
         AnimatedContent(
             targetState = painter.state,

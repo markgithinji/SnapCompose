@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -118,10 +119,13 @@ fun PhotoDetailContent(photo: Photo, modifier: Modifier = Modifier) {
         ) {
             PhotoImage(
                 imageUrl = photo.fullUrl,
-                aspectRatio = 1f, // will be overridden by parent height
                 contentDescription = photo.authorName,
                 blurHash = photo.blurHash,
-                onRetry = {}
+                onRetry = {},
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(halfScreenHeightDp) // Force fixed height
+                    .clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
             )
         }
 

@@ -262,7 +262,6 @@ fun SearchScreenContent(
 
                                 PhotoCard(
                                     imageUrl = url,
-                                    aspectRatio = photo.width.toFloat() / photo.height.toFloat(),
                                     authorName = photo.authorName,
                                     authorImageUrl = "${photo.authorProfileImageUrl}?retry=$retryKey",
                                     onRetry = { retryKeys[photo.id] = retryKey + 1 },
