@@ -3,10 +3,13 @@ package com.example.composegallery.feature.gallery.ui
 import kotlinx.serialization.Serializable
 
 @Serializable
-object Gallery
+object GalleryRoute
 
 @Serializable
-object Search
+object SearchRoute
 
 @Serializable
-data class PhotoDetail(val photoId: String)
+data class PhotoDetailRoute(val photoId: String)
+
+@Serializable
+data class FullscreenPhotoRoute(val photoId: String)

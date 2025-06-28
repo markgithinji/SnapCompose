@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.example.composegallery.ui.theme.ComposeGalleryTheme
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -16,37 +17,46 @@ fun MainAppNavigation() {
             val navController = rememberNavController()
             NavHost(
                 navController = navController,
-                startDestination = Gallery
+                startDestination = GalleryRoute
             ) {
-                composable<Gallery> {
+                composable<GalleryRoute> {
                     GalleryScreen(
                         sharedTransitionScope = this@SharedTransitionLayout,
                         animatedVisibilityScope = this,
                         onSearchNavigate = {
-                            navController.navigate(Search)
+                            navController.navigate(SearchRoute)
                         },
                         onPhotoClick = { photoId ->
-                            navController.navigate(PhotoDetail(photoId))
+                            navController.navigate(PhotoDetailRoute(photoId))
                         }
                     )
                 }
-                composable<Search> {
+                composable<SearchRoute> {
                     SearchScreen(
                         sharedTransitionScope = this@SharedTransitionLayout,
                         animatedVisibilityScope = this,
                         onBack = { navController.popBackStack() },
                         onPhotoClick = { photoId ->
-                            navController.navigate(PhotoDetail(photoId))
+                            navController.navigate(PhotoDetailRoute(photoId))
                         }
                     )
                 }
-                composable<PhotoDetail> { backStackEntry ->
-                    val photoId = backStackEntry.arguments?.getString("photoId")
-                    photoId?.let {
-                        PhotoDetailScreen(photoId = it, onBack = { navController.popBackStack() })
-                    }
+                composable<PhotoDetailRoute> { backStackEntry ->
+                    val photoDetailRoute = backStackEntry.toRoute<PhotoDetailRoute>()
+                    PhotoDetailScreen(
+                        photoId = photoDetailRoute.photoId,
+                        onBack = { navController.popBackStack() },
+                        onExpandClick = { photoId ->
+                            navController.navigate(FullscreenPhotoRoute(photoId))
+                        }
+                    )
                 }
-
+                composable<FullscreenPhotoRoute> { backStackEntry ->
+                    val fullscreenPhotoRoute = backStackEntry.toRoute<FullscreenPhotoRoute>()
+                    PhotoViewerScreen(
+                        photoId = fullscreenPhotoRoute.photoId
+                    )
+                }
             }
         }
     }

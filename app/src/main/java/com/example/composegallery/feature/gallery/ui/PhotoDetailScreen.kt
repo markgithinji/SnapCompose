@@ -1,6 +1,7 @@
 package com.example.composegallery.feature.gallery.ui
 
 import android.icu.util.TimeZone
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -47,6 +49,7 @@ import java.util.Locale
 fun PhotoDetailScreen(
     photoId: String,
     onBack: () -> Unit,
+    onExpandClick: (String) -> Unit,
     viewModel: PhotoDetailViewModel = hiltViewModel()
 ) {
     val photoState by viewModel.uiState.collectAsState()
@@ -98,7 +101,8 @@ fun PhotoDetailScreen(
             is UiState.Content -> {
                 PhotoDetailContent(
                     photo = state.data,
-                    modifier = Modifier.padding(padding)
+                    modifier = Modifier.padding(padding),
+                    onExpandClick = onExpandClick
                 )
             }
         }
@@ -106,7 +110,11 @@ fun PhotoDetailScreen(
 }
 
 @Composable
-fun PhotoDetailContent(photo: Photo, modifier: Modifier = Modifier) {
+fun PhotoDetailContent(
+    photo: Photo,
+    modifier: Modifier = Modifier,
+    onExpandClick: (String) -> Unit
+) {
     val containerSize = LocalWindowInfo.current.containerSize
     val density = LocalDensity.current
     val halfScreenHeightDp = with(density) { (containerSize.height * 0.5f).toDp() }
@@ -127,6 +135,21 @@ fun PhotoDetailContent(photo: Photo, modifier: Modifier = Modifier) {
                     .height(halfScreenHeightDp) // Force fixed height
                     .clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
             )
+            IconButton(
+                onClick = { onExpandClick(photo.id) },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(12.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
+                        shape = CircleShape
+                    )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Fullscreen,
+                    contentDescription = "View Full Screen"
+                )
+            }
         }
 
         Box(
