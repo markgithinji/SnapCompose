@@ -19,11 +19,11 @@ class GalleryViewModel @Inject constructor(
     galleryRepository: GalleryRepository,
     observeSearchResults: ObserveSearchResultsUseCase
 ) : ViewModel() {
-    val pagedPhotos: Flow<PagingData<Photo>> =
-        galleryRepository.getPagedPhotos().cachedIn(viewModelScope)
-
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery
+
+    val pagedPhotos: Flow<PagingData<Photo>> =
+        galleryRepository.getPagedPhotos().cachedIn(viewModelScope)
 
     val searchResults: Flow<PagingData<Photo>> =
         observeSearchResults(_searchQuery)
