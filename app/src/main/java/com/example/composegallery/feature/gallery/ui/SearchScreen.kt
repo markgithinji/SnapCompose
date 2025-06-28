@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,6 +28,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -49,6 +51,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
@@ -67,6 +70,7 @@ fun SearchScreen(
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedContentScope,
     onBack: () -> Unit,
+    onPhotoClick: (String) -> Unit,
     viewModel: GalleryViewModel = hiltViewModel()
 ) {
     var query by rememberSaveable { mutableStateOf("") }
@@ -100,7 +104,8 @@ fun SearchScreen(
             animatedVisibilityScope = animatedVisibilityScope,
             paddingValues = padding,
             photos = pagedPhotos,
-            retryKeys = retryKeys
+            retryKeys = retryKeys,
+            onPhotoClick = onPhotoClick
         )
     }
 }
@@ -193,7 +198,8 @@ fun SearchScreenContent(
     animatedVisibilityScope: AnimatedContentScope,
     paddingValues: PaddingValues,
     photos: LazyPagingItems<Photo>,
-    retryKeys: SnapshotStateMap<String, Int>
+    retryKeys: SnapshotStateMap<String, Int>,
+    onPhotoClick: (String) -> Unit
 ) {
     val isLoading = photos.loadState.refresh is LoadState.Loading
 
@@ -265,7 +271,12 @@ fun SearchScreenContent(
                                     authorName = photo.authorName,
                                     authorImageUrl = "${photo.authorProfileImageUrl}?retry=$retryKey",
                                     onRetry = { retryKeys[photo.id] = retryKey + 1 },
-                                    blurHash = photo.blurHash
+                                    blurHash = photo.blurHash,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .aspectRatio(photo.width.toFloat() / photo.height)
+                                        .clip(RoundedCornerShape(12.dp)),
+                                    onClick = { onPhotoClick(photo.id) }
                                 )
                             }
                         }

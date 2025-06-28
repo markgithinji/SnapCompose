@@ -34,7 +34,10 @@ fun MainAppNavigation() {
                     SearchScreen(
                         sharedTransitionScope = this@SharedTransitionLayout,
                         animatedVisibilityScope = this,
-                        onBack = { navController.popBackStack() }
+                        onBack = { navController.popBackStack() },
+                        onPhotoClick = { photoId ->
+                            navController.navigate(PhotoDetail(photoId))
+                        }
                     )
                 }
                 composable<PhotoDetail> { backStackEntry ->
