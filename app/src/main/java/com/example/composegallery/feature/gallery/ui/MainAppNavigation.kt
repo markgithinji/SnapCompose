@@ -24,10 +24,12 @@ fun MainAppNavigation() {
                         animatedVisibilityScope = this,
                         onSearchNavigate = {
                             navController.navigate(Search)
+                        },
+                        onPhotoClick = { photo ->
+                            navController.navigate(PhotoDetail(photo.id))
                         }
                     )
                 }
-
                 composable<Search> {
                     SearchScreen(
                         sharedTransitionScope = this@SharedTransitionLayout,
@@ -35,6 +37,13 @@ fun MainAppNavigation() {
                         onBack = { navController.popBackStack() }
                     )
                 }
+                composable<PhotoDetail> { backStackEntry ->
+                    val photoId = backStackEntry.arguments?.getString("photoId")
+                    photoId?.let {
+                        PhotoDetailScreen(photoId = it, onBack = { navController.popBackStack() })
+                    }
+                }
+
             }
         }
     }

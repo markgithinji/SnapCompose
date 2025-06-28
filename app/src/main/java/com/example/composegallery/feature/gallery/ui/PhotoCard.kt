@@ -48,9 +48,17 @@ fun PhotoCard(
     authorName: String,
     authorImageUrl: String,
     onRetry: () -> Unit,
-    blurHash: String? = null
+    blurHash: String? = null,
+    onClick: (() -> Unit)? = null
 ) {
-    Column(modifier = Modifier.padding(8.dp)) {
+    val modifier = Modifier
+        .padding(8.dp)
+        .then(
+            if (onClick != null) Modifier.clickable { onClick() }
+            else Modifier
+        )
+
+    Column(modifier = modifier) {
         PhotoImage(
             imageUrl = imageUrl,
             aspectRatio = aspectRatio,
@@ -64,6 +72,7 @@ fun PhotoCard(
         AuthorInfoRow(authorName = authorName, authorImageUrl = authorImageUrl)
     }
 }
+
 
 @Composable
 fun PhotoImage(

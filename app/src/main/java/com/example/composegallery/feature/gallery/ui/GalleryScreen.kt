@@ -46,7 +46,8 @@ fun GalleryScreen(
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedContentScope,
     viewModel: GalleryViewModel = hiltViewModel(),
-    onSearchNavigate: () -> Unit
+    onSearchNavigate: () -> Unit,
+    onPhotoClick: (Photo) -> Unit
 ) {
     val photos = viewModel.pagedPhotos.collectAsLazyPagingItems()
     val pullRefreshState = rememberPullToRefreshState()
@@ -91,6 +92,7 @@ fun GalleryScreen(
             hasLoadedOnce = hasLoadedOnce.value,
             photos = photos,
             onSearchClick = onSearchNavigate,
+            onPhotoClick = onPhotoClick,
             onRetry = { photos.retry() },
             sharedTransitionScope = sharedTransitionScope,
             animatedVisibilityScope = animatedVisibilityScope
@@ -106,6 +108,7 @@ private fun PhotoGridWithLoadState(
     photos: LazyPagingItems<Photo>,
     onSearchClick: () -> Unit,
     onRetry: () -> Unit,
+    onPhotoClick: (Photo) -> Unit,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedContentScope
 ) {
@@ -138,7 +141,8 @@ private fun PhotoGridWithLoadState(
                         photos = photos,
                         onSearchClick = onSearchClick,
                         sharedTransitionScope = sharedTransitionScope,
-                        animatedVisibilityScope = animatedVisibilityScope
+                        animatedVisibilityScope = animatedVisibilityScope,
+                        onPhotoClick = { onPhotoClick(it) }
                     )
                 }
             }

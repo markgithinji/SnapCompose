@@ -43,9 +43,13 @@ fun PhotoGrid(
     photos: LazyPagingItems<Photo>,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope,
-    onSearchClick: () -> Unit
+    onSearchClick: () -> Unit,
+    onPhotoClick: (Photo) -> Unit
 ) {
     val retryKeys = remember { mutableStateMapOf<String, Int>() }
+    val isGridClickable =
+        photos.loadState.refresh !is LoadState.Loading &&
+                photos.loadState.refresh !is LoadState.Error
 
     LazyVerticalStaggeredGrid(
         columns = StaggeredGridCells.Fixed(calculateResponsiveColumnCount()),
@@ -59,7 +63,8 @@ fun PhotoGrid(
                 onSearchClick = onSearchClick,
                 modifier = Modifier
                     .padding(
-                        top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()// pushes header below status bar
+                        top = WindowInsets.statusBars.asPaddingValues()
+                            .calculateTopPadding()// pushes header below status bar
                     ),
                 sharedTransitionScope = sharedTransitionScope,
                 animatedVisibilityScope = animatedVisibilityScope
@@ -89,7 +94,10 @@ fun PhotoGrid(
                     authorName = photo.authorName,
                     authorImageUrl = "${photo.authorProfileImageUrl}?retry=$retryKey",
                     onRetry = { retryKeys[photo.id] = retryKey + 1 },
-                    blurHash = photo.blurHash
+                    blurHash = photo.blurHash,
+                    onClick = if (isGridClickable) {
+                        { onPhotoClick(photo) }
+                    } else null
                 )
             }
         }

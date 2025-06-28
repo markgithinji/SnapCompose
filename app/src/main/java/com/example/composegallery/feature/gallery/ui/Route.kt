@@ -4,5 +4,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 object Gallery
+
 @Serializable
 object Search
+
+@Serializable
+data class PhotoDetail(val photoId: String)
