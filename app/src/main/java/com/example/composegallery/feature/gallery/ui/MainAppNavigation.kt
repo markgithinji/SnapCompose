@@ -25,8 +25,8 @@ fun MainAppNavigation() {
                         onSearchNavigate = {
                             navController.navigate(Search)
                         },
-                        onPhotoClick = { photo ->
-                            navController.navigate(PhotoDetail(photo.id))
+                        onPhotoClick = { photoId ->
+                            navController.navigate(PhotoDetail(photoId))
                         }
                     )
                 }
