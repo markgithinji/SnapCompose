@@ -8,5 +8,8 @@ data class Photo(
     val fullUrl: String,
     val authorName: String,
     val authorProfileImageUrl: String,
-    val blurHash: String? = null
+    val blurHash: String? = null,
+    val description: String? = null,
+    val createdAt: String? = null,
+    val exif: Exif? = null
 )

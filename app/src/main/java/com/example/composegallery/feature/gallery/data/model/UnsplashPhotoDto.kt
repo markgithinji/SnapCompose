@@ -12,7 +12,11 @@ data class UnsplashPhotoDto(
     val urls: UrlsDto,
     val user: UserDto,
     val likes: Int = 0,
-    @SerialName("blur_hash") val blurHash: String? = null
+    @SerialName("blur_hash") val blurHash: String? = null,
+    val description: String? = null,
+    @SerialName("alt_description") val altDescription: String? = null,
+    @SerialName("created_at") val createdAt: String? = null,
+    val exif: ExifDto? = null
 )
 
 internal fun UnsplashPhotoDto.toDomainModel(): Photo? {
@@ -31,6 +35,9 @@ internal fun UnsplashPhotoDto.toDomainModel(): Photo? {
         fullUrl = urls.full,
         authorName = user.name,
         authorProfileImageUrl = user.profileImage.small,
-        blurHash = blurHash
+        blurHash = blurHash,
+        description = description ?: altDescription,
+        createdAt = createdAt,
+        exif = exif?.toDomainModel()
     )
 }

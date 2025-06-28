@@ -5,9 +5,13 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.PagingSource
 import androidx.paging.filter
+import com.example.composegallery.BuildConfig
+import com.example.composegallery.feature.gallery.data.model.toDomainModel
 import com.example.composegallery.feature.gallery.data.pagingsource.UnsplashGetPhotosPagingSource
 import com.example.composegallery.feature.gallery.data.pagingsource.UnsplashSearchPagingSource
 import com.example.composegallery.feature.gallery.data.remote.UnsplashApi
+import com.example.composegallery.feature.gallery.data.util.Result
+import com.example.composegallery.feature.gallery.data.util.safeApiCall
 import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.domain.repository.GalleryRepository
 import kotlinx.coroutines.flow.Flow
@@ -41,4 +45,10 @@ class DefaultGalleryRepository @Inject constructor(
             }
     }
 
+    override suspend fun getPhoto(photoId: String): Result<Photo> {
+        return safeApiCall {
+            val response = api.getPhoto(photoId = photoId, clientId = BuildConfig.UNSPLASH_API_KEY)
+            response.toDomainModel() ?: throw IllegalStateException("Invalid photo data")
+        }
+    }
 }
