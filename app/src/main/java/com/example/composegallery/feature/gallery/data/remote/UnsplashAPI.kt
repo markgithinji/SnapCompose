@@ -2,6 +2,7 @@ package com.example.composegallery.feature.gallery.data.remote
 
 import com.example.composegallery.feature.gallery.data.model.SearchResponseDto
 import com.example.composegallery.feature.gallery.data.model.UnsplashPhotoDto
+import com.example.composegallery.feature.gallery.data.model.UnsplashUserDto
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -27,4 +28,10 @@ interface UnsplashApi {
         @Path("id") photoId: String,
         @Query("client_id") clientId: String
     ): UnsplashPhotoDto
+
+    @GET("users/{username}")
+    suspend fun getUser(
+        @Path("username") username: String,
+        @Query("client_id") clientId: String
+    ): UnsplashUserDto
 }
