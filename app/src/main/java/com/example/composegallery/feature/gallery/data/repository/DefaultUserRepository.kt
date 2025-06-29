@@ -6,6 +6,7 @@ import com.example.composegallery.feature.gallery.data.remote.UnsplashApi
 import com.example.composegallery.feature.gallery.data.util.Result
 import com.example.composegallery.feature.gallery.data.util.safeApiCall
 import com.example.composegallery.feature.gallery.domain.model.UnsplashUser
+import com.example.composegallery.feature.gallery.domain.repository.UserRepository
 import javax.inject.Inject
 
 class DefaultUserRepository @Inject constructor(

@@ -1,4 +1,4 @@
-package com.example.composegallery.feature.gallery.data.repository
+package com.example.composegallery.feature.gallery.domain.repository
 
 import com.example.composegallery.feature.gallery.data.util.Result
 import com.example.composegallery.feature.gallery.domain.model.UnsplashUser
