@@ -36,9 +36,11 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,7 +58,6 @@ import coil.compose.AsyncImage
 import com.example.composegallery.feature.gallery.domain.model.Collection
 import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.domain.model.UnsplashUser
-import kotlin.random.Random
 
 @Composable
 fun UserProfileScreen(
@@ -94,7 +95,6 @@ fun UserProfileScreen(
                 userLikesState = UiState.Content(listOf()),
                 userCollections = collections
             )
-
         }
     }
 }
@@ -109,6 +109,7 @@ fun UserProfileContent(
     userCollections: LazyPagingItems<Collection>
 ) {
     var selectedTab by remember { mutableStateOf(UserTab.PHOTOS) }
+    val retryKeys = remember { mutableStateMapOf<String, Int>() }
 
     Scaffold(
         topBar = {
@@ -194,7 +195,13 @@ fun UserProfileContent(
 
             // Photo Grid for selected tab
             when (selectedTab) {
-                UserTab.PHOTOS -> renderPhotoItems(userPhotos)
+                UserTab.PHOTOS -> renderPhotoItems(
+                    photos = userPhotos,
+                    retryKeys = retryKeys,
+                    onRetry = { id -> retryKeys[id] = (retryKeys[id] ?: 0) + 1 },
+                    onPhotoClick = { }
+                )
+
                 UserTab.LIKES -> {}
                 UserTab.COLLECTIONS -> renderCollectionItems(
                     collections = userCollections,
@@ -205,56 +212,54 @@ fun UserProfileContent(
     }
 }
 
-fun LazyStaggeredGridScope.renderPhotoItems(photos: LazyPagingItems<Photo>) {
-    items(count = photos.itemCount) { index ->
+fun LazyStaggeredGridScope.renderPhotoItems(
+    photos: LazyPagingItems<Photo>,
+    retryKeys: SnapshotStateMap<String, Int>,
+    onRetry: (String) -> Unit,
+    onPhotoClick: ((Photo) -> Unit)?
+) {
+    val isGridClickable =
+        photos.loadState.refresh !is LoadState.Loading &&
+                photos.loadState.refresh !is LoadState.Error
+
+    items(
+        count = photos.itemCount,
+        key = { index -> photos[index]?.id ?: index }
+    ) { index ->
         val photo = photos[index] ?: return@items
 
-        AsyncImage(
-            model = photo.regularUrl,
-            contentDescription = photo.description ?: "User photo",
-            contentScale = ContentScale.Crop,
+        val retryKey = retryKeys[photo.id] ?: 0
+        val url = if (retryKey > 0) "${photo.fullUrl}?retry=$retryKey" else photo.fullUrl
+
+        ProfilePhotoCard(
+            imageUrl = url,
+            onRetry = { onRetry(photo.id) },
+            blurHash = photo.blurHash,
             modifier = Modifier
                 .fillMaxWidth()
-                .aspectRatio(Random.nextDouble(0.8, 1.6).toFloat())
-                .clip(RoundedCornerShape(12.dp))
+                .aspectRatio(photo.width.toFloat() / photo.height)
+                .clip(RoundedCornerShape(12.dp)),
+            onClick = if (isGridClickable) {
+                { onPhotoClick?.invoke(photo) }
+            } else null
         )
     }
 
-    // Loading state placeholders
-    if (photos.loadState.refresh is LoadState.Loading) {
-        items(6) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(1f)
-                    .clip(RoundedCornerShape(12.dp))
+    when (val appendState = photos.loadState.append) {
+        is LoadState.Loading -> item(span = StaggeredGridItemSpan.FullLine) {
+            BottomLoadingIndicator()
+        }
+
+        is LoadState.Error -> item(span = StaggeredGridItemSpan.FullLine) {
+            LoadMoreError(
+                message = appendState.error.localizedMessage ?: "Error loading more",
+                onRetry = { photos.retry() }
             )
         }
-    }
 
-    // ProgressIndicator
-    if (photos.loadState.append is LoadState.Loading) {
-        item(span = StaggeredGridItemSpan.FullLine) {
-            ProgressIndicator()
-        }
-    }
-
-    // Error handling
-    if (photos.loadState.refresh is LoadState.Error) {
-        val error = photos.loadState.refresh as LoadState.Error
-        item(span = StaggeredGridItemSpan.FullLine) {
-            Text(
-                text = "Failed to load photos: ${error.error.message}",
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth(),
-                textAlign = TextAlign.Center
-            )
-        }
+        else -> Unit
     }
 }
-
 
 fun LazyStaggeredGridScope.renderCollectionItems(
     collections: LazyPagingItems<Collection>,
@@ -383,5 +388,28 @@ fun StatItemTab(
                     .background(MaterialTheme.colorScheme.primary)
             )
         }
+    }
+}
+
+@Composable
+fun ProfilePhotoCard(
+    imageUrl: String,
+    onRetry: () -> Unit,
+    blurHash: String? = null,
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null
+) {
+    val clickableModifier = Modifier
+        .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier)
+        .padding(8.dp)
+
+    Box(modifier = clickableModifier) {
+        PhotoImage(
+            imageUrl = imageUrl,
+            contentDescription = "User photo",
+            blurHash = blurHash,
+            onRetry = onRetry,
+            modifier = modifier
+        )
     }
 }
