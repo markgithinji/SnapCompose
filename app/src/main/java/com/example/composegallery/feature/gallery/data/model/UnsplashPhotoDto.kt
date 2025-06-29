@@ -24,8 +24,10 @@ internal fun UnsplashPhotoDto.toDomainModel(): Photo? {
     if (
         urls.thumb.isBlank() ||
         urls.full.isBlank() ||
+        urls.regular.isBlank() ||
         user.name.isBlank() ||
         user.profileImage.small.isBlank() ||
+        user.profileImage.medium.isBlank() ||
         user.profileImage.large.isBlank()
     ) return null
 
@@ -35,10 +37,12 @@ internal fun UnsplashPhotoDto.toDomainModel(): Photo? {
         height = height,
         thumbUrl = urls.thumb,
         fullUrl = urls.full,
+        regularUrl = urls.regular,
         authorName = user.name,
         authorProfileImageUrl = user.profileImage.small,
+        authorProfileImageMediumResUrl = user.profileImage.medium,
         authorProfileImageHighResUrl = user.profileImage.large,
-        authorInstagramUsername = user.instagramUsername,
+        username = user.username,
         location = user.location.toPhotoLocation(),
         blurHash = blurHash,
         description = description ?: altDescription,

@@ -269,7 +269,7 @@ fun SearchScreenContent(
                                 PhotoCard(
                                     imageUrl = url,
                                     authorName = photo.authorName,
-                                    authorImageUrl = "${photo.authorProfileImageUrl}?retry=$retryKey",
+                                    authorImageUrl = "${photo.authorProfileImageMediumResUrl}?retry=$retryKey",
                                     onRetry = { retryKeys[photo.id] = retryKey + 1 },
                                     blurHash = photo.blurHash,
                                     modifier = Modifier
