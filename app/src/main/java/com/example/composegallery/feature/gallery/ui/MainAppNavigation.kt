@@ -67,7 +67,19 @@ fun MainAppNavigation() {
                         onBack = { navController.popBackStack() },
                         onPhotoClick = { photoId ->
                             navController.navigate(PhotoDetailRoute(photoId))
+                        },
+                        onCollectionClick = { collectionId, title ->
+                            navController.navigate(CollectionDetailRoute(collectionId, title))
                         }
+                    )
+                }
+                composable<CollectionDetailRoute> { backStackEntry ->
+                    val params = backStackEntry.toRoute<CollectionDetailRoute>()
+                    CollectionDetailScreen(
+                        collectionId = params.collectionId,
+                        collectionTitle = params.collectionTitle,
+                        onBack = { navController.popBackStack() },
+                        onPhotoClick = { photoId -> navController.navigate(PhotoDetailRoute(photoId)) }
                     )
                 }
             }

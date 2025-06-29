@@ -1,0 +1,106 @@
+package com.example.composegallery.feature.gallery.ui
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.paging.LoadState
+import androidx.paging.compose.collectAsLazyPagingItems
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CollectionDetailScreen(
+    collectionId: String,
+    collectionTitle: String,
+    onBack: () -> Unit,
+    onPhotoClick: (String) -> Unit,
+    viewModel: UserProfileViewModel = hiltViewModel()
+) {
+    val photos = viewModel.collectionPhotos.collectAsLazyPagingItems()
+    val retryKeys = remember { mutableStateMapOf<String, Int>() }
+
+    LaunchedEffect(collectionId) {
+        viewModel.loadCollectionPhotos(collectionId)
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(collectionTitle, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                }
+            )
+        }
+    ) { padding ->
+        LazyVerticalStaggeredGrid(
+            columns = StaggeredGridCells.Fixed(2),
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize(),
+            contentPadding = PaddingValues(12.dp),
+            verticalItemSpacing = 12.dp,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(
+                count = photos.itemCount,
+                key = { index -> photos[index]?.id ?: index }
+            ) { index ->
+                val photo = photos[index] ?: return@items
+                val retryKey = retryKeys[photo.id] ?: 0
+                val url = if (retryKey > 0) "${photo.fullUrl}?retry=$retryKey" else photo.fullUrl
+
+                ProfilePhotoCard(
+                    imageUrl = url,
+                    blurHash = photo.blurHash,
+                    onRetry = { retryKeys[photo.id] = retryKey + 1 },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(photo.width.toFloat() / photo.height)
+                        .clip(RoundedCornerShape(12.dp)),
+                    onClick = { onPhotoClick(photo.id) }
+                )
+            }
+
+            when (val appendState = photos.loadState.append) {
+                is LoadState.Loading -> item(span = StaggeredGridItemSpan.FullLine) {
+                    BottomLoadingIndicator()
+                }
+
+                is LoadState.Error -> item(span = StaggeredGridItemSpan.FullLine) {
+                    LoadMoreError(
+                        message = appendState.error.localizedMessage ?: "Error loading more",
+                        onRetry = { photos.retry() }
+                    )
+                }
+
+                else -> Unit
+            }
+        }
+    }
+}

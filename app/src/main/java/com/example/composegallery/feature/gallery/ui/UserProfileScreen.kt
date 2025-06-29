@@ -63,6 +63,7 @@ import com.example.composegallery.feature.gallery.domain.model.UnsplashUser
 fun UserProfileScreen(
     username: String,
     onPhotoClick: (String) -> Unit,
+    onCollectionClick: (String, String) -> Unit,
     onBack: () -> Unit,
     viewModel: UserProfileViewModel = hiltViewModel()
 ) {
@@ -94,6 +95,7 @@ fun UserProfileScreen(
             UserProfileContent(
                 user = user,
                 onPhotoClick = onPhotoClick,
+                onCollectionClick = onCollectionClick,
                 onBack = onBack,
                 userPhotos = photos,
                 userLikes = userLikes,
@@ -108,6 +110,7 @@ fun UserProfileScreen(
 fun UserProfileContent(
     user: UnsplashUser,
     onPhotoClick: (String) -> Unit,
+    onCollectionClick: (String, String) -> Unit,
     onBack: () -> Unit,
     userPhotos: LazyPagingItems<Photo>,
     userLikes: LazyPagingItems<Photo>,
@@ -216,7 +219,9 @@ fun UserProfileContent(
 
                 UserTab.COLLECTIONS -> renderCollectionItems(
                     collections = userCollections,
-                    onCollectionClick = {}
+                    onCollectionClick = { collection ->
+                        onCollectionClick(collection.id, collection.title)
+                    }
                 )
             }
         }
