@@ -67,12 +67,14 @@ fun UserProfileScreen(
 ) {
     val userProfileState by viewModel.userProfileState.collectAsStateWithLifecycle()
     val photos = viewModel.pagedUserPhotos.collectAsLazyPagingItems()
+    val userLikes = viewModel.userLikedPhotos.collectAsLazyPagingItems()
     val collections = viewModel.userCollectionsState.collectAsLazyPagingItems()
 
     LaunchedEffect(username) {
         viewModel.loadUserProfile(username)
         viewModel.loadUserPhotos(username)
         viewModel.loadUserCollections(username)
+        viewModel.loadUserLikedPhotos(username)
     }
 
     when (userProfileState) {
@@ -92,7 +94,7 @@ fun UserProfileScreen(
                 user = user,
                 onBack = onBack,
                 userPhotos = photos,
-                userLikesState = UiState.Content(listOf()),
+                userLikes = userLikes,
                 userCollections = collections
             )
         }
@@ -105,7 +107,7 @@ fun UserProfileContent(
     user: UnsplashUser,
     onBack: () -> Unit,
     userPhotos: LazyPagingItems<Photo>,
-    userLikesState: UiState<List<Photo>>,
+    userLikes: LazyPagingItems<Photo>,
     userCollections: LazyPagingItems<Collection>
 ) {
     var selectedTab by remember { mutableStateOf(UserTab.PHOTOS) }
@@ -202,7 +204,13 @@ fun UserProfileContent(
                     onPhotoClick = { }
                 )
 
-                UserTab.LIKES -> {}
+                UserTab.LIKES -> renderPhotoItems(
+                    photos = userLikes,
+                    retryKeys = retryKeys,
+                    onRetry = { id -> retryKeys[id] = (retryKeys[id] ?: 0) + 1 },
+                    onPhotoClick = { }
+                )
+
                 UserTab.COLLECTIONS -> renderCollectionItems(
                     collections = userCollections,
                     onCollectionClick = {}
