@@ -65,7 +65,7 @@ fun UserProfileScreen(
     viewModel: UserProfileViewModel = hiltViewModel()
 ) {
     val userProfileState by viewModel.userProfileState.collectAsStateWithLifecycle()
-    val userPhotosState by viewModel.userPhotos.collectAsStateWithLifecycle()
+    val photos = viewModel.pagedUserPhotos.collectAsLazyPagingItems()
     val collections = viewModel.userCollectionsState.collectAsLazyPagingItems()
 
     LaunchedEffect(username) {
@@ -90,12 +90,11 @@ fun UserProfileScreen(
             UserProfileContent(
                 user = user,
                 onBack = onBack,
-                userPhotosState = userPhotosState,
-                userLikesState = UiState.Content(
-                    listOf()
-                ),
+                userPhotos = photos,
+                userLikesState = UiState.Content(listOf()),
                 userCollections = collections
             )
+
         }
     }
 }
@@ -105,7 +104,7 @@ fun UserProfileScreen(
 fun UserProfileContent(
     user: UnsplashUser,
     onBack: () -> Unit,
-    userPhotosState: UiState<List<Photo>>,
+    userPhotos: LazyPagingItems<Photo>,
     userLikesState: UiState<List<Photo>>,
     userCollections: LazyPagingItems<Collection>
 ) {
@@ -195,8 +194,8 @@ fun UserProfileContent(
 
             // Photo Grid for selected tab
             when (selectedTab) {
-                UserTab.PHOTOS -> renderPhotoItems(userPhotosState)
-                UserTab.LIKES -> renderPhotoItems(userLikesState)
+                UserTab.PHOTOS -> renderPhotoItems(userPhotos)
+                UserTab.LIKES -> {}
                 UserTab.COLLECTIONS -> renderCollectionItems(
                     collections = userCollections,
                     onCollectionClick = {}
@@ -206,56 +205,56 @@ fun UserProfileContent(
     }
 }
 
-fun LazyStaggeredGridScope.renderPhotoItems(uiState: UiState<List<Photo>>) {
-    when (uiState) {
-        is UiState.Loading -> {
-            // TODO: USe Blur hash
-            items(6) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(1f)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                )
-            }
-        }
+fun LazyStaggeredGridScope.renderPhotoItems(photos: LazyPagingItems<Photo>) {
+    items(count = photos.itemCount) { index ->
+        val photo = photos[index] ?: return@items
 
-        is UiState.Error -> {
-            item(span = StaggeredGridItemSpan.FullLine) {
-                Text(
-                    text = "Failed to load photos",
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth(),
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
+        AsyncImage(
+            model = photo.regularUrl,
+            contentDescription = photo.description ?: "User photo",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(Random.nextDouble(0.8, 1.6).toFloat())
+                .clip(RoundedCornerShape(12.dp))
+        )
+    }
 
-        is UiState.Content -> {
-            val photos = uiState.data
-            items(
-                count = photos.size,
-                key = { index -> photos[index].id }
-            ) { index ->
-                val photo = photos[index]
-                AsyncImage(
-                    model = photo.regularUrl,
-                    contentDescription = photo.description ?: "User photo",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(
-                            Random.nextDouble(0.8, 1.6).toFloat()
-                        ) // An experimental feature
-                        .clip(RoundedCornerShape(12.dp))
-                )
-            }
+    // Loading state placeholders
+    if (photos.loadState.refresh is LoadState.Loading) {
+        items(6) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f)
+                    .clip(RoundedCornerShape(12.dp))
+            )
+        }
+    }
+
+    // ProgressIndicator
+    if (photos.loadState.append is LoadState.Loading) {
+        item(span = StaggeredGridItemSpan.FullLine) {
+            ProgressIndicator()
+        }
+    }
+
+    // Error handling
+    if (photos.loadState.refresh is LoadState.Error) {
+        val error = photos.loadState.refresh as LoadState.Error
+        item(span = StaggeredGridItemSpan.FullLine) {
+            Text(
+                text = "Failed to load photos: ${error.error.message}",
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
         }
     }
 }
+
 
 fun LazyStaggeredGridScope.renderCollectionItems(
     collections: LazyPagingItems<Collection>,

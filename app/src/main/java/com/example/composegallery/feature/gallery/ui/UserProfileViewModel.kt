@@ -14,8 +14,10 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
 
 @HiltViewModel
 class UserProfileViewModel @Inject constructor(
@@ -25,12 +27,11 @@ class UserProfileViewModel @Inject constructor(
     private val _userProfileState = MutableStateFlow<UiState<UnsplashUser>>(UiState.Loading)
     val userProfileState: StateFlow<UiState<UnsplashUser>> = _userProfileState.asStateFlow()
 
-    private val _userPhotos = MutableStateFlow<UiState<List<Photo>>>(UiState.Loading)
-    val userPhotos: StateFlow<UiState<List<Photo>>> = _userPhotos.asStateFlow()
+    private val _pagedUserPhotos = MutableStateFlow(PagingData.empty<Photo>())
+    val pagedUserPhotos: StateFlow<PagingData<Photo>> = _pagedUserPhotos
 
     private val _userCollectionsState = MutableStateFlow<PagingData<Collection>>(PagingData.empty())
     val userCollectionsState: StateFlow<PagingData<Collection>> = _userCollectionsState
-
 
     fun loadUserProfile(username: String) {
         viewModelScope.launch {
@@ -44,11 +45,11 @@ class UserProfileViewModel @Inject constructor(
 
     fun loadUserPhotos(username: String) {
         viewModelScope.launch {
-            _userPhotos.value = UiState.Loading
-            when (val result = userRepository.getUserPhotos(username)) {
-                is Result.Success -> _userPhotos.value = UiState.Content(result.data)
-                is Result.Error -> _userPhotos.value = UiState.Error(result.message)
-            }
+            userRepository.getUserPhotos(username)
+                .cachedIn(viewModelScope)
+                .collectLatest { pagingData ->
+                    _pagedUserPhotos.value = pagingData
+                }
         }
     }
 
