@@ -1,6 +1,7 @@
 package com.example.composegallery.feature.gallery.data.remote
 
 import com.example.composegallery.feature.gallery.data.model.SearchResponseDto
+import com.example.composegallery.feature.gallery.data.model.UnsplashCollectionDto
 import com.example.composegallery.feature.gallery.data.model.UnsplashPhotoDto
 import com.example.composegallery.feature.gallery.data.model.UnsplashUserDto
 import retrofit2.http.GET
@@ -42,4 +43,12 @@ interface UnsplashApi {
         @Query("per_page") perPage: Int = 20,
         @Query("client_id") clientId: String
     ): List<UnsplashPhotoDto>
+
+    @GET("users/{username}/collections")
+    suspend fun getUserCollections(
+        @Path("username") username: String,
+        @Query("page") page: Int = 1,
+        @Query("per_page") perPage: Int = 20,
+        @Query("client_id") clientId: String
+    ): List<UnsplashCollectionDto>
 }

@@ -5,6 +5,7 @@ import com.example.composegallery.feature.gallery.data.model.toDomainModel
 import com.example.composegallery.feature.gallery.data.remote.UnsplashApi
 import com.example.composegallery.feature.gallery.data.util.Result
 import com.example.composegallery.feature.gallery.data.util.safeApiCall
+import com.example.composegallery.feature.gallery.domain.model.Collection
 import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.domain.model.UnsplashUser
 import com.example.composegallery.feature.gallery.domain.repository.UserRepository
@@ -30,6 +31,15 @@ class DefaultUserRepository @Inject constructor(
                 username = username,
                 clientId = BuildConfig.UNSPLASH_API_KEY
             ).mapNotNull { it.toDomainModel() }
+        }
+    }
+
+    override suspend fun getUserCollections(username: String): Result<List<Collection>> {
+        return safeApiCall {
+            api.getUserCollections(
+                username = username,
+                clientId = BuildConfig.UNSPLASH_API_KEY
+            ).map { it.toDomainModel() }
         }
     }
 }
