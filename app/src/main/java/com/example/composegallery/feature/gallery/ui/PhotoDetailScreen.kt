@@ -179,23 +179,38 @@ fun PhotoDetailInfo(photo: Photo) {
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        // Author
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        // Author Info
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             AsyncImage(
-                model = photo.authorProfileImageUrl,
+                model = photo.authorProfileImageHighResUrl,
                 contentDescription = "${photo.authorName}'s profile picture",
                 modifier = Modifier
                     .size(48.dp)
-                    .clip(CircleShape),
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentScale = ContentScale.Crop
             )
+
             Spacer(modifier = Modifier.width(12.dp))
-            Text(
-                text = photo.authorName,
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.SemiBold
+
+            Column {
+                Text(
+                    text = photo.authorName,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.SemiBold
+                    )
                 )
-            )
+                photo.authorInstagramUsername?.let {
+                    Text(
+                        text = "@$it",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
         }
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
@@ -204,19 +219,32 @@ fun PhotoDetailInfo(photo: Photo) {
         Text(
             text = "Size: ${photo.width} × ${photo.height}",
             style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
+        // Location
+        photo.location?.let { location ->
+            val locationText = listOfNotNull(location.city, location.country).joinToString(", ")
+            if (locationText.isNotBlank()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "📍 $locationText",
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                )
+            }
+        }
+
         // Description
-        photo.description?.takeIf { it.isNotBlank() }?.let {
+        photo.description?.takeIf { it.isNotBlank() }?.let { description ->
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = "Description",
-                style = MaterialTheme.typography.titleSmall.copy(
-                    fontWeight = FontWeight.Medium
-                )
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Medium)
             )
             Text(
-                text = it,
+                text = description,
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(top = 4.dp)
             )
@@ -227,9 +255,7 @@ fun PhotoDetailInfo(photo: Photo) {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = "Created At",
-                style = MaterialTheme.typography.titleSmall.copy(
-                    fontWeight = FontWeight.Medium
-                )
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Medium)
             )
             Text(
                 text = it,
@@ -240,14 +266,6 @@ fun PhotoDetailInfo(photo: Photo) {
 
         // EXIF Info
         photo.exif?.let { exif ->
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "Camera Info",
-                style = MaterialTheme.typography.titleSmall.copy(
-                    fontWeight = FontWeight.Medium
-                )
-            )
-
             val infoList = listOfNotNull(
                 exif.make?.let { "Make" to it },
                 exif.model?.let { "Model" to it },
@@ -257,12 +275,21 @@ fun PhotoDetailInfo(photo: Photo) {
                 exif.iso?.let { "ISO" to it }
             )
 
-            infoList.forEach { (label, value) ->
+            if (infoList.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "$label: $value",
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(top = 4.dp),
+                    text = "Camera Info",
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Medium)
                 )
+
+                infoList.forEach { (label, value) ->
+                    Text(
+                        text = "$label: $value",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(top = 4.dp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         }
     }

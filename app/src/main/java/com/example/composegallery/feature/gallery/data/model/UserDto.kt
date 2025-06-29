@@ -7,5 +7,7 @@ import kotlinx.serialization.Serializable
 data class UserDto(
     val name: String,
     @SerialName("profile_image")
-    val profileImage: ProfileImageDto
+    val profileImage: ProfileImageDto,
+    @SerialName("instagram_username") val instagramUsername: String? = null,
+    val location: String? = null
 )

@@ -1,6 +1,7 @@
 package com.example.composegallery.feature.gallery.data.model
 
 import com.example.composegallery.feature.gallery.domain.model.Photo
+import com.example.composegallery.feature.gallery.domain.model.PhotoLocation
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -24,7 +25,8 @@ internal fun UnsplashPhotoDto.toDomainModel(): Photo? {
         urls.thumb.isBlank() ||
         urls.full.isBlank() ||
         user.name.isBlank() ||
-        user.profileImage.small.isBlank()
+        user.profileImage.small.isBlank() ||
+        user.profileImage.large.isBlank()
     ) return null
 
     return Photo(
@@ -35,9 +37,24 @@ internal fun UnsplashPhotoDto.toDomainModel(): Photo? {
         fullUrl = urls.full,
         authorName = user.name,
         authorProfileImageUrl = user.profileImage.small,
+        authorProfileImageHighResUrl = user.profileImage.large,
+        authorInstagramUsername = user.instagramUsername,
+        location = user.location.toPhotoLocation(),
         blurHash = blurHash,
         description = description ?: altDescription,
         createdAt = createdAt,
         exif = exif?.toDomainModel()
     )
 }
+
+fun String?.toPhotoLocation(): PhotoLocation? {
+    if (this.isNullOrBlank()) return null
+
+    val parts = this.split(",").map { it.trim() }
+    return when (parts.size) {
+        2 -> PhotoLocation(city = parts[0], country = parts[1])
+        1 -> PhotoLocation(city = null, country = parts[0])
+        else -> null
+    }
+}
+
