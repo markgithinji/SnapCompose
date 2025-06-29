@@ -6,6 +6,7 @@ import androidx.paging.PagingData
 import com.example.composegallery.BuildConfig
 import com.example.composegallery.feature.gallery.data.model.toDomainModel
 import com.example.composegallery.feature.gallery.data.pagingsource.UnsplashGetUserCollectionsPagingSource
+import com.example.composegallery.feature.gallery.data.pagingsource.UnsplashGetUserLikesPagingSource
 import com.example.composegallery.feature.gallery.data.pagingsource.UnsplashGetUserPhotosPagingSource
 import com.example.composegallery.feature.gallery.data.remote.UnsplashApi
 import com.example.composegallery.feature.gallery.data.util.Result
@@ -47,5 +48,14 @@ class DefaultUserRepository @Inject constructor(
                 UnsplashGetUserCollectionsPagingSource(api, username)
             }
         )
+    }
+
+    override fun getUserLikedPhotos(username: String): Flow<PagingData<Photo>> {
+        return Pager(
+            config = PagingConfig(pageSize = 20),
+            pagingSourceFactory = {
+                UnsplashGetUserLikesPagingSource(api, username)
+            }
+        ).flow
     }
 }

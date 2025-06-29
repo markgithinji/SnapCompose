@@ -33,6 +33,9 @@ class UserProfileViewModel @Inject constructor(
     private val _userCollectionsState = MutableStateFlow<PagingData<Collection>>(PagingData.empty())
     val userCollectionsState: StateFlow<PagingData<Collection>> = _userCollectionsState
 
+    private val _userLikedPhotos = MutableStateFlow<PagingData<Photo>>(PagingData.empty())
+    val userLikedPhotos: StateFlow<PagingData<Photo>> = _userLikedPhotos
+
     fun loadUserProfile(username: String) {
         viewModelScope.launch {
             _userProfileState.value = UiState.Loading
@@ -60,6 +63,16 @@ class UserProfileViewModel @Inject constructor(
                 .cachedIn(viewModelScope)
                 .collect { pagingData ->
                     _userCollectionsState.value = pagingData
+                }
+        }
+    }
+
+    fun loadUserLikedPhotos(username: String) {
+        viewModelScope.launch {
+            userRepository.getUserLikedPhotos(username)
+                .cachedIn(viewModelScope)
+                .collectLatest {
+                    _userLikedPhotos.value = it
                 }
         }
     }

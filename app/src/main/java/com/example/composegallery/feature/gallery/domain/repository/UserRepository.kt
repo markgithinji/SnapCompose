@@ -11,5 +11,6 @@ import kotlinx.coroutines.flow.Flow
 interface UserRepository {
     suspend fun getUserProfile(username: String): Result<UnsplashUser>
     fun getUserPhotos(username: String): Flow<PagingData<Photo>>
+    fun getUserLikedPhotos(username: String): Flow<PagingData<Photo>>
     fun getUserCollections(username: String): Pager<Int, Collection>
 }
