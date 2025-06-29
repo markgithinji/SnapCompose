@@ -2,6 +2,8 @@ package com.example.composegallery.feature.gallery.data.di
 
 import com.example.composegallery.feature.gallery.data.remote.UnsplashApi
 import com.example.composegallery.feature.gallery.data.repository.DefaultGalleryRepository
+import com.example.composegallery.feature.gallery.data.repository.DefaultUserRepository
+import com.example.composegallery.feature.gallery.data.repository.UserRepository
 import com.example.composegallery.feature.gallery.domain.repository.GalleryRepository
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
@@ -40,5 +42,13 @@ object NetworkModule {
     @Singleton
     fun provideGalleryRepository(api: UnsplashApi): GalleryRepository {
         return DefaultGalleryRepository(api)
+    }
+
+    @Provides
+    @Singleton
+    fun provideUserRepository(
+        api: UnsplashApi
+    ): UserRepository {
+        return DefaultUserRepository(api)
     }
 }

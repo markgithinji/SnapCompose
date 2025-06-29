@@ -1,0 +1,33 @@
+package com.example.composegallery.feature.gallery.ui
+
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.composegallery.feature.gallery.data.repository.UserRepository
+import com.example.composegallery.feature.gallery.data.util.Result
+import com.example.composegallery.feature.gallery.domain.model.UnsplashUser
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+@HiltViewModel
+class UserProfileViewModel @Inject constructor(
+    private val userRepository: UserRepository
+) : ViewModel() {
+
+    private val _userProfileState = MutableStateFlow<UiState<UnsplashUser>>(UiState.Loading)
+    val userProfileState: StateFlow<UiState<UnsplashUser>> = _userProfileState.asStateFlow()
+
+    fun loadUserProfile(username: String) {
+        viewModelScope.launch {
+            _userProfileState.value = UiState.Loading
+            when (val result = userRepository.getUserProfile(username)) {
+                is Result.Success -> _userProfileState.value = UiState.Content(result.data)
+                is Result.Error -> _userProfileState.value = UiState.Error(result.message)
+            }
+        }
+    }
+}
