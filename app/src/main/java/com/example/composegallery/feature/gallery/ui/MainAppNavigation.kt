@@ -48,6 +48,9 @@ fun MainAppNavigation() {
                         onBack = { navController.popBackStack() },
                         onExpandClick = { photoId ->
                             navController.navigate(FullscreenPhotoRoute(photoId))
+                        },
+                        onUserClick = { username ->
+                            navController.navigate(UserProfileRoute(username))
                         }
                     )
                 }
@@ -55,6 +58,13 @@ fun MainAppNavigation() {
                     val fullscreenPhotoRoute = backStackEntry.toRoute<FullscreenPhotoRoute>()
                     PhotoViewerScreen(
                         photoId = fullscreenPhotoRoute.photoId
+                    )
+                }
+                composable<UserProfileRoute> { backStackEntry ->
+                    val userProfileRoute = backStackEntry.toRoute<UserProfileRoute>()
+                    UserProfileScreen(
+                        username = userProfileRoute.username,
+                        onBack = { navController.popBackStack() }
                     )
                 }
             }

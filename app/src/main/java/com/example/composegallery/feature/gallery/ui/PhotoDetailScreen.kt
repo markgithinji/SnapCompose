@@ -2,6 +2,7 @@ package com.example.composegallery.feature.gallery.ui
 
 import android.icu.util.TimeZone
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -53,6 +54,7 @@ fun PhotoDetailScreen(
     photoId: String,
     onBack: () -> Unit,
     onExpandClick: (String) -> Unit,
+    onUserClick: (String) -> Unit,
     viewModel: PhotoDetailViewModel = hiltViewModel()
 ) {
     val photoState by viewModel.uiState.collectAsState()
@@ -105,7 +107,8 @@ fun PhotoDetailScreen(
                 PhotoDetailContent(
                     photo = state.data,
                     modifier = Modifier.padding(padding),
-                    onExpandClick = onExpandClick
+                    onExpandClick = onExpandClick,
+                    onUserClick = onUserClick
                 )
             }
         }
@@ -116,7 +119,8 @@ fun PhotoDetailScreen(
 fun PhotoDetailContent(
     photo: Photo,
     modifier: Modifier = Modifier,
-    onExpandClick: (String) -> Unit
+    onExpandClick: (String) -> Unit,
+    onUserClick: (String) -> Unit
 ) {
     val containerSize = LocalWindowInfo.current.containerSize
     val density = LocalDensity.current
@@ -161,7 +165,10 @@ fun PhotoDetailContent(
                 .height(halfScreenHeightDp)
         ) {
             Column(Modifier.verticalScroll(rememberScrollState())) {
-                PhotoDetailInfo(photo = photo)
+                PhotoDetailInfo(
+                    photo = photo,
+                    onUserClick = onUserClick
+                )
             }
         }
     }
@@ -169,7 +176,10 @@ fun PhotoDetailContent(
 
 
 @Composable
-fun PhotoDetailInfo(photo: Photo) {
+fun PhotoDetailInfo(
+    photo: Photo,
+    onUserClick: (String) -> Unit
+) {
     val formattedDate by remember(photo.createdAt) {
         derivedStateOf { photo.createdAt?.formatToReadableDate() }
     }
@@ -181,7 +191,9 @@ fun PhotoDetailInfo(photo: Photo) {
     ) {
         // Author Info
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onUserClick(photo.username ?: photo.authorName) },
             verticalAlignment = Alignment.CenterVertically
         ) {
             AsyncImage(
@@ -203,7 +215,7 @@ fun PhotoDetailInfo(photo: Photo) {
                         fontWeight = FontWeight.SemiBold
                     )
                 )
-                photo.authorInstagramUsername?.let {
+                photo.username?.let {
                     Text(
                         text = "@$it",
                         style = MaterialTheme.typography.bodySmall,

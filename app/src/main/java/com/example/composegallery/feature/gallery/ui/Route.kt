@@ -13,3 +13,6 @@ data class PhotoDetailRoute(val photoId: String)
 
 @Serializable
 data class FullscreenPhotoRoute(val photoId: String)
+
+@Serializable
+data class UserProfileRoute(val username: String)
