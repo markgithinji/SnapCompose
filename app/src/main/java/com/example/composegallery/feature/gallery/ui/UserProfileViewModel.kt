@@ -4,6 +4,7 @@ package com.example.composegallery.feature.gallery.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.composegallery.feature.gallery.data.util.Result
+import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.domain.model.UnsplashUser
 import com.example.composegallery.feature.gallery.domain.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,12 +22,25 @@ class UserProfileViewModel @Inject constructor(
     private val _userProfileState = MutableStateFlow<UiState<UnsplashUser>>(UiState.Loading)
     val userProfileState: StateFlow<UiState<UnsplashUser>> = _userProfileState.asStateFlow()
 
+    private val _userPhotos = MutableStateFlow<UiState<List<Photo>>>(UiState.Loading)
+    val userPhotos: StateFlow<UiState<List<Photo>>> = _userPhotos.asStateFlow()
+
     fun loadUserProfile(username: String) {
         viewModelScope.launch {
             _userProfileState.value = UiState.Loading
             when (val result = userRepository.getUserProfile(username)) {
                 is Result.Success -> _userProfileState.value = UiState.Content(result.data)
                 is Result.Error -> _userProfileState.value = UiState.Error(result.message)
+            }
+        }
+    }
+
+    fun loadUserPhotos(username: String) {
+        viewModelScope.launch {
+            _userPhotos.value = UiState.Loading
+            when (val result = userRepository.getUserPhotos(username)) {
+                is Result.Success -> _userPhotos.value = UiState.Content(result.data)
+                is Result.Error -> _userPhotos.value = UiState.Error(result.message)
             }
         }
     }

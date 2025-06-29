@@ -34,4 +34,12 @@ interface UnsplashApi {
         @Path("username") username: String,
         @Query("client_id") clientId: String
     ): UnsplashUserDto
+
+    @GET("users/{username}/photos")
+    suspend fun getUserPhotos(
+        @Path("username") username: String,
+        @Query("page") page: Int = 1,
+        @Query("per_page") perPage: Int = 20,
+        @Query("client_id") clientId: String
+    ): List<UnsplashPhotoDto>
 }

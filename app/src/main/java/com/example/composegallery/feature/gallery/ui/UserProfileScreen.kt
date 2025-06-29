@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -36,12 +37,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.domain.model.UnsplashUser
+import kotlin.random.Random
 
 @Composable
 fun UserProfileScreen(
@@ -50,9 +54,11 @@ fun UserProfileScreen(
     viewModel: UserProfileViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.userProfileState.collectAsStateWithLifecycle()
+    val userPhotosState by viewModel.userPhotos.collectAsStateWithLifecycle()
 
     LaunchedEffect(username) {
         viewModel.loadUserProfile(username)
+        viewModel.loadUserPhotos(username)
     }
 
     when (uiState) {
@@ -68,7 +74,11 @@ fun UserProfileScreen(
 
         is UiState.Content -> {
             val user = (uiState as UiState.Content<UnsplashUser>).data
-            UserProfileContent(user = user, onBack = onBack)
+            UserProfileContent(
+                user = user,
+                onBack = onBack,
+                userPhotosState = userPhotosState
+            )
         }
     }
 }
@@ -77,6 +87,7 @@ fun UserProfileScreen(
 @Composable
 fun UserProfileContent(
     user: UnsplashUser,
+    userPhotosState: UiState<List<Photo>>,
     onBack: () -> Unit
 ) {
     Scaffold(
@@ -153,7 +164,7 @@ fun UserProfileContent(
                 }
             }
 
-            //Stats
+            // Stats
             item(span = StaggeredGridItemSpan.FullLine) {
                 Row(
                     modifier = Modifier
@@ -172,22 +183,50 @@ fun UserProfileContent(
                 }
             }
 
-            // Photo Grid Items
-//            items(photos.size) { index ->
-//                AsyncImage(
-//                    model = photos[index],
-//                    contentDescription = "Liked photo",
-//                    contentScale = ContentScale.Crop,
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .aspectRatio(Random.nextDouble(0.8, 1.6).toFloat())
-//                        .clip(RoundedCornerShape(12.dp))
-//                )
-//            }
+            // Photos
+            when (userPhotosState) {
+                is UiState.Loading -> {
+                    item(span = StaggeredGridItemSpan.FullLine) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(24.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            ProgressIndicator()
+                        }
+                    }
+                }
+
+                is UiState.Error -> {
+                    item(span = StaggeredGridItemSpan.FullLine) {
+                        Text(
+                            text = "Error loading photos: ${(userPhotosState as UiState.Error).message}",
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
+                }
+
+                is UiState.Content -> {
+                    val photos = (userPhotosState as UiState.Content<List<Photo>>).data
+                    items(photos.size, key = { photos[it].id }) { index ->
+                        val photo = photos[index]
+                        AsyncImage(
+                            model = photo.regularUrl,
+                            contentDescription = photo.description ?: "User photo",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .aspectRatio(Random.nextDouble(0.8, 1.6).toFloat())
+                                .clip(RoundedCornerShape(12.dp))
+                        )
+                    }
+                }
+            }
         }
     }
 }
-
 
 @Composable
 private fun StatItem(count: String, label: String, highlighted: Boolean = false) {
