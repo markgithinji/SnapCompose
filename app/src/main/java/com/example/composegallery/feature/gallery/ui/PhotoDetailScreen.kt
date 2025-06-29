@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -35,8 +36,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -168,9 +171,7 @@ fun PhotoDetailContent(
 @Composable
 fun PhotoDetailInfo(photo: Photo) {
     val formattedDate by remember(photo.createdAt) {
-        derivedStateOf {
-            photo.createdAt?.formatToReadableDate()
-        }
+        derivedStateOf { photo.createdAt?.formatToReadableDate() }
     }
 
     Column(
@@ -182,60 +183,87 @@ fun PhotoDetailInfo(photo: Photo) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             AsyncImage(
                 model = photo.authorProfileImageUrl,
-                contentDescription = "Author Image",
+                contentDescription = "${photo.authorName}'s profile picture",
                 modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
+                    .size(48.dp)
+                    .clip(CircleShape),
+                contentScale = ContentScale.Crop
             )
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(12.dp))
             Text(
                 text = photo.authorName,
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.SemiBold
+                )
             )
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
 
-        // Photo Info
-        Text("Photo ID: ${photo.id}", style = MaterialTheme.typography.bodyMedium)
-        Spacer(modifier = Modifier.height(4.dp))
-        Text("Size: ${photo.width} x ${photo.height}", style = MaterialTheme.typography.bodySmall)
+        // Photo Dimensions
+        Text(
+            text = "Size: ${photo.width} × ${photo.height}",
+            style = MaterialTheme.typography.bodyMedium,
+        )
 
         // Description
         photo.description?.takeIf { it.isNotBlank() }?.let {
-            Spacer(modifier = Modifier.height(12.dp))
-            Text("Description", style = MaterialTheme.typography.titleSmall)
-            Text(it, style = MaterialTheme.typography.bodySmall)
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Description",
+                style = MaterialTheme.typography.titleSmall.copy(
+                    fontWeight = FontWeight.Medium
+                )
+            )
+            Text(
+                text = it,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(top = 4.dp)
+            )
         }
 
         // Created At
         formattedDate?.let {
-            Spacer(modifier = Modifier.height(8.dp))
-            Text("Created at", style = MaterialTheme.typography.titleSmall)
-            Text(it, style = MaterialTheme.typography.bodySmall)
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Created At",
+                style = MaterialTheme.typography.titleSmall.copy(
+                    fontWeight = FontWeight.Medium
+                )
+            )
+            Text(
+                text = it,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(top = 4.dp)
+            )
         }
 
-        // EXIF
+        // EXIF Info
         photo.exif?.let { exif ->
-            Spacer(modifier = Modifier.height(12.dp))
-            Text("Camera Info", style = MaterialTheme.typography.titleSmall)
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Camera Info",
+                style = MaterialTheme.typography.titleSmall.copy(
+                    fontWeight = FontWeight.Medium
+                )
+            )
 
-            exif.make?.let { Text("Make: $it", style = MaterialTheme.typography.bodySmall) }
-            exif.model?.let { Text("Model: $it", style = MaterialTheme.typography.bodySmall) }
-            exif.aperture?.let { Text("Aperture: $it", style = MaterialTheme.typography.bodySmall) }
-            exif.shutterSpeed?.let {
+            val infoList = listOfNotNull(
+                exif.make?.let { "Make" to it },
+                exif.model?.let { "Model" to it },
+                exif.aperture?.let { "Aperture" to it },
+                exif.shutterSpeed?.let { "Shutter Speed" to it },
+                exif.focalLength?.let { "Focal Length" to it },
+                exif.iso?.let { "ISO" to it }
+            )
+
+            infoList.forEach { (label, value) ->
                 Text(
-                    "Shutter Speed: $it",
-                    style = MaterialTheme.typography.bodySmall
+                    text = "$label: $value",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(top = 4.dp),
                 )
             }
-            exif.focalLength?.let {
-                Text(
-                    "Focal Length: $it",
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-            exif.iso?.let { Text("ISO: $it", style = MaterialTheme.typography.bodySmall) }
         }
     }
 }
