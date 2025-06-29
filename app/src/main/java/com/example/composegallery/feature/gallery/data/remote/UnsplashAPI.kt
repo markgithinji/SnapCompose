@@ -59,4 +59,12 @@ interface UnsplashApi {
         @Query("per_page") perPage: Int = 20,
         @Query("client_id") clientId: String
     ): List<UnsplashPhotoDto>
+
+    @GET("collections/{id}/photos")
+    suspend fun getCollectionPhotos(
+        @Path("id") collectionId: String,
+        @Query("page") page: Int,
+        @Query("per_page") perPage: Int,
+        @Query("client_id") clientId: String
+    ): List<UnsplashPhotoDto>
 }

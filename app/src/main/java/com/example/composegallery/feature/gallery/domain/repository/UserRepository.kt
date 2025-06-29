@@ -13,4 +13,5 @@ interface UserRepository {
     fun getUserPhotos(username: String): Flow<PagingData<Photo>>
     fun getUserLikedPhotos(username: String): Flow<PagingData<Photo>>
     fun getUserCollections(username: String): Pager<Int, Collection>
+    fun getCollectionPhotos(collectionId: String): Flow<PagingData<Photo>>
 }

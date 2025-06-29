@@ -5,6 +5,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.example.composegallery.BuildConfig
 import com.example.composegallery.feature.gallery.data.model.toDomainModel
+import com.example.composegallery.feature.gallery.data.pagingsource.UnsplashGetCollectionPhotosPagingSource
 import com.example.composegallery.feature.gallery.data.pagingsource.UnsplashGetUserCollectionsPagingSource
 import com.example.composegallery.feature.gallery.data.pagingsource.UnsplashGetUserLikesPagingSource
 import com.example.composegallery.feature.gallery.data.pagingsource.UnsplashGetUserPhotosPagingSource
@@ -55,6 +56,15 @@ class DefaultUserRepository @Inject constructor(
             config = PagingConfig(pageSize = 20),
             pagingSourceFactory = {
                 UnsplashGetUserLikesPagingSource(api, username)
+            }
+        ).flow
+    }
+
+    override fun getCollectionPhotos(collectionId: String): Flow<PagingData<Photo>> {
+        return Pager(
+            config = PagingConfig(pageSize = 20),
+            pagingSourceFactory = {
+                UnsplashGetCollectionPhotosPagingSource(api, collectionId)
             }
         ).flow
     }
