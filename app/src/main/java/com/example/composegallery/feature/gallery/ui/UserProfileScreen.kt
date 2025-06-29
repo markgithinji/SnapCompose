@@ -62,6 +62,7 @@ import com.example.composegallery.feature.gallery.domain.model.UnsplashUser
 @Composable
 fun UserProfileScreen(
     username: String,
+    onPhotoClick: (String) -> Unit,
     onBack: () -> Unit,
     viewModel: UserProfileViewModel = hiltViewModel()
 ) {
@@ -92,6 +93,7 @@ fun UserProfileScreen(
             val user = (userProfileState as UiState.Content<UnsplashUser>).data
             UserProfileContent(
                 user = user,
+                onPhotoClick = onPhotoClick,
                 onBack = onBack,
                 userPhotos = photos,
                 userLikes = userLikes,
@@ -105,6 +107,7 @@ fun UserProfileScreen(
 @Composable
 fun UserProfileContent(
     user: UnsplashUser,
+    onPhotoClick: (String) -> Unit,
     onBack: () -> Unit,
     userPhotos: LazyPagingItems<Photo>,
     userLikes: LazyPagingItems<Photo>,
@@ -168,7 +171,7 @@ fun UserProfileContent(
                 }
             }
 
-            // Interactive Stats Row as Tabs
+            // Stats Row as Tabs
             item(span = StaggeredGridItemSpan.FullLine) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -201,14 +204,14 @@ fun UserProfileContent(
                     photos = userPhotos,
                     retryKeys = retryKeys,
                     onRetry = { id -> retryKeys[id] = (retryKeys[id] ?: 0) + 1 },
-                    onPhotoClick = { }
+                    onPhotoClick = onPhotoClick
                 )
 
                 UserTab.LIKES -> renderPhotoItems(
                     photos = userLikes,
                     retryKeys = retryKeys,
                     onRetry = { id -> retryKeys[id] = (retryKeys[id] ?: 0) + 1 },
-                    onPhotoClick = { }
+                    onPhotoClick = onPhotoClick
                 )
 
                 UserTab.COLLECTIONS -> renderCollectionItems(
@@ -224,7 +227,7 @@ fun LazyStaggeredGridScope.renderPhotoItems(
     photos: LazyPagingItems<Photo>,
     retryKeys: SnapshotStateMap<String, Int>,
     onRetry: (String) -> Unit,
-    onPhotoClick: ((Photo) -> Unit)?
+    onPhotoClick: (String) -> Unit
 ) {
     val isGridClickable =
         photos.loadState.refresh !is LoadState.Loading &&
@@ -248,7 +251,7 @@ fun LazyStaggeredGridScope.renderPhotoItems(
                 .aspectRatio(photo.width.toFloat() / photo.height)
                 .clip(RoundedCornerShape(12.dp)),
             onClick = if (isGridClickable) {
-                { onPhotoClick?.invoke(photo) }
+                { onPhotoClick(photo.id) }
             } else null
         )
     }

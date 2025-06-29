@@ -64,7 +64,10 @@ fun MainAppNavigation() {
                     val userProfileRoute = backStackEntry.toRoute<UserProfileRoute>()
                     UserProfileScreen(
                         username = userProfileRoute.username,
-                        onBack = { navController.popBackStack() }
+                        onBack = { navController.popBackStack() },
+                        onPhotoClick = { photoId ->
+                            navController.navigate(PhotoDetailRoute(photoId))
+                        }
                     )
                 }
             }
