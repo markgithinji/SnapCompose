@@ -24,6 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,6 +33,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -58,6 +60,7 @@ import coil.compose.AsyncImage
 import com.example.composegallery.feature.gallery.domain.model.Collection
 import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.domain.model.UnsplashUser
+import com.example.composegallery.feature.gallery.domain.model.UserStatistics
 
 @Composable
 fun UserProfileScreen(
@@ -68,15 +71,19 @@ fun UserProfileScreen(
     viewModel: UserProfileViewModel = hiltViewModel()
 ) {
     val userProfileState by viewModel.userProfileState.collectAsStateWithLifecycle()
+    val userStatsState by viewModel.userStatisticsState.collectAsStateWithLifecycle()
     val photos = viewModel.pagedUserPhotos.collectAsLazyPagingItems()
     val userLikes = viewModel.userLikedPhotos.collectAsLazyPagingItems()
     val collections = viewModel.userCollectionsState.collectAsLazyPagingItems()
+
+    var showStatsDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(username) {
         viewModel.loadUserProfile(username)
         viewModel.loadUserPhotos(username)
         viewModel.loadUserCollections(username)
         viewModel.loadUserLikedPhotos(username)
+        viewModel.loadUserStatistics(username)
     }
 
     when (userProfileState) {
@@ -96,10 +103,57 @@ fun UserProfileScreen(
                 user = user,
                 onPhotoClick = onPhotoClick,
                 onCollectionClick = onCollectionClick,
+                onStatsClick = { showStatsDialog = true },
                 onBack = onBack,
                 userPhotos = photos,
                 userLikes = userLikes,
                 userCollections = collections
+            )
+        }
+    }
+
+    // Show the stats dialog if requested
+    if (showStatsDialog) {
+        if (userStatsState is UiState.Content) {
+            val stats = (userStatsState as UiState.Content<UserStatistics>).data
+            AlertDialog(
+                onDismissRequest = { showStatsDialog = false },
+                title = { Text("User Statistics") },
+                text = {
+                    UserStatsChart(
+                        stats = stats,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(300.dp)
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = { showStatsDialog = false }) {
+                        Text("Close")
+                    }
+                }
+            )
+        } else if (userStatsState is UiState.Loading) {
+            AlertDialog(
+                onDismissRequest = { showStatsDialog = false },
+                title = { Text("Loading Stats...") },
+                text = { ProgressIndicator() },
+                confirmButton = {
+                    TextButton(onClick = { showStatsDialog = false }) {
+                        Text("Close")
+                    }
+                }
+            )
+        } else if (userStatsState is UiState.Error) {
+            AlertDialog(
+                onDismissRequest = { showStatsDialog = false },
+                title = { Text("Error Loading Stats") },
+                text = { Text((userStatsState as UiState.Error).message) },
+                confirmButton = {
+                    TextButton(onClick = { showStatsDialog = false }) {
+                        Text("Close")
+                    }
+                }
             )
         }
     }
@@ -111,6 +165,7 @@ fun UserProfileContent(
     user: UnsplashUser,
     onPhotoClick: (String) -> Unit,
     onCollectionClick: (String, String) -> Unit,
+    onStatsClick: (String) -> Unit,
     onBack: () -> Unit,
     userPhotos: LazyPagingItems<Photo>,
     userLikes: LazyPagingItems<Photo>,
@@ -129,7 +184,7 @@ fun UserProfileContent(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { }) {
+                    IconButton(onClick = { onStatsClick(user.username) }) {
                         Icon(Icons.Default.BarChart, contentDescription = "Stats")
                     }
                 }

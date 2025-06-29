@@ -4,6 +4,7 @@ import com.example.composegallery.feature.gallery.data.model.SearchResponseDto
 import com.example.composegallery.feature.gallery.data.model.UnsplashCollectionDto
 import com.example.composegallery.feature.gallery.data.model.UnsplashPhotoDto
 import com.example.composegallery.feature.gallery.data.model.UnsplashUserDto
+import com.example.composegallery.feature.gallery.data.model.UserStatisticsDto
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -67,4 +68,10 @@ interface UnsplashApi {
         @Query("per_page") perPage: Int,
         @Query("client_id") clientId: String
     ): List<UnsplashPhotoDto>
+
+    @GET("users/{username}/statistics")
+    suspend fun getUserStatistics(
+        @Path("username") username: String,
+        @Query("client_id") clientId: String
+    ): UserStatisticsDto
 }

@@ -9,6 +9,7 @@ import com.example.composegallery.feature.gallery.data.util.Result
 import com.example.composegallery.feature.gallery.domain.model.Collection
 import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.domain.model.UnsplashUser
+import com.example.composegallery.feature.gallery.domain.model.UserStatistics
 import com.example.composegallery.feature.gallery.domain.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,6 +39,9 @@ class UserProfileViewModel @Inject constructor(
 
     private val _userLikedPhotos = MutableStateFlow<PagingData<Photo>>(PagingData.empty())
     val userLikedPhotos: StateFlow<PagingData<Photo>> = _userLikedPhotos
+
+    private val _userStatisticsState = MutableStateFlow<UiState<UserStatistics>>(UiState.Loading)
+    val userStatisticsState: StateFlow<UiState<UserStatistics>> = _userStatisticsState.asStateFlow()
 
     fun loadUserProfile(username: String) {
         viewModelScope.launch {
@@ -87,6 +91,16 @@ class UserProfileViewModel @Inject constructor(
                 .collectLatest {
                     _collectionPhotos.value = it
                 }
+        }
+    }
+
+    fun loadUserStatistics(username: String) {
+        viewModelScope.launch {
+            _userStatisticsState.value = UiState.Loading
+            when (val result = userRepository.getUserStatistics(username)) {
+                is Result.Success -> _userStatisticsState.value = UiState.Content(result.data)
+                is Result.Error -> _userStatisticsState.value = UiState.Error(result.message)
+            }
         }
     }
 }
