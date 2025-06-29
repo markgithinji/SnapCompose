@@ -1,7 +1,10 @@
 package com.example.composegallery.feature.gallery.data.repository
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
 import com.example.composegallery.BuildConfig
 import com.example.composegallery.feature.gallery.data.model.toDomainModel
+import com.example.composegallery.feature.gallery.data.pagingsource.UnsplashGetUserCollectionsPagingSource
 import com.example.composegallery.feature.gallery.data.remote.UnsplashApi
 import com.example.composegallery.feature.gallery.data.util.Result
 import com.example.composegallery.feature.gallery.data.util.safeApiCall
@@ -34,12 +37,12 @@ class DefaultUserRepository @Inject constructor(
         }
     }
 
-    override suspend fun getUserCollections(username: String): Result<List<Collection>> {
-        return safeApiCall {
-            api.getUserCollections(
-                username = username,
-                clientId = BuildConfig.UNSPLASH_API_KEY
-            ).map { it.toDomainModel() }
-        }
+    override fun getUserCollections(username: String): Pager<Int, Collection> {
+        return Pager(
+            config = PagingConfig(pageSize = 20),
+            pagingSourceFactory = {
+                UnsplashGetUserCollectionsPagingSource(api, username)
+            }
+        )
     }
 }

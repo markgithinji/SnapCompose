@@ -45,13 +45,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.example.composegallery.feature.gallery.domain.model.Collection
 import com.example.composegallery.feature.gallery.domain.model.Photo
-import com.example.composegallery.feature.gallery.domain.model.PhotoLocation
 import com.example.composegallery.feature.gallery.domain.model.UnsplashUser
 import kotlin.random.Random
 
@@ -61,65 +64,37 @@ fun UserProfileScreen(
     onBack: () -> Unit,
     viewModel: UserProfileViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.userProfileState.collectAsStateWithLifecycle()
+    val userProfileState by viewModel.userProfileState.collectAsStateWithLifecycle()
     val userPhotosState by viewModel.userPhotos.collectAsStateWithLifecycle()
+    val collections = viewModel.userCollectionsState.collectAsLazyPagingItems()
 
     LaunchedEffect(username) {
         viewModel.loadUserProfile(username)
         viewModel.loadUserPhotos(username)
+        viewModel.loadUserCollections(username)
     }
 
-    when (uiState) {
+    when (userProfileState) {
         is UiState.Loading -> {
             ProgressIndicator()
         }
 
         is UiState.Error -> {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Error: ${(uiState as UiState.Error).message}")
+                Text("Error: ${(userProfileState as UiState.Error).message}")
             }
         }
 
         is UiState.Content -> {
-            val user = (uiState as UiState.Content<UnsplashUser>).data
+            val user = (userProfileState as UiState.Content<UnsplashUser>).data
             UserProfileContent(
                 user = user,
                 onBack = onBack,
                 userPhotosState = userPhotosState,
                 userLikesState = UiState.Content(
-                    listOf(
-                        Photo( // fake photo
-                            id = "like1",
-                            width = 1080,
-                            height = 720,
-                            thumbUrl = "https://source.unsplash.com/random/300x300?sig=1",
-                            regularUrl = "https://source.unsplash.com/random/600x400?sig=1",
-                            fullUrl = "https://source.unsplash.com/random/1200x800?sig=1",
-                            authorName = "Jane Doe",
-                            authorProfileImageUrl = "",
-                            authorProfileImageMediumResUrl = "",
-                            authorProfileImageHighResUrl = "",
-                            username = "janedoe",
-                            location = PhotoLocation(city = "Nairobi", country = "Kenya"),
-                            blurHash = null,
-                            description = "Liked photo",
-                            createdAt = "2023-01-01T00:00:00Z",
-                            exif = null
-                        )
-                    )
+                    listOf()
                 ),
-                userCollectionsState = UiState.Content(
-                    listOf(
-                        Collection( // fake collection
-                            id = "collection1",
-                            title = "Urban Shots",
-                            description = "A curated collection of city photos",
-                            totalPhotos = 10,
-                            coverPhoto = null,
-                            authorName = "Jane Doe"
-                        )
-                    )
-                )
+                userCollections = collections
             )
         }
     }
@@ -129,10 +104,10 @@ fun UserProfileScreen(
 @Composable
 fun UserProfileContent(
     user: UnsplashUser,
+    onBack: () -> Unit,
     userPhotosState: UiState<List<Photo>>,
     userLikesState: UiState<List<Photo>>,
-    userCollectionsState: UiState<List<Collection>>,
-    onBack: () -> Unit
+    userCollections: LazyPagingItems<Collection>
 ) {
     var selectedTab by remember { mutableStateOf(UserTab.PHOTOS) }
 
@@ -222,8 +197,10 @@ fun UserProfileContent(
             when (selectedTab) {
                 UserTab.PHOTOS -> renderPhotoItems(userPhotosState)
                 UserTab.LIKES -> renderPhotoItems(userLikesState)
-                UserTab.COLLECTIONS -> { // TODO: to be implemented
-                }
+                UserTab.COLLECTIONS -> renderCollectionItems(
+                    collections = userCollections,
+                    onCollectionClick = {}
+                )
             }
         }
     }
@@ -280,6 +257,106 @@ fun LazyStaggeredGridScope.renderPhotoItems(uiState: UiState<List<Photo>>) {
     }
 }
 
+fun LazyStaggeredGridScope.renderCollectionItems(
+    collections: LazyPagingItems<Collection>,
+    onCollectionClick: (Collection) -> Unit = {}
+) {
+    items(count = collections.itemCount) { index ->
+        val collection = collections[index] ?: return@items
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(12.dp))
+                .clickable { onCollectionClick(collection) }
+        ) {
+            AsyncImage(
+                model = collection.coverPhoto?.regularUrl,
+                contentDescription = collection.title,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1.4f)
+                    .clip(RoundedCornerShape(12.dp))
+            )
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            Text(
+                text = collection.title,
+                style = MaterialTheme.typography.titleMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(horizontal = 8.dp)
+            )
+
+            collection.description?.let {
+                if (it.isNotBlank()) {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodySmall,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    )
+                }
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "${collection.totalPhotos} photos",
+                    style = MaterialTheme.typography.labelSmall
+                )
+            }
+        }
+    }
+
+    if (collections.loadState.refresh is LoadState.Loading) {
+        items(4) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1.3f)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+            )
+        }
+    }
+
+    if (collections.loadState.append is LoadState.Loading) {
+        item(span = StaggeredGridItemSpan.FullLine) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                ProgressIndicator()
+            }
+        }
+    }
+
+    // Error handling
+    if (collections.loadState.refresh is LoadState.Error) {
+        val error = collections.loadState.refresh as LoadState.Error
+        item(span = StaggeredGridItemSpan.FullLine) {
+            Text(
+                text = "Error: ${error.error.localizedMessage ?: "Unknown error"}",
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
 @Composable
 fun StatItemTab(
     count: String,
@@ -297,7 +374,6 @@ fun StatItemTab(
         Text(
             label,
             style = MaterialTheme.typography.labelMedium,
-            color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
         )
         if (selected) {
             Box(

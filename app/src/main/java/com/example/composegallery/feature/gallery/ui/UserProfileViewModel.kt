@@ -3,6 +3,8 @@ package com.example.composegallery.feature.gallery.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.example.composegallery.feature.gallery.data.util.Result
 import com.example.composegallery.feature.gallery.domain.model.Collection
 import com.example.composegallery.feature.gallery.domain.model.Photo
@@ -26,8 +28,9 @@ class UserProfileViewModel @Inject constructor(
     private val _userPhotos = MutableStateFlow<UiState<List<Photo>>>(UiState.Loading)
     val userPhotos: StateFlow<UiState<List<Photo>>> = _userPhotos.asStateFlow()
 
-    private val _userCollectionsState = MutableStateFlow<UiState<List<Collection>>>(UiState.Loading)
-    val userCollectionsState: StateFlow<UiState<List<Collection>>> = _userCollectionsState
+    private val _userCollectionsState = MutableStateFlow<PagingData<Collection>>(PagingData.empty())
+    val userCollectionsState: StateFlow<PagingData<Collection>> = _userCollectionsState
+
 
     fun loadUserProfile(username: String) {
         viewModelScope.launch {
@@ -51,11 +54,12 @@ class UserProfileViewModel @Inject constructor(
 
     fun loadUserCollections(username: String) {
         viewModelScope.launch {
-            _userCollectionsState.value = UiState.Loading
-            when (val result = userRepository.getUserCollections(username)) {
-                is Result.Success -> _userCollectionsState.value = UiState.Content(result.data)
-                is Result.Error -> _userCollectionsState.value = UiState.Error(result.message)
-            }
+            userRepository.getUserCollections(username)
+                .flow
+                .cachedIn(viewModelScope)
+                .collect { pagingData ->
+                    _userCollectionsState.value = pagingData
+                }
         }
     }
 }
