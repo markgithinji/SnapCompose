@@ -1,14 +1,18 @@
 package com.example.composegallery.feature.gallery.ui
 
+import ConfettiButton
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,6 +31,7 @@ import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -41,6 +46,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
@@ -51,6 +58,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
@@ -61,6 +69,9 @@ import com.example.composegallery.feature.gallery.domain.model.Collection
 import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.domain.model.UnsplashUser
 import com.example.composegallery.feature.gallery.domain.model.UserStatistics
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
 
 @Composable
 fun UserProfileScreen(
@@ -171,7 +182,7 @@ fun UserProfileContent(
     userLikes: LazyPagingItems<Photo>,
     userCollections: LazyPagingItems<Collection>
 ) {
-    var selectedTab by remember { mutableStateOf(UserTab.PHOTOS) }
+    var selectedTab by rememberSaveable { mutableStateOf(UserTab.PHOTOS) }
     val retryKeys = remember { mutableStateMapOf<String, Int>() }
 
     Scaffold(
@@ -203,30 +214,7 @@ fun UserProfileContent(
         ) {
             // Profile Header
             item(span = StaggeredGridItemSpan.FullLine) {
-                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    AsyncImage(
-                        model = user.profileImageLarge,
-                        contentDescription = "${user.name}'s profile picture",
-                        modifier = Modifier
-                            .size(120.dp)
-                            .clip(CircleShape)
-                    )
-                    Spacer(Modifier.width(16.dp))
-                    Column {
-                        Text(user.name, style = MaterialTheme.typography.titleLarge)
-                        user.location?.let { Text(it) }
-                        user.instagramUsername?.let {
-                            Text("@$it", color = MaterialTheme.colorScheme.primary)
-                        }
-                        Button(
-                            onClick = {},
-                            modifier = Modifier.height(32.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF6E6E))
-                        ) {
-                            Text("Follow", style = MaterialTheme.typography.labelMedium)
-                        }
-                    }
-                }
+                UserProfileHeader(user = user)
             }
 
             // Stats Row as Tabs
@@ -282,6 +270,109 @@ fun UserProfileContent(
         }
     }
 }
+
+@Composable
+fun UserProfileHeader(
+    user: UnsplashUser,
+    modifier: Modifier = Modifier
+) {
+    ConstraintLayout(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(IntrinsicSize.Min)
+            .padding(horizontal = 16.dp, vertical = 16.dp)
+    ) {
+        val (profileImage, columnContent) = createRefs()
+
+        AsyncImage(
+            model = user.profileImageLarge,
+            contentDescription = "${user.name}'s profile picture",
+            modifier = Modifier
+                .size(120.dp)
+                .clip(CircleShape)
+                .constrainAs(profileImage) {
+                    start.linkTo(parent.start)
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                }
+        )
+
+        Column(
+            modifier = Modifier.constrainAs(columnContent) {
+                start.linkTo(
+                    profileImage.end,
+                    margin = 36.dp
+                )
+                top.linkTo(profileImage.top)
+                bottom.linkTo(profileImage.bottom)
+            },
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(user.name, style = MaterialTheme.typography.titleLarge)
+            Spacer(Modifier.height(4.dp))
+            user.location?.let {
+                Text(it, style = MaterialTheme.typography.bodyMedium)
+                Spacer(Modifier.height(4.dp))
+            }
+            user.instagramUsername?.let {
+                Text(
+                    "@$it",
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Spacer(Modifier.height(8.dp))
+            }
+            ConfettiButton(onFollowChanged = {})
+        }
+    }
+}
+
+@Composable
+fun FollowButton() {
+    var isFollowing by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+
+    val buttonText = if (isFollowing) "Following" else "Follow"
+    val backgroundColor by animateColorAsState(
+        targetValue = if (isFollowing) Color(0xFFB2DFDB) else Color(0xFFFF6E6E),
+        label = "buttonColor"
+    )
+
+    Button(
+        onClick = {
+            scope.launch {
+                isLoading = true
+                delay(600) // simulate network delay
+                isFollowing = !isFollowing
+                isLoading = false
+            }
+        },
+        modifier = Modifier
+            .height(36.dp)
+            .defaultMinSize(minWidth = 96.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = backgroundColor),
+        shape = RoundedCornerShape(50)
+    ) {
+        if (isLoading) {
+            CircularProgressIndicator(
+                color = Color.White,
+                modifier = Modifier
+                    .size(16.dp)
+                    .padding(end = 8.dp),
+                strokeWidth = 2.dp
+            )
+        }
+
+        Text(
+            buttonText,
+            style = MaterialTheme.typography.labelMedium,
+            color = Color.White
+        )
+    }
+}
+
 
 fun LazyStaggeredGridScope.renderPhotoItems(
     photos: LazyPagingItems<Photo>,

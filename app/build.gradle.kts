@@ -75,6 +75,8 @@ dependencies {
     implementation(libs.jakewharton.timber)
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
+    implementation (libs.androidx.constraintlayout.compose)
+    implementation (libs.ui)
     ksp(libs.hilt.android.compiler)
     implementation(libs.androidx.paging.runtime)
     implementation(libs.androidx.paging.compose)

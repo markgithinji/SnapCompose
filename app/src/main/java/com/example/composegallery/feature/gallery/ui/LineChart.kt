@@ -4,10 +4,12 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -15,8 +17,13 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.example.composegallery.feature.gallery.domain.model.HistoricalData
+import com.example.composegallery.feature.gallery.domain.model.StatData
+import com.example.composegallery.feature.gallery.domain.model.StatValue
 import com.example.composegallery.feature.gallery.domain.model.UserStatistics
 
 @Composable
@@ -75,7 +82,6 @@ fun LineChart(
                 end = Offset(width, y),
                 strokeWidth = 1f
             )
-            // Draw Y axis label on left with formatted number (e.g. 150k, 1M)
             drawContext.canvas.nativeCanvas.drawText(
                 formatNumber(valueAtTick),
                 paddingLeft - 8,
@@ -92,6 +98,7 @@ fun LineChart(
             strokeWidth = 2f
         )
 
+        // Draw X axis labels (5 segments)
         val labelInterval = (values.size / 5).coerceAtLeast(1)
         for (i in values.indices step labelInterval) {
             val x = paddingLeft + i * stepX
@@ -114,6 +121,7 @@ fun LineChart(
             )
         }
 
+        // Draw points
         points.forEach { point ->
             drawCircle(
                 color = pointColor,
@@ -123,6 +131,7 @@ fun LineChart(
         }
     }
 }
+
 
 private fun formatNumber(value: Int): String {
     val absValue = kotlin.math.abs(value)
@@ -140,8 +149,10 @@ fun UserStatsChart(
 ) {
     Column(modifier.padding(16.dp)) {
         Text(
-            "Downloads (Last ${stats.downloads.historical.quantity} days)",
-            style = MaterialTheme.typography.titleMedium
+            text = "Downloads (Last ${stats.downloads.historical.quantity} days)",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Start
         )
         Spacer(Modifier.height(8.dp))
         LineChart(
@@ -156,8 +167,10 @@ fun UserStatsChart(
         Spacer(Modifier.height(10.dp))
 
         Text(
-            "Views (Last ${stats.views.historical.quantity} days)",
-            style = MaterialTheme.typography.titleMedium
+            text = "Views (Last ${stats.views.historical.quantity} days)",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Start
         )
         Spacer(Modifier.height(8.dp))
         LineChart(
@@ -168,5 +181,49 @@ fun UserStatsChart(
                 .fillMaxWidth()
                 .height(120.dp)
         )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewUserStatsChart() {
+    val mockStats = UserStatistics(
+        username = "john_doe",
+        downloads = StatData(
+            total = 150_000,
+            historical = HistoricalData(
+                change = 5,
+                average = 5000,
+                resolution = "days",
+                quantity = 30,
+                values = List(30) { index ->
+                    StatValue(
+                        date = "2024-06-${(index + 1).coerceAtMost(30)}",
+                        value = (4000..6000).random()
+                    )
+                }
+            )
+        ),
+        views = StatData(
+            total = 1_200_000,
+            historical = HistoricalData(
+                change = 12,
+                average = 40000,
+                resolution = "days",
+                quantity = 30,
+                values = List(30) { index ->
+                    StatValue(
+                        date = "2024-06-${(index + 1).coerceAtMost(30)}",
+                        value = (30000..50000).random()
+                    )
+                }
+            )
+        )
+    )
+
+    MaterialTheme {
+        Surface(modifier = Modifier.fillMaxSize()) {
+            UserStatsChart(stats = mockStats)
+        }
     }
 }
