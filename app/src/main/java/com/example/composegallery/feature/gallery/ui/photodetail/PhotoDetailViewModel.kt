@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.composegallery.feature.gallery.data.util.Result
 import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.domain.repository.GalleryRepository
-import com.example.composegallery.feature.gallery.ui.UiState
+import com.example.composegallery.feature.gallery.ui.util.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

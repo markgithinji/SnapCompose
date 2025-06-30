@@ -1,18 +1,15 @@
 package com.example.composegallery.feature.gallery.ui.profile
 
 import ConfettiButton
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -28,10 +25,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -46,19 +43,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
@@ -69,13 +66,11 @@ import com.example.composegallery.feature.gallery.domain.model.Collection
 import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.domain.model.UnsplashUser
 import com.example.composegallery.feature.gallery.domain.model.UserStatistics
+import com.example.composegallery.feature.gallery.ui.util.UiState
+import com.example.composegallery.feature.gallery.ui.common.PhotoImage
 import com.example.composegallery.feature.gallery.ui.gallery.BottomLoadingIndicator
 import com.example.composegallery.feature.gallery.ui.gallery.LoadMoreError
-import com.example.composegallery.feature.gallery.ui.common.PhotoImage
 import com.example.composegallery.feature.gallery.ui.gallery.ProgressIndicator
-import com.example.composegallery.feature.gallery.ui.UiState
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 
 @Composable
@@ -282,9 +277,8 @@ fun UserProfileHeader(
     modifier: Modifier = Modifier
 ) {
     ConstraintLayout(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .height(IntrinsicSize.Min)
             .padding(horizontal = 16.dp, vertical = 16.dp)
     ) {
         val (profileImage, columnContent) = createRefs()
@@ -293,91 +287,88 @@ fun UserProfileHeader(
             model = user.profileImageLarge,
             contentDescription = "${user.name}'s profile picture",
             modifier = Modifier
-                .size(120.dp)
+                .size(140.dp)
                 .clip(CircleShape)
                 .constrainAs(profileImage) {
                     start.linkTo(parent.start)
                     top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
+//                    bottom.linkTo(parent.bottom)
                 }
         )
 
         Column(
-            modifier = Modifier.constrainAs(columnContent) {
-                start.linkTo(
-                    profileImage.end,
-                    margin = 36.dp
-                )
-                top.linkTo(profileImage.top)
-                bottom.linkTo(profileImage.bottom)
-            },
+            modifier = Modifier
+                .constrainAs(columnContent) {
+                    start.linkTo(profileImage.end, margin = 36.dp)
+                    top.linkTo(profileImage.top)
+                    bottom.linkTo(profileImage.bottom)
+                    end.linkTo(parent.end)
+                    width = Dimension.fillToConstraints
+                },
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.Start
         ) {
             Text(user.name, style = MaterialTheme.typography.titleLarge)
             Spacer(Modifier.height(4.dp))
-            user.location?.let {
-                Text(it, style = MaterialTheme.typography.bodyMedium)
+
+            user.bio?.let {
+                Text(it, style = MaterialTheme.typography.bodySmall, maxLines = 3)
                 Spacer(Modifier.height(4.dp))
             }
+
+            user.location?.let {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Default.Place,
+                        contentDescription = "Location",
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    Text(it, style = MaterialTheme.typography.bodyMedium)
+                }
+                Spacer(Modifier.height(4.dp))
+            }
+
+            user.portfolioUrl?.let { url ->
+                val uriHandler = LocalUriHandler.current
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Default.Link,
+                        contentDescription = "Portfolio",
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        text = url,
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.clickable { uriHandler.openUri(url) }
+                    )
+                }
+                Spacer(Modifier.height(4.dp))
+            }
+
             user.instagramUsername?.let {
-                Text(
-                    "@$it",
-                    color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Default.CameraAlt,
+                        contentDescription = "Instagram",
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        text = "@$it",
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
                 Spacer(Modifier.height(8.dp))
             }
+
             ConfettiButton(onFollowChanged = {})
         }
     }
 }
-
-@Composable
-fun FollowButton() {
-    var isFollowing by remember { mutableStateOf(false) }
-    var isLoading by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
-
-    val buttonText = if (isFollowing) "Following" else "Follow"
-    val backgroundColor by animateColorAsState(
-        targetValue = if (isFollowing) Color(0xFFB2DFDB) else Color(0xFFFF6E6E),
-        label = "buttonColor"
-    )
-
-    Button(
-        onClick = {
-            scope.launch {
-                isLoading = true
-                delay(600) // simulate network delay
-                isFollowing = !isFollowing
-                isLoading = false
-            }
-        },
-        modifier = Modifier
-            .height(36.dp)
-            .defaultMinSize(minWidth = 96.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = backgroundColor),
-        shape = RoundedCornerShape(50)
-    ) {
-        if (isLoading) {
-            CircularProgressIndicator(
-                color = Color.White,
-                modifier = Modifier
-                    .size(16.dp)
-                    .padding(end = 8.dp),
-                strokeWidth = 2.dp
-            )
-        }
-
-        Text(
-            buttonText,
-            style = MaterialTheme.typography.labelMedium,
-            color = Color.White
-        )
-    }
-}
-
 
 fun LazyStaggeredGridScope.renderPhotoItems(
     photos: LazyPagingItems<Photo>,

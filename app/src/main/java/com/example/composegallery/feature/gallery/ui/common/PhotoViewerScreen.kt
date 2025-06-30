@@ -23,7 +23,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.SubcomposeAsyncImage
-import com.example.composegallery.feature.gallery.ui.UiState
+import com.example.composegallery.feature.gallery.ui.util.UiState
 import com.example.composegallery.feature.gallery.ui.gallery.ProgressIndicator
 import com.example.composegallery.feature.gallery.ui.photodetail.PhotoDetailViewModel
 

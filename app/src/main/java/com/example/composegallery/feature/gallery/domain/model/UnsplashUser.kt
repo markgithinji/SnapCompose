@@ -6,6 +6,7 @@ data class UnsplashUser(
     val name: String,
     val bio: String?,
     val location: String?,
+    val portfolioUrl: String?,
     val profileImageSmall: String,
     val profileImageMedium: String,
     val profileImageLarge: String,

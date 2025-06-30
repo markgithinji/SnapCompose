@@ -11,7 +11,7 @@ import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.domain.model.UnsplashUser
 import com.example.composegallery.feature.gallery.domain.model.UserStatistics
 import com.example.composegallery.feature.gallery.domain.repository.UserRepository
-import com.example.composegallery.feature.gallery.ui.UiState
+import com.example.composegallery.feature.gallery.ui.util.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

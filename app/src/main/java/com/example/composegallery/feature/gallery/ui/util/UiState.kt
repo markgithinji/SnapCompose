@@ -1,4 +1,4 @@
-package com.example.composegallery.feature.gallery.ui
+package com.example.composegallery.feature.gallery.ui.util
 
 sealed interface UiState<out T> {
     object Loading : UiState<Nothing>
