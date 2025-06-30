@@ -1,4 +1,4 @@
-package com.example.composegallery.feature.gallery.ui
+package com.example.composegallery.feature.gallery.ui.photodetail
 
 import android.icu.util.TimeZone
 import androidx.compose.foundation.background
@@ -46,6 +46,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.composegallery.feature.gallery.domain.model.Photo
+import com.example.composegallery.feature.gallery.ui.common.PhotoImage
+import com.example.composegallery.feature.gallery.ui.UiState
+import com.example.composegallery.feature.gallery.ui.gallery.ProgressIndicator
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)

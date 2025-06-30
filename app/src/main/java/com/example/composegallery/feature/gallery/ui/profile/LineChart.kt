@@ -1,4 +1,4 @@
-package com.example.composegallery.feature.gallery.ui
+package com.example.composegallery.feature.gallery.ui.profile
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box

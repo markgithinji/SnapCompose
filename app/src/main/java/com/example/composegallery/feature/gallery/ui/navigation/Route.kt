@@ -1,4 +1,4 @@
-package com.example.composegallery.feature.gallery.ui
+package com.example.composegallery.feature.gallery.ui.navigation
 
 import kotlinx.serialization.Serializable
 

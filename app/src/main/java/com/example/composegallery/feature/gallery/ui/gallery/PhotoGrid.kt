@@ -1,4 +1,4 @@
-package com.example.composegallery.feature.gallery.ui
+package com.example.composegallery.feature.gallery.ui.gallery
 
 import android.app.Activity
 import androidx.compose.animation.AnimatedVisibilityScope
@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import com.example.composegallery.feature.gallery.domain.model.Photo
+import com.example.composegallery.feature.gallery.ui.common.PhotoCard
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable

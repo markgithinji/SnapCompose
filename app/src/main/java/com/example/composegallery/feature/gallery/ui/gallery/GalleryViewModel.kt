@@ -1,4 +1,4 @@
-package com.example.composegallery.feature.gallery.ui
+package com.example.composegallery.feature.gallery.ui.gallery
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

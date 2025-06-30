@@ -1,4 +1,4 @@
-package com.example.composegallery.feature.gallery.ui
+package com.example.composegallery.feature.gallery.ui.gallery
 
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.EnterExitState
@@ -62,6 +62,7 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.composegallery.feature.gallery.domain.model.Photo
+import com.example.composegallery.feature.gallery.ui.common.PhotoCard
 import com.example.composegallery.ui.theme.searchBar
 
 @OptIn(ExperimentalSharedTransitionApi::class)

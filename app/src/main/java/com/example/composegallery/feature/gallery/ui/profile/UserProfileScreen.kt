@@ -1,4 +1,4 @@
-package com.example.composegallery.feature.gallery.ui
+package com.example.composegallery.feature.gallery.ui.profile
 
 import ConfettiButton
 import androidx.compose.animation.animateColorAsState
@@ -69,6 +69,11 @@ import com.example.composegallery.feature.gallery.domain.model.Collection
 import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.domain.model.UnsplashUser
 import com.example.composegallery.feature.gallery.domain.model.UserStatistics
+import com.example.composegallery.feature.gallery.ui.gallery.BottomLoadingIndicator
+import com.example.composegallery.feature.gallery.ui.gallery.LoadMoreError
+import com.example.composegallery.feature.gallery.ui.common.PhotoImage
+import com.example.composegallery.feature.gallery.ui.gallery.ProgressIndicator
+import com.example.composegallery.feature.gallery.ui.UiState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 

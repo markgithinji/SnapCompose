@@ -1,4 +1,4 @@
-package com.example.composegallery.feature.gallery.ui
+package com.example.composegallery.feature.gallery.ui.common
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween

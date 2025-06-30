@@ -1,4 +1,4 @@
-package com.example.composegallery.feature.gallery.ui
+package com.example.composegallery.feature.gallery.ui.profile
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -29,6 +29,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.example.composegallery.feature.gallery.ui.gallery.BottomLoadingIndicator
+import com.example.composegallery.feature.gallery.ui.gallery.LoadMoreError
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
