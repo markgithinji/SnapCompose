@@ -66,11 +66,12 @@ import com.example.composegallery.feature.gallery.domain.model.Collection
 import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.domain.model.UnsplashUser
 import com.example.composegallery.feature.gallery.domain.model.UserStatistics
-import com.example.composegallery.feature.gallery.ui.util.UiState
 import com.example.composegallery.feature.gallery.ui.common.PhotoImage
+import com.example.composegallery.feature.gallery.ui.common.calculateResponsiveColumnCount
 import com.example.composegallery.feature.gallery.ui.gallery.BottomLoadingIndicator
 import com.example.composegallery.feature.gallery.ui.gallery.LoadMoreError
 import com.example.composegallery.feature.gallery.ui.gallery.ProgressIndicator
+import com.example.composegallery.feature.gallery.ui.util.UiState
 
 
 @Composable
@@ -202,9 +203,10 @@ fun UserProfileContent(
             )
         }
     ) { padding ->
+        val columnCount = calculateResponsiveColumnCount()
 
         LazyVerticalStaggeredGrid(
-            columns = StaggeredGridCells.Fixed(2),
+            columns = StaggeredGridCells.Fixed(columnCount),
             contentPadding = PaddingValues(16.dp),
             verticalItemSpacing = 12.dp,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
