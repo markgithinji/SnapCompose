@@ -75,9 +75,9 @@ fun LineChart(
                 end = Offset(width, y),
                 strokeWidth = 1f
             )
-            // Draw Y axis label on left
+            // Draw Y axis label on left with formatted number (e.g. 150k, 1M)
             drawContext.canvas.nativeCanvas.drawText(
-                valueAtTick.toString(),
+                formatNumber(valueAtTick),
                 paddingLeft - 8,
                 y + 10,
                 paintText
@@ -124,6 +124,15 @@ fun LineChart(
     }
 }
 
+private fun formatNumber(value: Int): String {
+    val absValue = kotlin.math.abs(value)
+    return when {
+        absValue >= 1_000_000 -> String.format("%.1fM", value / 1_000_000f)
+        absValue >= 1_000 -> String.format("%.1fk", value / 1_000f)
+        else -> value.toString()
+    }
+}
+
 @Composable
 fun UserStatsChart(
     stats: UserStatistics,
@@ -144,7 +153,7 @@ fun UserStatsChart(
                 .height(120.dp)
         )
 
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(10.dp))
 
         Text(
             "Views (Last ${stats.views.historical.quantity} days)",
@@ -161,4 +170,3 @@ fun UserStatsChart(
         )
     }
 }
-
