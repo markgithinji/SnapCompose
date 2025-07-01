@@ -11,10 +11,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -55,9 +53,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
@@ -65,6 +61,7 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.domain.model.Photo
+import com.example.composegallery.feature.gallery.ui.common.MessageScreen
 import com.example.composegallery.feature.gallery.ui.common.PhotoCard
 import com.example.composegallery.ui.theme.searchBar
 
@@ -166,7 +163,7 @@ fun SearchScreenTopBar(
                     Text(
                         "Search Unsplash...",
                         style = MaterialTheme.typography.headlineSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
                         modifier = Modifier.alpha(textFieldInnerContentAlpha)
                     )
                 },
@@ -228,40 +225,11 @@ fun SearchScreenContent(
         ) {
             when {
                 showWelcome -> { // ie. if we haven't submitted a query yet
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Image(
-                            modifier = Modifier
-                                .fillMaxWidth(0.2f),
-                            painter = painterResource(id = R.drawable.image_icon_no_search),
-                            contentDescription = null,
-                        )
-                        Spacer(modifier = Modifier.height(32.dp))
-                        Text(
-                            text = "Over 6 million photos",
-                            style = MaterialTheme.typography.headlineLarge,
-                            textAlign = TextAlign.Center,
-                            maxLines = 1,
-                            modifier = Modifier
-                                .padding(vertical = 6.dp)
-                        )
-                        Text(
-                            text = "Let's look for something beautiful",
-                            style = MaterialTheme.typography.headlineSmall,
-                            textAlign = TextAlign.Center,
-                            maxLines = 2,
-                            softWrap = true,
-                            modifier = Modifier
-                                .fillMaxWidth(0.6f)
-                                .padding(horizontal = 16.dp)
-                                .align(Alignment.CenterHorizontally)
-                        )
-                    }
+                    MessageScreen(
+                        imageRes = R.drawable.no_search_icon,
+                        title = "Over 6 million photos",
+                        subtitle = "Lets look for something beautiful",
+                    )
                 }
 
                 isLoading -> {

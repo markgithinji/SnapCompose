@@ -44,8 +44,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.domain.model.Photo
+import com.example.composegallery.feature.gallery.ui.common.MessageScreen
 import com.example.composegallery.feature.gallery.ui.common.PhotoImage
+import com.example.composegallery.feature.gallery.ui.common.RetryButton
 import com.example.composegallery.feature.gallery.ui.gallery.ProgressIndicator
 import com.example.composegallery.feature.gallery.ui.util.UiState
 import java.util.Locale
@@ -90,19 +93,12 @@ fun PhotoDetailScreen(
             }
 
             is UiState.Error -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "Failed to load photo: ${state.message}",
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Center
-                    )
-                }
+                MessageScreen(
+                    imageRes = R.drawable.error_icon,
+                    title = "Failed to load photo",
+                    subtitle = state.message,
+                    titleColor = MaterialTheme.colorScheme.error
+                )
             }
 
             is UiState.Content -> {

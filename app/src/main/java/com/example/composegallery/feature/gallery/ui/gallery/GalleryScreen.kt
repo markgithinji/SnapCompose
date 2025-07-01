@@ -37,7 +37,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.domain.model.Photo
+import com.example.composegallery.feature.gallery.ui.common.MessageScreen
+import com.example.composegallery.feature.gallery.ui.common.RetryButton
 
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
@@ -130,10 +133,14 @@ private fun PhotoGridWithLoadState(
                 }
 
                 is LoadState.Error -> {
-                    DataNotFoundBox(
-                        message = state.error.localizedMessage ?: "Unknown error",
-                        onRetry = onRetry
-                    )
+                    MessageScreen(
+                        imageRes = R.drawable.error_icon,
+                        title = "Failed to load images",
+                        subtitle = state.error.localizedMessage ?: "Unknown error",
+                        titleColor = MaterialTheme.colorScheme.error
+                    ) {
+                        RetryButton(onClick = onRetry)
+                    }
                 }
 
                 else -> {
@@ -159,28 +166,5 @@ fun ProgressIndicator() {
         contentAlignment = Alignment.Center
     ) {
         LoadingIndicator()
-    }
-}
-
-@Composable
-fun DataNotFoundBox(message: String, onRetry: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = "Failed to load images:\n$message",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.error,
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = onRetry) {
-                Text("Retry")
-            }
-        }
     }
 }

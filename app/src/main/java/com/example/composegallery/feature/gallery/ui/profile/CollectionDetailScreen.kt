@@ -30,7 +30,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.composegallery.feature.gallery.ui.gallery.BottomLoadingIndicator
-import com.example.composegallery.feature.gallery.ui.gallery.LoadMoreError
+import com.example.composegallery.feature.gallery.ui.gallery.LoadMoreListError
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -95,7 +95,7 @@ fun CollectionDetailScreen(
                 }
 
                 is LoadState.Error -> item(span = StaggeredGridItemSpan.FullLine) {
-                    LoadMoreError(
+                    LoadMoreListError(
                         message = appendState.error.localizedMessage ?: "Error loading more",
                         onRetry = { photos.retry() }
                     )

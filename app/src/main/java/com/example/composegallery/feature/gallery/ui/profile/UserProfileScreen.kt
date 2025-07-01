@@ -26,6 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.AlertDialog
@@ -51,7 +52,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -62,14 +62,16 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
+import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.domain.model.Collection
 import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.domain.model.UnsplashUser
 import com.example.composegallery.feature.gallery.domain.model.UserStatistics
+import com.example.composegallery.feature.gallery.ui.common.MessageScreen
 import com.example.composegallery.feature.gallery.ui.common.PhotoImage
 import com.example.composegallery.feature.gallery.ui.common.calculateResponsiveColumnCount
 import com.example.composegallery.feature.gallery.ui.gallery.BottomLoadingIndicator
-import com.example.composegallery.feature.gallery.ui.gallery.LoadMoreError
+import com.example.composegallery.feature.gallery.ui.gallery.LoadMoreListError
 import com.example.composegallery.feature.gallery.ui.gallery.ProgressIndicator
 import com.example.composegallery.feature.gallery.ui.util.UiState
 
@@ -104,9 +106,12 @@ fun UserProfileScreen(
         }
 
         is UiState.Error -> {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Error: ${(userProfileState as UiState.Error).message}")
-            }
+            MessageScreen(
+                imageRes = R.drawable.error_icon,
+                title = "Failed to load user profile",
+                subtitle = (userProfileState as UiState.Error).message,
+                titleColor = MaterialTheme.colorScheme.error
+            )
         }
 
         is UiState.Content -> {
@@ -159,8 +164,20 @@ fun UserProfileScreen(
         } else if (userStatsState is UiState.Error) {
             AlertDialog(
                 onDismissRequest = { showStatsDialog = false },
-                title = { Text("Error Loading Stats") },
-                text = { Text((userStatsState as UiState.Error).message) },
+                title = {
+                    Text(
+                        text = "Error Loading Stats",
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.Error,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                },
                 confirmButton = {
                     TextButton(onClick = { showStatsDialog = false }) {
                         Text("Close")
@@ -343,6 +360,11 @@ fun UserProfileHeader(
             user.portfolioUrl?.let { url ->
                 val uriHandler = LocalUriHandler.current
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Default.Link,
+                        contentDescription = "Portfolio",
+                        modifier = Modifier.size(16.dp)
+                    )
                     Spacer(Modifier.width(4.dp))
                     Text(
                         text = url,
@@ -356,6 +378,11 @@ fun UserProfileHeader(
 
             user.instagramUsername?.let {
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Default.CameraAlt,
+                        contentDescription = "Instagram",
+                        modifier = Modifier.size(16.dp)
+                    )
                     Spacer(Modifier.width(4.dp))
                     Text(
                         text = "@$it",
@@ -410,7 +437,7 @@ fun LazyStaggeredGridScope.renderPhotoItems(
         }
 
         is LoadState.Error -> item(span = StaggeredGridItemSpan.FullLine) {
-            LoadMoreError(
+            LoadMoreListError(
                 message = appendState.error.localizedMessage ?: "Error loading more",
                 onRetry = { photos.retry() }
             )
@@ -506,13 +533,9 @@ fun LazyStaggeredGridScope.renderCollectionItems(
     if (collections.loadState.refresh is LoadState.Error) {
         val error = collections.loadState.refresh as LoadState.Error
         item(span = StaggeredGridItemSpan.FullLine) {
-            Text(
-                text = "Error: ${error.error.localizedMessage ?: "Unknown error"}",
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                textAlign = TextAlign.Center
+            LoadMoreListError(
+                message = error.error.localizedMessage ?: "Error loading",
+                onRetry = { collections.retry() }
             )
         }
     }

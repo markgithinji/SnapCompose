@@ -140,9 +140,13 @@ fun PhotoErrorOverlay(onRetry: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text("⚠", style = MaterialTheme.typography.headlineMedium)
-        Spacer(modifier = Modifier.height(8.dp))
-        Text("Tap to retry", style = MaterialTheme.typography.bodyMedium)
+        Text("⚠", style = MaterialTheme.typography.headlineLarge)
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(
+            "Tap to retry",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onErrorContainer
+        )
     }
 }
 

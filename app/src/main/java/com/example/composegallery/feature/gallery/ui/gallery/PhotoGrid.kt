@@ -22,7 +22,6 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
@@ -35,11 +34,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.ui.common.PhotoCard
+import com.example.composegallery.feature.gallery.ui.common.RetryButton
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -115,7 +116,7 @@ fun PhotoGrid(
             }
 
             is LoadState.Error -> item(span = StaggeredGridItemSpan.FullLine) {
-                LoadMoreError(
+                LoadMoreListError(
                     message = appendState.error.localizedMessage ?: "Error loading more",
                     onRetry = { photos.retry() }
                 )
@@ -156,22 +157,21 @@ fun BottomLoadingIndicator() {
 }
 
 @Composable
-fun LoadMoreError(message: String, onRetry: () -> Unit) {
+fun LoadMoreListError(message: String, onRetry: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(24.dp)
             .navigationBarsPadding(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = message,
             color = MaterialTheme.colorScheme.error,
-            style = MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.labelMedium,
+            textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(8.dp))
-        Button(onClick = onRetry) {
-            Text("Retry")
-        }
+        RetryButton(onClick = onRetry)
     }
 }
