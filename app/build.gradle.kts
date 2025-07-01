@@ -75,8 +75,8 @@ dependencies {
     implementation(libs.jakewharton.timber)
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
-    implementation (libs.androidx.constraintlayout.compose)
-    implementation (libs.ui)
+    implementation(libs.androidx.constraintlayout.compose)
+    implementation(libs.ui)
     ksp(libs.hilt.android.compiler)
     implementation(libs.androidx.paging.runtime)
     implementation(libs.androidx.paging.compose)
@@ -86,6 +86,8 @@ dependencies {
     implementation(libs.androidx.material3.window.size.class1)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.room.runtime)
+    ksp (libs.androidx.room.compiler)
 
 
 

@@ -8,7 +8,6 @@ import androidx.paging.filter
 import com.example.composegallery.BuildConfig
 import com.example.composegallery.feature.gallery.data.model.toDomainModel
 import com.example.composegallery.feature.gallery.data.pagingsource.UnsplashGetPhotosPagingSource
-import com.example.composegallery.feature.gallery.data.pagingsource.UnsplashSearchPagingSource
 import com.example.composegallery.feature.gallery.data.remote.UnsplashApi
 import com.example.composegallery.feature.gallery.data.util.Result
 import com.example.composegallery.feature.gallery.data.util.safeApiCall
@@ -25,10 +24,6 @@ class DefaultGalleryRepository @Inject constructor(
 
     override fun getPagedPhotos(): Flow<PagingData<Photo>> {
         return createPager { UnsplashGetPhotosPagingSource(api) }
-    }
-
-    override fun searchPagedPhotos(query: String): Flow<PagingData<Photo>> {
-        return createPager { UnsplashSearchPagingSource(api, query) }
     }
 
     private fun createPager(

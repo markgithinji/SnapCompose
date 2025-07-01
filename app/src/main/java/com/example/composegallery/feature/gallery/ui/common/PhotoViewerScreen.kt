@@ -23,14 +23,14 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.SubcomposeAsyncImage
+import com.example.composegallery.feature.gallery.ui.gallery.GalleryViewModel
 import com.example.composegallery.feature.gallery.ui.util.UiState
 import com.example.composegallery.feature.gallery.ui.gallery.ProgressIndicator
-import com.example.composegallery.feature.gallery.ui.photodetail.PhotoDetailViewModel
 
 @Composable
 fun PhotoViewerScreen(
     photoId: String,
-    viewModel: PhotoDetailViewModel = hiltViewModel()
+    viewModel: GalleryViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
 

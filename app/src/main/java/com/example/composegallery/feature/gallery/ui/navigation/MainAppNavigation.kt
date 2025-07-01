@@ -12,7 +12,7 @@ import com.example.composegallery.feature.gallery.ui.gallery.GalleryScreen
 import com.example.composegallery.feature.gallery.ui.photodetail.PhotoDetailScreen
 import com.example.composegallery.feature.gallery.ui.common.PhotoViewerScreen
 import com.example.composegallery.feature.gallery.ui.profile.UserProfileScreen
-import com.example.composegallery.feature.gallery.ui.gallery.SearchScreen
+import com.example.composegallery.feature.gallery.ui.search.SearchScreen
 import com.example.composegallery.ui.theme.ComposeGalleryTheme
 
 @OptIn(ExperimentalSharedTransitionApi::class)

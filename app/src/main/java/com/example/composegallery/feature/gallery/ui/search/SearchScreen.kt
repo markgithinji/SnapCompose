@@ -1,4 +1,4 @@
-package com.example.composegallery.feature.gallery.ui.gallery
+package com.example.composegallery.feature.gallery.ui.search
 
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.EnterExitState
@@ -40,6 +40,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -63,6 +64,8 @@ import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.ui.common.MessageScreen
 import com.example.composegallery.feature.gallery.ui.common.PhotoCard
+import com.example.composegallery.feature.gallery.ui.gallery.GalleryViewModel
+import com.example.composegallery.feature.gallery.ui.gallery.ProgressIndicator
 import com.example.composegallery.ui.theme.searchBar
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -72,12 +75,13 @@ fun SearchScreen(
     animatedVisibilityScope: AnimatedContentScope,
     onBack: () -> Unit,
     onPhotoClick: (String) -> Unit,
-    viewModel: GalleryViewModel = hiltViewModel()
+    viewModel: SearchViewModel = hiltViewModel()
 ) {
     var query by rememberSaveable { mutableStateOf("") }
     var firstSearchDone by rememberSaveable { mutableStateOf(false) }
     val retryKeys = remember { mutableStateMapOf<String, Int>() }
     val pagedPhotos = viewModel.searchResults.collectAsLazyPagingItems()
+
 
     Scaffold(
         modifier = Modifier

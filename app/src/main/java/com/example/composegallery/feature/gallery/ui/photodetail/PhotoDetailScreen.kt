@@ -49,6 +49,7 @@ import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.ui.common.MessageScreen
 import com.example.composegallery.feature.gallery.ui.common.PhotoImage
 import com.example.composegallery.feature.gallery.ui.common.RetryButton
+import com.example.composegallery.feature.gallery.ui.gallery.GalleryViewModel
 import com.example.composegallery.feature.gallery.ui.gallery.ProgressIndicator
 import com.example.composegallery.feature.gallery.ui.util.UiState
 import java.util.Locale
@@ -60,7 +61,7 @@ fun PhotoDetailScreen(
     onBack: () -> Unit,
     onExpandClick: (String) -> Unit,
     onUserClick: (String) -> Unit,
-    viewModel: PhotoDetailViewModel = hiltViewModel()
+    viewModel: GalleryViewModel = hiltViewModel()
 ) {
     val photoState by viewModel.uiState.collectAsState()
 
