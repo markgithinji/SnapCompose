@@ -111,7 +111,7 @@ fun DummySearchBar(
                     onClick = onClick
                 ),
             shape = MaterialTheme.shapes.searchBar,
-            color = MaterialTheme.colorScheme.surfaceVariant
+            color = MaterialTheme.colorScheme.primaryContainer
         ) {
             Row(
                 modifier = Modifier
@@ -123,7 +123,8 @@ fun DummySearchBar(
             ) {
                 Text(
                     text = "Search photos...",
-                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    style = MaterialTheme.typography.headlineSmall,
                     modifier = Modifier.weight(1f)
                 )
                 Icon(

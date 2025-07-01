@@ -6,12 +6,11 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,6 +27,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.composegallery.feature.gallery.ui.gallery.ProgressIndicator
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.random.Random
@@ -44,8 +44,12 @@ fun ConfettiButton( // An Experiment, still needs work. Could be replaced with a
     val scope = rememberCoroutineScope()
 
     val backgroundColor by animateColorAsState(
-        targetValue = if (isFollowing) Color(0xFFB2DFDB) else Color(0xFFFF6E6E),
+        targetValue = if (isFollowing) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primaryContainer,
         label = "buttonColor"
+    )
+    val textColor by animateColorAsState(
+        targetValue = if (isFollowing) Color.White else Color.Black,
+        label = "textColor"
     )
 
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
@@ -63,27 +67,23 @@ fun ConfettiButton( // An Experiment, still needs work. Could be replaced with a
                     delay(600) // simulate network delay
                     isFollowing = !isFollowing
                     isLoading = false
-                    triggerConfetti = true
+                    if (isFollowing) triggerConfetti = true // Only show confetti when following
                     onFollowChanged?.invoke(isFollowing)
                 }
             },
             colors = ButtonDefaults.buttonColors(containerColor = backgroundColor),
-            modifier = Modifier,
+            modifier = Modifier
+                .fillMaxWidth(1f) // 60% of parent width
+                .height(38.dp),
             shape = RoundedCornerShape(50)
         ) {
             if (isLoading) {
-                CircularProgressIndicator(
-                    color = Color.White,
-                    modifier = Modifier
-                        .size(16.dp)
-                        .padding(end = 8.dp),
-                    strokeWidth = 2.dp
-                )
+                ProgressIndicator()
             }
             Text(
                 text = if (isFollowing) "Following" else "Follow",
                 style = MaterialTheme.typography.labelMedium,
-                color = Color.White
+                color = textColor
             )
         }
     }

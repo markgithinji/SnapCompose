@@ -40,15 +40,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.ui.common.PhotoImage
-import com.example.composegallery.feature.gallery.ui.util.UiState
 import com.example.composegallery.feature.gallery.ui.gallery.ProgressIndicator
+import com.example.composegallery.feature.gallery.ui.util.UiState
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -151,13 +150,14 @@ fun PhotoDetailContent(
                     .align(Alignment.BottomEnd)
                     .padding(12.dp)
                     .background(
-                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
+                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f),
                         shape = CircleShape
                     )
             ) {
                 Icon(
                     imageVector = Icons.Default.Fullscreen,
-                    contentDescription = "View Full Screen"
+                    contentDescription = "View Full Screen",
+                    tint = MaterialTheme.colorScheme.onSurface
                 )
             }
         }
@@ -214,53 +214,54 @@ fun PhotoDetailInfo(
             Column {
                 Text(
                     text = photo.authorName,
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.SemiBold
-                    )
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 photo.username?.let {
                     Text(
                         text = "@$it",
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
         }
 
-        HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
-
-        // Photo Dimensions
-        Text(
-            text = "Size: ${photo.width} × ${photo.height}",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        HorizontalDivider(modifier = Modifier.padding(vertical = 14.dp))
 
         // Location
         photo.location?.let { location ->
             val locationText = listOfNotNull(location.city, location.country).joinToString(", ")
             if (locationText.isNotBlank()) {
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "📍 $locationText",
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Photo Dimensions
+        Text(
+            text = "Size: ${photo.width} × ${photo.height}",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
 
         // Description
         photo.description?.takeIf { it.isNotBlank() }?.let { description ->
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Description",
-                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Medium)
+                text = "Description:",
+                style = MaterialTheme.typography.labelMedium
             )
             Text(
                 text = description,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 4.dp)
             )
         }
@@ -269,12 +270,13 @@ fun PhotoDetailInfo(
         formattedDate?.let {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Created At",
-                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Medium)
+                text = "Created At:",
+                style = MaterialTheme.typography.labelMedium
             )
             Text(
                 text = it,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 4.dp)
             )
         }
@@ -293,16 +295,16 @@ fun PhotoDetailInfo(
             if (infoList.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Camera Info",
-                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Medium)
+                    text = "Camera Info:",
+                    style = MaterialTheme.typography.labelMedium
                 )
 
                 infoList.forEach { (label, value) ->
                     Text(
                         text = "$label: $value",
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.headlineSmall,
                         modifier = Modifier.padding(top = 4.dp),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }

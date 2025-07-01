@@ -8,6 +8,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.example.composegallery.R
 
+
 val SourceSans = FontFamily(
     Font(R.font.sourcesans_extra_light, FontWeight.ExtraLight),
     Font(R.font.sourcesans_light, FontWeight.Light),
@@ -38,7 +39,7 @@ val Typography = Typography(
 
     headlineLarge = TextStyle(
         fontFamily = SourceSans,
-        fontWeight = FontWeight.SemiBold,
+        fontWeight = FontWeight.Bold,
         fontSize = 20.sp
     ),
     headlineMedium = TextStyle(
@@ -55,28 +56,28 @@ val Typography = Typography(
     bodyLarge = TextStyle(
         fontFamily = SourceSans,
         fontWeight = FontWeight.Light,
-        fontSize = 16.sp
+        fontSize = 18.sp
     ),
     bodyMedium = TextStyle(
         fontFamily = SourceSans,
         fontWeight = FontWeight.ExtraLight,
-        fontSize = 14.sp
+        fontSize = 16.sp
     ),
     bodySmall = TextStyle(
         fontFamily = SourceSans,
         fontWeight = FontWeight.ExtraLight,
-        fontSize = 12.sp
+        fontSize = 14.sp
     ),
 
     labelLarge = TextStyle(
         fontFamily = SourceSans,
         fontWeight = FontWeight.Medium,
-        fontSize = 14.sp
+        fontSize = 16.sp
     ),
     labelMedium = TextStyle(
         fontFamily = SourceSans,
         fontWeight = FontWeight.Normal,
-        fontSize = 12.sp
+        fontSize = 14.sp
     ),
     labelSmall = TextStyle(
         fontFamily = SourceSans,

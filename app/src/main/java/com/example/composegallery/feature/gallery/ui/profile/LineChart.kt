@@ -157,8 +157,8 @@ fun UserStatsChart(
         Spacer(Modifier.height(8.dp))
         LineChart(
             values = stats.downloads.historical.values.map { it.value },
-            lineColor = Color(0xFF4CAF50), // greenish
-            pointColor = Color(0xFF388E3C),
+            lineColor = MaterialTheme.colorScheme.primaryContainer,
+            pointColor = MaterialTheme.colorScheme.onPrimaryContainer,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(120.dp)
@@ -175,8 +175,8 @@ fun UserStatsChart(
         Spacer(Modifier.height(8.dp))
         LineChart(
             values = stats.views.historical.values.map { it.value },
-            lineColor = Color(0xFF2196F3), // blue
-            pointColor = Color(0xFF1976D2),
+            lineColor = MaterialTheme.colorScheme.secondaryContainer,
+            pointColor = MaterialTheme.colorScheme.onSecondaryContainer,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(120.dp)
