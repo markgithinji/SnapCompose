@@ -13,65 +13,56 @@ interface UnsplashApi {
     @GET("photos")
     suspend fun getPhotos(
         @Query("page") page: Int = 1,
-        @Query("per_page") perPage: Int = 20,
-        @Query("client_id") clientId: String
+        @Query("per_page") perPage: Int = DEFAULT_PAGE_SIZE
     ): List<UnsplashPhotoDto>
 
     @GET("search/photos")
     suspend fun searchPhotos(
         @Query("query") query: String,
         @Query("page") page: Int = 1,
-        @Query("per_page") perPage: Int = 20,
-        @Query("client_id") clientId: String
+        @Query("per_page") perPage: Int = DEFAULT_PAGE_SIZE
     ): SearchResponseDto
 
     @GET("photos/{id}")
-    suspend fun getPhoto(
-        @Path("id") photoId: String,
-        @Query("client_id") clientId: String
-    ): UnsplashPhotoDto
+    suspend fun getPhoto(@Path("id") photoId: String): UnsplashPhotoDto
 
     @GET("users/{username}")
-    suspend fun getUser(
-        @Path("username") username: String,
-        @Query("client_id") clientId: String
-    ): UnsplashUserDto
+    suspend fun getUser(@Path("username") username: String): UnsplashUserDto
 
     @GET("users/{username}/photos")
     suspend fun getUserPhotos(
         @Path("username") username: String,
         @Query("page") page: Int = 1,
-        @Query("per_page") perPage: Int = 10,
-        @Query("client_id") clientId: String
+        @Query("per_page") perPage: Int = USER_PHOTO_PAGE_SIZE
     ): List<UnsplashPhotoDto>
 
     @GET("users/{username}/collections")
     suspend fun getUserCollections(
         @Path("username") username: String,
         @Query("page") page: Int = 1,
-        @Query("per_page") perPage: Int = 20,
-        @Query("client_id") clientId: String
+        @Query("per_page") perPage: Int = USER_COLLECTION_PAGE_SIZE
     ): List<UnsplashCollectionDto>
 
-    @GET("/users/{username}/likes")
+    @GET("users/{username}/likes")
     suspend fun getUserLikedPhotos(
         @Path("username") username: String,
         @Query("page") page: Int = 1,
-        @Query("per_page") perPage: Int = 10,
-        @Query("client_id") clientId: String
+        @Query("per_page") perPage: Int = USER_PHOTO_PAGE_SIZE
     ): List<UnsplashPhotoDto>
 
     @GET("collections/{id}/photos")
     suspend fun getCollectionPhotos(
         @Path("id") collectionId: String,
         @Query("page") page: Int,
-        @Query("per_page") perPage: Int,
-        @Query("client_id") clientId: String
+        @Query("per_page") perPage: Int
     ): List<UnsplashPhotoDto>
 
     @GET("users/{username}/statistics")
-    suspend fun getUserStatistics(
-        @Path("username") username: String,
-        @Query("client_id") clientId: String
-    ): UserStatisticsDto
+    suspend fun getUserStatistics(@Path("username") username: String): UserStatisticsDto
+
+    companion object {
+        const val DEFAULT_PAGE_SIZE = 20
+        const val USER_PHOTO_PAGE_SIZE = 10
+        const val USER_COLLECTION_PAGE_SIZE = 20
+    }
 }

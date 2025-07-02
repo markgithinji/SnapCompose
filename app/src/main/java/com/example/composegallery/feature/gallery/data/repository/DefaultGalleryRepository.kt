@@ -5,7 +5,6 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.PagingSource
 import androidx.paging.filter
-import com.example.composegallery.BuildConfig
 import com.example.composegallery.feature.gallery.data.model.toDomainModel
 import com.example.composegallery.feature.gallery.data.pagingsource.UnsplashGetPhotosPagingSource
 import com.example.composegallery.feature.gallery.data.remote.UnsplashApi
@@ -30,7 +29,7 @@ class DefaultGalleryRepository @Inject constructor(
         pagingSourceFactory: () -> PagingSource<Int, Photo>
     ): Flow<PagingData<Photo>> {
         return Pager(
-            config = PagingConfig(pageSize = 20),
+            config = PagingConfig(pageSize = UnsplashApi.DEFAULT_PAGE_SIZE),
             pagingSourceFactory = pagingSourceFactory
         ).flow
             .distinctUntilChanged()
@@ -42,7 +41,7 @@ class DefaultGalleryRepository @Inject constructor(
 
     override suspend fun getPhoto(photoId: String): Result<Photo> {
         return safeApiCall {
-            val response = api.getPhoto(photoId = photoId, clientId = BuildConfig.UNSPLASH_API_KEY)
+            val response = api.getPhoto(photoId = photoId)
             response.toDomainModel() ?: throw IllegalStateException("Invalid photo data")
         }
     }

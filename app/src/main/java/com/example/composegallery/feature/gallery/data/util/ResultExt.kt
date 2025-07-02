@@ -24,8 +24,25 @@ inline fun <T> safeApiCall(block: () -> T): Result<T> {
         }
         Timber.tag("safeApiCall").e(e, "HTTP Exception: $message")
         Result.Error(message, e)
+    } catch (e: IllegalStateException) {
+        Timber.tag("safeApiCall").e(e, "Invalid or missing data from the API")
+        Result.Error("Invalid data received from the server.", e)
+    } catch (e: IllegalArgumentException) {
+        Timber.tag("safeApiCall").e(e, "Invalid argument or model mapping")
+        Result.Error("Unexpected data format received.", e)
     } catch (e: Exception) {
         Timber.tag("safeApiCall").e(e, "Unexpected error")
         Result.Error("Unexpected error", e)
+    }
+}
+
+inline fun <T> safeDbCall(block: () -> T): Result<T> {
+    return try {
+        Result.Success(block())
+    } catch (e: CancellationException) {
+        throw e // Don't swallow coroutine cancellation
+    } catch (e: Exception) {
+        Timber.tag("safeDbCall").e(e, "Database error")
+        Result.Error(message = "Database error", throwable = e)
     }
 }

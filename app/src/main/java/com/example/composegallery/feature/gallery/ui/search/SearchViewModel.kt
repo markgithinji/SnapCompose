@@ -3,10 +3,12 @@ package com.example.composegallery.feature.gallery.ui.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
+import com.example.composegallery.feature.gallery.data.util.Result
 import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.domain.model.RecentSearch
 import com.example.composegallery.feature.gallery.domain.repository.SearchRepository
 import com.example.composegallery.feature.gallery.domain.usecase.ObserveSearchResultsUseCase
+import com.example.composegallery.feature.gallery.domain.usecase.SubmitSearchUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -14,11 +16,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
     observeSearchResults: ObserveSearchResultsUseCase,
+    private val submitSearchUseCase: SubmitSearchUseCase,
     private val searchRepository: SearchRepository
 ) : ViewModel() {
 
@@ -34,16 +38,14 @@ class SearchViewModel @Inject constructor(
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     fun submitSearch(query: String) {
-        val trimmed = query.trim()
-        if (trimmed.isEmpty()) return
-
-        _query.value = trimmed
-        saveSearchQuery(trimmed)
-    }
-
-    private fun saveSearchQuery(query: String) {
         viewModelScope.launch {
-            searchRepository.saveRecentSearch(query)
+            when (val result = submitSearchUseCase(query)) {
+                is Result.Success -> _query.value = result.data
+                is Result.Error -> {
+                    // Optionally log or show UI message for empty/invalid query
+                    Timber.w("Search submission failed: ${result.message}")
+                }
+            }
         }
     }
 
@@ -59,4 +61,3 @@ class SearchViewModel @Inject constructor(
     //     }
     // }
 }
-

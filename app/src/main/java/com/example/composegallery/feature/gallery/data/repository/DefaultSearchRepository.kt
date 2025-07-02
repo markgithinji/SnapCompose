@@ -6,6 +6,8 @@ import androidx.paging.PagingData
 import com.example.composegallery.feature.gallery.data.local.RecentSearchDao
 import com.example.composegallery.feature.gallery.data.pagingsource.UnsplashSearchPagingSource
 import com.example.composegallery.feature.gallery.data.remote.UnsplashApi
+import com.example.composegallery.feature.gallery.data.util.Result
+import com.example.composegallery.feature.gallery.data.util.safeDbCall
 import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.domain.model.RecentSearch
 import com.example.composegallery.feature.gallery.domain.repository.SearchRepository
@@ -19,7 +21,7 @@ class DefaultSearchRepository @Inject constructor(
 
     override fun searchPagedPhotos(query: String): Flow<PagingData<Photo>> {
         return Pager(
-            config = PagingConfig(pageSize = 20),
+            config = PagingConfig(pageSize = UnsplashApi.DEFAULT_PAGE_SIZE),
             pagingSourceFactory = { UnsplashSearchPagingSource(api, query) }
         ).flow
     }
@@ -28,13 +30,16 @@ class DefaultSearchRepository @Inject constructor(
         return recentSearchDao.getRecentSearches(limit)
     }
 
-    override suspend fun saveRecentSearch(query: String) {
-        if (query.isNotBlank()) {
-            recentSearchDao.insertSearch(RecentSearch(query = query.trim()))
+    override suspend fun saveRecentSearch(query: String): Result<Unit> {
+        return safeDbCall {
+            recentSearchDao.deleteSearchIgnoreCase(query)
+            recentSearchDao.insertSearch(RecentSearch(query = query))
         }
     }
 
-    override suspend fun clearRecentSearches() {
-        recentSearchDao.clearSearches()
+    override suspend fun clearRecentSearches(): Result<Unit> {
+        return safeDbCall {
+            recentSearchDao.clearSearches()
+        }
     }
 }

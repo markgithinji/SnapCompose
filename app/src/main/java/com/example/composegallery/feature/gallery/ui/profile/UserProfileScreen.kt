@@ -63,7 +63,7 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
 import com.example.composegallery.R
-import com.example.composegallery.feature.gallery.domain.model.Collection
+import com.example.composegallery.feature.gallery.domain.model.PhotoCollection
 import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.domain.model.UnsplashUser
 import com.example.composegallery.feature.gallery.domain.model.UserStatistics
@@ -198,7 +198,7 @@ fun UserProfileContent(
     onBack: () -> Unit,
     userPhotos: LazyPagingItems<Photo>,
     userLikes: LazyPagingItems<Photo>,
-    userCollections: LazyPagingItems<Collection>
+    userCollections: LazyPagingItems<PhotoCollection>
 ) {
     var selectedTab by rememberSaveable { mutableStateOf(UserTab.PHOTOS) }
     val retryKeys = remember { mutableStateMapOf<String, Int>() }
@@ -448,8 +448,8 @@ fun LazyStaggeredGridScope.renderPhotoItems(
 }
 
 fun LazyStaggeredGridScope.renderCollectionItems(
-    collections: LazyPagingItems<Collection>,
-    onCollectionClick: (Collection) -> Unit = {}
+    collections: LazyPagingItems<PhotoCollection>,
+    onCollectionClick: (PhotoCollection) -> Unit = {}
 ) {
     items(count = collections.itemCount) { index ->
         val collection = collections[index] ?: return@items

@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface RecentSearchDao {
+
     @Query("SELECT * FROM recent_searches ORDER BY timestamp DESC LIMIT :limit")
     fun getRecentSearches(limit: Int = 10): Flow<List<RecentSearch>>
 
@@ -17,6 +18,9 @@ interface RecentSearchDao {
 
     @Query("DELETE FROM recent_searches WHERE query = :query")
     suspend fun deleteSearch(query: String)
+
+    @Query("DELETE FROM recent_searches WHERE LOWER(query) = LOWER(:query)")
+    suspend fun deleteSearchIgnoreCase(query: String)
 
     @Query("DELETE FROM recent_searches")
     suspend fun clearSearches()

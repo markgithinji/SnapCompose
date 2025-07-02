@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.example.composegallery.feature.gallery.data.local.AppDatabase
 import com.example.composegallery.feature.gallery.data.local.RecentSearchDao
+import com.example.composegallery.feature.gallery.data.remote.AuthInterceptor
 import com.example.composegallery.feature.gallery.data.remote.UnsplashApi
 import com.example.composegallery.feature.gallery.data.repository.DefaultGalleryRepository
 import com.example.composegallery.feature.gallery.data.repository.DefaultSearchRepository
@@ -19,6 +20,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import javax.inject.Singleton
 
@@ -35,11 +37,20 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideUnsplashApi(json: Json): UnsplashApi {
+    fun provideOkHttpClient(): OkHttpClient {
+        return OkHttpClient.Builder()
+            .addInterceptor(AuthInterceptor())
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideUnsplashApi(json: Json, client: OkHttpClient): UnsplashApi {
         val contentType = "application/json".toMediaType()
 
         return Retrofit.Builder()
             .baseUrl(BASE_URL)
+            .client(client)
             .addConverterFactory(json.asConverterFactory(contentType))
             .build()
             .create(UnsplashApi::class.java)
@@ -53,9 +64,7 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideUserRepository(
-        api: UnsplashApi
-    ): UserRepository {
+    fun provideUserRepository(api: UnsplashApi): UserRepository {
         return DefaultUserRepository(api)
     }
 
@@ -66,6 +75,7 @@ object NetworkModule {
     ): SearchRepository {
         return DefaultSearchRepository(api, recentSearchDao)
     }
+
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): AppDatabase {
