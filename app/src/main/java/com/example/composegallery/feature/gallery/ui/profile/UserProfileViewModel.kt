@@ -1,6 +1,5 @@
 package com.example.composegallery.feature.gallery.ui.profile
 
-
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
@@ -20,7 +19,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-
 @HiltViewModel
 class UserProfileViewModel @Inject constructor(
     private val userRepository: UserRepository
@@ -29,8 +27,8 @@ class UserProfileViewModel @Inject constructor(
     private val _userProfileState = MutableStateFlow<UiState<UnsplashUser>>(UiState.Loading)
     val userProfileState: StateFlow<UiState<UnsplashUser>> = _userProfileState.asStateFlow()
 
-    private val _pagedUserPhotos = MutableStateFlow(PagingData.empty<Photo>())
-    val pagedUserPhotos: StateFlow<PagingData<Photo>> = _pagedUserPhotos
+    private val _userPhotos = MutableStateFlow(PagingData.empty<Photo>())
+    val userPhotos: StateFlow<PagingData<Photo>> = _userPhotos
 
     private val _userCollectionsState =
         MutableStateFlow<PagingData<PhotoCollection>>(PagingData.empty())
@@ -60,7 +58,7 @@ class UserProfileViewModel @Inject constructor(
             userRepository.getUserPhotos(username)
                 .cachedIn(viewModelScope)
                 .collectLatest { pagingData ->
-                    _pagedUserPhotos.value = pagingData
+                    _userPhotos.value = pagingData
                 }
         }
     }

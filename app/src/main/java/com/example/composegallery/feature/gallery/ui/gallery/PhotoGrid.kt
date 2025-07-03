@@ -1,6 +1,5 @@
 package com.example.composegallery.feature.gallery.ui.gallery
 
-import android.app.Activity
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
@@ -24,23 +23,23 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
-import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import com.example.composegallery.feature.gallery.domain.model.Photo
+import com.example.composegallery.feature.gallery.ui.common.BottomLoadingIndicator
+import com.example.composegallery.feature.gallery.ui.common.LoadMoreListError
 import com.example.composegallery.feature.gallery.ui.common.PhotoCard
+import com.example.composegallery.feature.gallery.ui.common.ProgressIndicator
 import com.example.composegallery.feature.gallery.ui.common.RetryButton
+import com.example.composegallery.feature.gallery.ui.common.calculateResponsiveColumnCount
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -78,7 +77,10 @@ fun PhotoGrid(
 
         items(
             count = photos.itemCount,
-            key = { index -> photos[index]?.id ?: index },
+            key = { index ->
+                val photo = photos[index]
+                photo?.id?.let { "$it-$index" } ?: "item-$index"
+            },
             span = { index ->
                 if ((index + 1) % 5 == 0) {
                     StaggeredGridItemSpan.FullLine // Show a featured photo item in near full size at every 5th position
@@ -97,15 +99,13 @@ fun PhotoGrid(
                     imageUrl = url,
                     authorName = photo.authorName,
                     authorImageUrl = "${photo.authorProfileImageMediumResUrl}?retry=$retryKey",
-                    onRetry = { retryKeys[photo.id] = retryKey + 1 },
                     blurHash = photo.blurHash,
+                    onRetry = { retryKeys[photo.id] = retryKey + 1 },
+                    onClick = takeIf { isGridClickable }?.let { { onPhotoClick(photo) } },
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(photo.width.toFloat() / photo.height)
-                        .clip(RoundedCornerShape(12.dp)),
-                    onClick = if (isGridClickable) {
-                        { onPhotoClick(photo) }
-                    } else null
+                        .clip(RoundedCornerShape(12.dp))
                 )
             }
         }
@@ -124,54 +124,5 @@ fun PhotoGrid(
 
             else -> Unit
         }
-    }
-}
-
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-@Composable
-fun calculateResponsiveColumnCount(): Int {
-    val context = LocalContext.current
-    val activity = context as? Activity ?: return 2 // default fallback
-
-    val windowSizeClass = calculateWindowSizeClass(activity)
-
-    return when (windowSizeClass.widthSizeClass) {
-        WindowWidthSizeClass.Compact -> 2
-        WindowWidthSizeClass.Medium -> 3
-        WindowWidthSizeClass.Expanded -> 4
-        else -> 2
-    }
-}
-
-@Composable
-fun BottomLoadingIndicator() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .navigationBarsPadding(),
-        contentAlignment = Alignment.Center
-    ) {
-        ProgressIndicator()
-    }
-}
-
-@Composable
-fun LoadMoreListError(message: String, onRetry: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(24.dp)
-            .navigationBarsPadding(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = message,
-            color = MaterialTheme.colorScheme.error,
-            style = MaterialTheme.typography.labelMedium,
-            textAlign = TextAlign.Center
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        RetryButton(onClick = onRetry)
     }
 }

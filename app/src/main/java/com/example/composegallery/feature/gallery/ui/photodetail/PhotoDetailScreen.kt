@@ -40,7 +40,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
@@ -48,9 +47,8 @@ import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.ui.common.MessageScreen
 import com.example.composegallery.feature.gallery.ui.common.PhotoImage
-import com.example.composegallery.feature.gallery.ui.common.RetryButton
+import com.example.composegallery.feature.gallery.ui.common.ProgressIndicator
 import com.example.composegallery.feature.gallery.ui.gallery.GalleryViewModel
-import com.example.composegallery.feature.gallery.ui.gallery.ProgressIndicator
 import com.example.composegallery.feature.gallery.ui.util.UiState
 import java.util.Locale
 

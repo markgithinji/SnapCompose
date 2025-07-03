@@ -25,7 +25,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.SubcomposeAsyncImage
 import com.example.composegallery.feature.gallery.ui.gallery.GalleryViewModel
 import com.example.composegallery.feature.gallery.ui.util.UiState
-import com.example.composegallery.feature.gallery.ui.gallery.ProgressIndicator
 
 @Composable
 fun PhotoViewerScreen(
@@ -56,10 +55,15 @@ fun PhotoViewerScreen(
 
                 val maxX = ((scale - 1f) * containerWidth) / 2f
                 val maxY = ((scale - 1f) * containerHeight) / 2f
+                val minZoom = 1f
+                val maxZoom = 5f
 
                 val transformableState =
                     rememberTransformableState { zoomChange, offsetChange, rotationChange ->
-                        scale = (scale * zoomChange).coerceIn(1f, 5f) // Limit zoom to bounds of the image
+                        scale = (scale * zoomChange).coerceIn( // Limit zoom to bounds of the image
+                            minZoom,
+                            maxZoom
+                        )
                         rotation += rotationChange
 
                         val newOffset = offset + offsetChange
@@ -71,10 +75,11 @@ fun PhotoViewerScreen(
 
                 SubcomposeAsyncImage(
                     model = photo.fullUrl,
-                    contentDescription = "Full screen photo",
+                    contentDescription = photo.description ?: "Zoomable image",
                     contentScale = ContentScale.Fit,
                     modifier = Modifier
                         .fillMaxSize()
+                        .transformable(transformableState)
                         .graphicsLayer {
                             scaleX = scale
                             scaleY = scale
@@ -82,7 +87,6 @@ fun PhotoViewerScreen(
                             translationY = offset.y
                             rotationZ = rotation
                         }
-                        .transformable(transformableState)
                         .pointerInput(Unit) {
                             detectTapGestures(onDoubleTap = {
                                 scale = 1f

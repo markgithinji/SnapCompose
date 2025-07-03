@@ -9,16 +9,20 @@ import androidx.compose.ui.platform.LocalContext
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
-fun calculateResponsiveColumnCount(): Int {
+fun calculateResponsiveColumnCount(
+    compact: Int = 2,
+    medium: Int = 3,
+    expanded: Int = 4
+): Int {
     val context = LocalContext.current
-    val activity = context as? Activity ?: return 2 // default fallback
+    val activity = context as? Activity ?: return compact
 
     val windowSizeClass = calculateWindowSizeClass(activity)
 
     return when (windowSizeClass.widthSizeClass) {
-        WindowWidthSizeClass.Compact -> 2
-        WindowWidthSizeClass.Medium -> 3
-        WindowWidthSizeClass.Expanded -> 4
-        else -> 2
+        WindowWidthSizeClass.Compact -> compact
+        WindowWidthSizeClass.Medium -> medium
+        WindowWidthSizeClass.Expanded -> expanded
+        else -> compact
     }
 }

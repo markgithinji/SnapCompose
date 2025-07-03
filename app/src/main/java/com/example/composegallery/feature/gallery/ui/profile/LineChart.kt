@@ -38,6 +38,7 @@ fun LineChart(
         Box(modifier) {
             Text("No data", style = MaterialTheme.typography.bodySmall)
         }
+
         return
     }
 
@@ -55,12 +56,12 @@ fun LineChart(
         val chartHeight = height - paddingBottom
 
         val stepX = chartWidth / (values.size - 1).coerceAtLeast(1)
-
+        val valueRange = (maxValue - minValue).takeIf { it != 0 } ?: 1
         // Map values to points in chart area
         val points = values.mapIndexed { index, value ->
             val x = paddingLeft + index * stepX
             val y =
-                chartHeight - ((value - minValue) / (maxValue - minValue).toFloat()) * chartHeight
+                chartHeight - ((value - minValue) / valueRange.toFloat()) * chartHeight
             Offset(x, y)
         }
 
@@ -136,8 +137,8 @@ fun LineChart(
 private fun formatNumber(value: Int): String {
     val absValue = kotlin.math.abs(value)
     return when {
-        absValue >= 1_000_000 -> String.format("%.1fM", value / 1_000_000f)
-        absValue >= 1_000 -> String.format("%.1fk", value / 1_000f)
+        absValue >= 1_000_000 -> "%.1fM".format(value / 1_000_000f)
+        absValue >= 1_000 -> "%.1fk".format(value / 1_000f)
         else -> value.toString()
     }
 }

@@ -14,12 +14,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -29,12 +31,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
 import coil.compose.SubcomposeAsyncImage
 import coil.compose.SubcomposeAsyncImageContent
 import com.example.composegallery.feature.gallery.ui.util.BlurHashDecoder
+import com.example.composegallery.ui.theme.ComposeGalleryTheme
 import com.valentinilk.shimmer.ShimmerBounds
 import com.valentinilk.shimmer.rememberShimmer
 import com.valentinilk.shimmer.shimmer
@@ -45,9 +49,9 @@ fun PhotoCard(
     authorName: String,
     authorImageUrl: String,
     onRetry: () -> Unit,
-    blurHash: String? = null,
     modifier: Modifier = Modifier,
-    onClick: (() -> Unit)? = null
+    blurHash: String? = null,
+    onClick: (() -> Unit)? = null,
 ) {
     val clickableModifier = Modifier
         .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier)
@@ -169,5 +173,28 @@ fun AuthorInfoRow(authorName: String, authorImageUrl: String) {
         Text(
             text = authorName, style = MaterialTheme.typography.labelLarge
         )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewPhotoCard() {
+    val dummyPhotoUrl = "https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d"
+    val dummyAuthorName = "Jane Doe"
+    val dummyAuthorAvatarUrl = "https://randomuser.me/api/portraits/women/44.jpg"
+    val dummyBlurHash = "LKO2?U%2Tw=w]~RBVZRi};RPxuwH"
+
+    ComposeGalleryTheme {
+        Surface {
+            PhotoCard(
+                imageUrl = dummyPhotoUrl,
+                authorName = dummyAuthorName,
+                authorImageUrl = dummyAuthorAvatarUrl,
+                blurHash = dummyBlurHash,
+                modifier = Modifier.fillMaxWidth(),
+                onClick = {}, // no-op
+                onRetry = {}  // no-op
+            )
+        }
     }
 }

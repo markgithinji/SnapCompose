@@ -29,8 +29,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
+import com.example.composegallery.feature.gallery.ui.common.SharedKeys
 import com.example.composegallery.ui.theme.searchBar
-
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -76,7 +76,6 @@ fun DummySearchBar(
     onClick: () -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    val searchBarSharedKey = "searchBarElement"
 
     with(sharedTransitionScope) {
 
@@ -102,7 +101,7 @@ fun DummySearchBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .sharedElement(
-                    sharedContentState = rememberSharedContentState(key = searchBarSharedKey),
+                    sharedContentState = rememberSharedContentState(key = SharedKeys.SEARCH_BAR),
                     animatedVisibilityScope = animatedVisibilityScope
                 )
                 .clickable(

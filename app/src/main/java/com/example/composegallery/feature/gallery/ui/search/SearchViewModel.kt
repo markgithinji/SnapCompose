@@ -3,6 +3,7 @@ package com.example.composegallery.feature.gallery.ui.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.example.composegallery.feature.gallery.data.util.Result
 import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.domain.model.RecentSearch
@@ -10,6 +11,7 @@ import com.example.composegallery.feature.gallery.domain.repository.SearchReposi
 import com.example.composegallery.feature.gallery.domain.usecase.ObserveSearchResultsUseCase
 import com.example.composegallery.feature.gallery.domain.usecase.SubmitSearchUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -29,9 +31,8 @@ class SearchViewModel @Inject constructor(
     private val _query = MutableStateFlow("")
     val query: StateFlow<String> = _query.asStateFlow()
 
-    val searchResults: StateFlow<PagingData<Photo>> =
-        observeSearchResults(query)
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), PagingData.empty())
+    val searchResults: Flow<PagingData<Photo>> =
+        observeSearchResults(query).cachedIn(viewModelScope)
 
     val recentSearches: StateFlow<List<RecentSearch>> =
         searchRepository.getRecentSearches(limit = 10)

@@ -1,3 +1,4 @@
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -27,7 +28,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.composegallery.feature.gallery.ui.gallery.ProgressIndicator
+import com.example.composegallery.feature.gallery.ui.common.ProgressIndicator
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.random.Random
@@ -77,14 +78,17 @@ fun ConfettiButton( // An Experiment, still needs work. Could be replaced with a
                 .height(38.dp),
             shape = RoundedCornerShape(50)
         ) {
-            if (isLoading) {
-                ProgressIndicator()
+            Crossfade(targetState = isLoading) { loading ->
+                if (loading) {
+                    ProgressIndicator()
+                } else {
+                    Text(
+                        text = if (isFollowing) "Following" else "Follow",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = textColor
+                    )
+                }
             }
-            Text(
-                text = if (isFollowing) "Following" else "Follow",
-                style = MaterialTheme.typography.labelMedium,
-                color = textColor
-            )
         }
     }
 }
@@ -98,6 +102,11 @@ fun ConfettiEffect(
     val animates = remember {
         List(particleCount) {
             Animatable(Offset(0f, 0f), Offset.VectorConverter)
+        }
+    }
+    val colors = remember {
+        List(particleCount) {
+            Color(Random.nextInt(256), Random.nextInt(256), Random.nextInt(256))
         }
     }
 
@@ -123,18 +132,12 @@ fun ConfettiEffect(
         onEffectComplete()
     }
 
-    Canvas(
-        modifier = Modifier
-    ) {
-        animates.forEach {
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        animates.forEachIndexed { index, animatable ->
             drawCircle(
-                color = Color(
-                    Random.nextInt(256),
-                    Random.nextInt(256),
-                    Random.nextInt(256)
-                ),
+                color = colors[index],
                 radius = 6f,
-                center = Offset(center.x + it.value.x, center.y + it.value.y)
+                center = Offset(center.x + animatable.value.x, center.y + animatable.value.y)
             )
         }
     }

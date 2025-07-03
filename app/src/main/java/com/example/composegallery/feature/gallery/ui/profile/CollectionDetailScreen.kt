@@ -15,6 +15,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -24,13 +25,14 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.example.composegallery.feature.gallery.ui.gallery.BottomLoadingIndicator
-import com.example.composegallery.feature.gallery.ui.gallery.LoadMoreListError
+import com.example.composegallery.feature.gallery.ui.common.BottomLoadingIndicator
+import com.example.composegallery.feature.gallery.ui.common.LoadMoreListError
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -101,7 +103,20 @@ fun CollectionDetailScreen(
                     )
                 }
 
-                else -> Unit
+                is LoadState.NotLoading -> {
+                    if (photos.loadState.append.endOfPaginationReached) {
+                        item(span = StaggeredGridItemSpan.FullLine) {
+                            Text(
+                                "No more photos",
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                        }
+                    }
+                }
             }
         }
     }

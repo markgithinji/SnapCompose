@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -40,7 +41,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -62,10 +62,12 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.domain.model.Photo
+import com.example.composegallery.feature.gallery.ui.common.LoadMoreListError
 import com.example.composegallery.feature.gallery.ui.common.MessageScreen
 import com.example.composegallery.feature.gallery.ui.common.PhotoCard
-import com.example.composegallery.feature.gallery.ui.gallery.GalleryViewModel
-import com.example.composegallery.feature.gallery.ui.gallery.ProgressIndicator
+import com.example.composegallery.feature.gallery.ui.common.ProgressIndicator
+import com.example.composegallery.feature.gallery.ui.common.RetryButton
+import com.example.composegallery.feature.gallery.ui.common.SharedKeys
 import com.example.composegallery.ui.theme.searchBar
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -125,7 +127,6 @@ fun SearchScreenTopBar(
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedContentScope
 ) {
-    val searchBarSharedKey = "searchBarElement"
     val keyboardController = LocalSoftwareKeyboardController.current
 
     // A transition to manage the alpha of the TextField's placeholder and text
@@ -176,7 +177,7 @@ fun SearchScreenTopBar(
                     .weight(1f)
                     .height(56.dp)
                     .sharedElement(
-                        sharedContentState = rememberSharedContentState(key = searchBarSharedKey),
+                        sharedContentState = rememberSharedContentState(key = SharedKeys.SEARCH_BAR),
                         animatedVisibilityScope = animatedVisibilityScope
                     )
                     .alpha(textFieldInnerContentAlpha),
@@ -209,7 +210,8 @@ fun SearchScreenContent(
     retryKeys: SnapshotStateMap<String, Int>,
     onPhotoClick: (String) -> Unit
 ) {
-    val isLoading = photos.loadState.refresh is LoadState.Loading
+    val loadState = photos.loadState
+    val isEmpty = photos.itemCount == 0 && loadState.refresh is LoadState.NotLoading
 
     with(animatedVisibilityScope) { // Apply animateEnterExit to the content area below the search bar
         Box(
@@ -219,35 +221,55 @@ fun SearchScreenContent(
                 .animateEnterExit(
                     enter = fadeIn(animationSpec = tween(delayMillis = 200)) + slideInVertically(
                         animationSpec = tween(delayMillis = 200),
-                        initialOffsetY = { fullHeight -> fullHeight / 2 } // Starts from halfway down
+                        initialOffsetY = { it / 2 } // Start from halfway down
                     ),
-                    exit = fadeOut(animationSpec = tween(durationMillis = 150)) + slideOutVertically(
-                        animationSpec = tween(durationMillis = 150),
-                        targetOffsetY = { fullHeight -> fullHeight / 2 } // Slides out halfway down
+                    exit = fadeOut(animationSpec = tween(150)) + slideOutVertically(
+                        animationSpec = tween(150),
+                        targetOffsetY = { it / 2 } // Slide out halfway down
                     )
                 )
         ) {
             when {
+
                 showWelcome -> { // ie. if we haven't submitted a query yet
                     MessageScreen(
                         imageRes = R.drawable.no_search_icon,
                         title = "Over 6 million photos",
-                        subtitle = "Lets look for something beautiful",
+                        subtitle = "Let’s look for something beautiful"
                     )
                 }
 
-                isLoading -> {
+                // Initial loading state (first page)
+                loadState.refresh is LoadState.Loading -> {
                     ProgressIndicator()
                 }
 
-                photos.itemCount == 0 -> {
-                    Text(
-                        text = "No results found",
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.align(Alignment.Center)
+                // Error on first page
+                loadState.refresh is LoadState.Error -> {
+                    val error = (loadState.refresh as LoadState.Error).error
+                    MessageScreen(
+                        imageRes = R.drawable.error_icon,
+                        title = "Something went wrong",
+                        subtitle = error.localizedMessage ?: "Unknown error",
+                        content = {
+                            RetryButton(
+                                onClick = { photos.retry() },
+                                modifier = Modifier.padding(16.dp)
+                            )
+                        }
                     )
                 }
 
+                // No results after loading
+                isEmpty -> {
+                    MessageScreen(
+                        imageRes = R.drawable.error_icon,
+                        title = "No results found",
+                        subtitle = "Try a different search term"
+                    )
+                }
+
+                // Content successfully loaded
                 else -> {
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(2),
@@ -258,7 +280,10 @@ fun SearchScreenContent(
                     ) {
                         items(
                             count = photos.itemCount,
-                            key = { index -> photos[index]?.id ?: index }
+                            key = { index ->
+                                val photo = photos[index]
+                                photo?.id?.let { "$it-$index" } ?: "item-$index"
+                            }
                         ) { index ->
                             val photo = photos[index]
                             if (photo != null) {
@@ -280,11 +305,29 @@ fun SearchScreenContent(
                                 )
                             }
                         }
+
+                        // Handle append loading/error states (pagination)
+                        item(span = { GridItemSpan(maxCurrentLineSpan) }) {
+                            when (loadState.append) {
+                                is LoadState.Loading -> {
+                                    ProgressIndicator()
+                                }
+
+                                is LoadState.Error -> {
+                                    val error = (loadState.append as LoadState.Error).error
+                                    LoadMoreListError(
+                                        message = "Failed to load more",
+                                        onRetry = { photos.retry() }
+                                    )
+                                }
+
+                                else -> Unit // No-op on NotLoading
+                            }
+                        }
                     }
                 }
             }
         }
     }
 }
-
 

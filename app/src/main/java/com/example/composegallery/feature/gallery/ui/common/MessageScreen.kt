@@ -21,11 +21,11 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun MessageScreen(
-    @DrawableRes imageRes: Int,
     title: String,
     subtitle: String,
-    titleColor: Color = MaterialTheme.colorScheme.onSurface,
+    @DrawableRes imageRes: Int,
     modifier: Modifier = Modifier,
+    titleColor: Color = MaterialTheme.colorScheme.onSurface,
     content: (@Composable () -> Unit)? = null
 ) {
     Column(
