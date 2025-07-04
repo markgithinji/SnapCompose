@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Link
@@ -22,19 +21,22 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import coil.compose.AsyncImage
-import com.example.composegallery.feature.gallery.domain.model.UnsplashUser
+import com.example.composegallery.feature.gallery.ui.common.UserProfileImage
 import java.net.URI
 
 @Composable
 fun UserProfileHeader(
-    user: UnsplashUser,
+    name: String,
+    profileImage: String,
+    bio: String?,
+    location: String?,
+    portfolioUrl: String?,
+    instagramUsername: String?,
     modifier: Modifier = Modifier
 ) {
     ConstraintLayout(
@@ -42,15 +44,14 @@ fun UserProfileHeader(
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 16.dp)
     ) {
-        val (profileImage, columnContent) = createRefs()
+        val (profileImageRef, columnContent) = createRefs()
 
-        AsyncImage(
-            model = user.profileImageLarge,
-            contentDescription = "${user.name}'s profile picture",
+        UserProfileImage(
+            imageUrl = profileImage,
+            contentDescription = "$name's profile picture",
             modifier = Modifier
                 .size(140.dp)
-                .clip(CircleShape)
-                .constrainAs(profileImage) {
+                .constrainAs(profileImageRef) {
                     start.linkTo(parent.start)
                     top.linkTo(parent.top)
                     bottom.linkTo(parent.bottom)
@@ -60,30 +61,30 @@ fun UserProfileHeader(
         Column(
             modifier = Modifier
                 .constrainAs(columnContent) {
-                    start.linkTo(profileImage.end, margin = 36.dp)
-                    top.linkTo(profileImage.top)
-                    bottom.linkTo(profileImage.bottom)
+                    start.linkTo(profileImageRef.end, margin = 36.dp)
+                    top.linkTo(profileImageRef.top)
+                    bottom.linkTo(profileImageRef.bottom)
                     end.linkTo(parent.end)
                     width = Dimension.fillToConstraints
                 },
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.Start
         ) {
-            Text(user.name, style = MaterialTheme.typography.headlineLarge)
+            Text(name, style = MaterialTheme.typography.headlineLarge)
             Spacer(Modifier.height(4.dp))
 
-            user.bio?.let {
+            bio?.let {
                 Text(
                     it,
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     overflow = TextOverflow.Ellipsis,
-                    maxLines = 4
+                    maxLines = 8
                 )
                 Spacer(Modifier.height(4.dp))
             }
 
-            user.location?.let {
+            location?.let {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         Icons.Default.Place,
@@ -96,7 +97,7 @@ fun UserProfileHeader(
                 Spacer(Modifier.height(4.dp))
             }
 
-            user.portfolioUrl?.let { url ->
+            portfolioUrl?.let { url ->
                 val uriHandler = LocalUriHandler.current
                 val displayUrl =
                     try { // A shorter alternative urls. Showing full URLs can be messy.
@@ -121,7 +122,7 @@ fun UserProfileHeader(
                 Spacer(Modifier.height(4.dp))
             }
 
-            user.instagramUsername?.let {
+            instagramUsername?.let {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         Icons.Default.CameraAlt,

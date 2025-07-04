@@ -1,9 +1,12 @@
-import androidx.compose.animation.Crossfade
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -78,7 +81,17 @@ fun ConfettiButton( // An Experiment, still needs work. Could be replaced with a
                 .height(38.dp),
             shape = RoundedCornerShape(50)
         ) {
-            Crossfade(targetState = isLoading) { loading ->
+            AnimatedContent(
+                targetState = isLoading,
+                transitionSpec = {
+                    fadeIn(animationSpec = tween(300)) togetherWith fadeOut(
+                        animationSpec = tween(
+                            200
+                        )
+                    )
+                },
+                label = "FollowButtonAnimation"
+            ) { loading ->
                 if (loading) {
                     ProgressIndicator()
                 } else {
@@ -94,7 +107,7 @@ fun ConfettiButton( // An Experiment, still needs work. Could be replaced with a
 }
 
 @Composable
-fun ConfettiEffect(
+private fun ConfettiEffect(
     onEffectComplete: () -> Unit,
     particles: MutableList<Offset>
 ) {
@@ -133,9 +146,13 @@ fun ConfettiEffect(
     }
 
     Canvas(modifier = Modifier.fillMaxSize()) {
-        animates.forEachIndexed { index, animatable ->
+        animates.forEach { animatable ->
             drawCircle(
-                color = colors[index],
+                color = Color(
+                    Random.nextInt(256),
+                    Random.nextInt(256),
+                    Random.nextInt(256)
+                ),
                 radius = 6f,
                 center = Offset(center.x + animatable.value.x, center.y + animatable.value.y)
             )

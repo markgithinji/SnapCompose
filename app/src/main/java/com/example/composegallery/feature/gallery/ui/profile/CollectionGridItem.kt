@@ -13,59 +13,62 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
-import com.example.composegallery.feature.gallery.domain.model.PhotoCollection
+import com.example.composegallery.feature.gallery.ui.common.PhotoImage
 
 @Composable
 fun CollectionGridItem(
-    collection: PhotoCollection,
-    onCollectionClick: (PhotoCollection) -> Unit,
-    modifier: Modifier = Modifier
+    id: String,
+    coverPhoto: String,
+    title: String,
+    totalPhotos: Int,
+    modifier: Modifier = Modifier,
+    blurHash: String? = null,
+    description: String? = null,
+    onRetry: () -> Unit,
+    onCollectionClick: (String) -> Unit
 ) {
     Column(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .clickable { onCollectionClick(collection) }
+            .clickable { onCollectionClick(id) }
     ) {
-        AsyncImage(
-            model = collection.coverPhoto?.regularUrl,
-            contentDescription = "Cover of ${collection.title} collection",
-            contentScale = ContentScale.Crop,
+        PhotoImage(
+            imageUrl = coverPhoto,
+            contentDescription = "Cover of $title collection",
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(1.4f)
-                .clip(RoundedCornerShape(12.dp))
+                .clip(RoundedCornerShape(12.dp)),
+            blurHash = blurHash,
+            onRetry = onRetry
         )
 
         Spacer(modifier = Modifier.height(6.dp))
 
         Text(
-            text = collection.title,
+            text = title,
             style = MaterialTheme.typography.headlineMedium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.padding(horizontal = 8.dp)
         )
 
-        collection.description?.let {
-            if (it.isNotBlank()) {
-                Text(
-                    text = it,
-                    style = MaterialTheme.typography.labelMedium,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 8.dp)
-                )
-            }
+        description?.takeIf { it.isNotBlank() }?.let {
+            Text(
+                text = it,
+                style = MaterialTheme.typography.labelMedium,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 8.dp)
+            )
         }
 
         Text(
-            text = "${collection.totalPhotos} photos",
+            text = "$totalPhotos photos",
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier

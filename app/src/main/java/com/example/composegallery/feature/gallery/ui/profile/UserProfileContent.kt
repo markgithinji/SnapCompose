@@ -1,6 +1,5 @@
 package com.example.composegallery.feature.gallery.ui.profile
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -40,30 +39,35 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.domain.model.PhotoCollection
-import com.example.composegallery.feature.gallery.domain.model.UnsplashUser
 import com.example.composegallery.feature.gallery.ui.common.BottomLoadingIndicator
+import com.example.composegallery.feature.gallery.ui.common.EmptyContentMessage
 import com.example.composegallery.feature.gallery.ui.common.LoadMoreListError
-import com.example.composegallery.feature.gallery.ui.common.PhotoImage
-import com.example.composegallery.feature.gallery.ui.common.ProgressIndicator
 import com.example.composegallery.feature.gallery.ui.common.calculateResponsiveColumnCount
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserProfileContent(
-    user: UnsplashUser,
+    name: String,
+    bio: String?,
+    location: String?,
+    profileImageUrl: String,
+    portfolioUrl: String?,
+    instagramUsername: String?,
+    totalPhotos: Int,
+    totalLikes: Int,
+    totalCollections: Int,
+    userPhotos: LazyPagingItems<Photo>,
+    userLikes: LazyPagingItems<Photo>,
+    userCollections: LazyPagingItems<PhotoCollection>,
     onPhotoClick: (String) -> Unit,
     onCollectionClick: (String, String) -> Unit,
     onStatsClick: () -> Unit,
-    onBack: () -> Unit,
-    userPhotos: LazyPagingItems<Photo>,
-    userLikes: LazyPagingItems<Photo>,
-    userCollections: LazyPagingItems<PhotoCollection>
+    onBack: () -> Unit
 ) {
     var selectedTab by rememberSaveable { mutableStateOf(UserTab.PHOTOS) }
     val retryKeys = remember { mutableStateMapOf<String, Int>() }
@@ -74,7 +78,7 @@ fun UserProfileContent(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "@${user.username}") },
+                title = { Text(text = "@${name}") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -105,32 +109,44 @@ fun UserProfileContent(
         ) {
             // Profile Header
             item(span = StaggeredGridItemSpan.FullLine) {
-                UserProfileHeader(user = user)
+                UserProfileHeader(
+                    name = name,
+                    profileImage = profileImageUrl,
+                    bio = bio,
+                    location = location,
+                    portfolioUrl = portfolioUrl,
+                    instagramUsername = instagramUsername
+                )
             }
 
             // Stats Row as Tabs
             item(span = StaggeredGridItemSpan.FullLine) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     StatItemTab(
-                        count = user.totalPhotos.toString(),
+                        count = totalPhotos.toString(),
                         label = "Photos",
                         selected = selectedTab == UserTab.PHOTOS,
-                        onClick = { selectedTab = UserTab.PHOTOS }
+                        onClick = { selectedTab = UserTab.PHOTOS },
+                        modifier = Modifier.weight(1f)
                     )
                     StatItemTab(
-                        count = user.totalLikes.toString(),
+                        count = totalLikes.toString(),
                         label = "Liked",
                         selected = selectedTab == UserTab.LIKES,
-                        onClick = { selectedTab = UserTab.LIKES }
+                        onClick = { selectedTab = UserTab.LIKES },
+                        modifier = Modifier.weight(1f)
                     )
                     StatItemTab(
-                        count = user.totalCollections.toString(),
+                        count = totalCollections.toString(),
                         label = "Collections",
                         selected = selectedTab == UserTab.COLLECTIONS,
-                        onClick = { selectedTab = UserTab.COLLECTIONS }
+                        onClick = { selectedTab = UserTab.COLLECTIONS },
+                        modifier = Modifier.weight(1f)
                     )
                 }
             }
@@ -153,24 +169,22 @@ fun UserProfileContent(
 
                 UserTab.COLLECTIONS -> renderCollectionItems(
                     collections = userCollections,
-                    onCollectionClick = { collection ->
-                        onCollectionClick(collection.id, collection.title)
-                    }
+                    retryKeys = retryKeys,
+                    onRetry = retryHandler,
+                    onCollectionClick = onCollectionClick
                 )
             }
         }
     }
 }
 
-fun LazyStaggeredGridScope.renderPhotoItems(
+private fun LazyStaggeredGridScope.renderPhotoItems(
     photos: LazyPagingItems<Photo>,
     retryKeys: SnapshotStateMap<String, Int>,
     onRetry: (String) -> Unit,
     onPhotoClick: (String) -> Unit
 ) {
-    val isGridClickable =
-        photos.loadState.refresh !is LoadState.Loading &&
-                photos.loadState.refresh !is LoadState.Error
+    val refreshState = photos.loadState.refresh
 
     items(
         count = photos.itemCount,
@@ -186,17 +200,35 @@ fun LazyStaggeredGridScope.renderPhotoItems(
 
         ProfilePhotoCard(
             imageUrl = url,
-            onRetry = { onRetry(photo.id) },
-            blurHash = photo.blurHash,
             modifier = Modifier
-                .animateContentSize()
                 .fillMaxWidth()
                 .aspectRatio(photo.width.toFloat() / photo.height)
                 .clip(RoundedCornerShape(12.dp)),
-            onClick = if (isGridClickable) {
-                { onPhotoClick(photo.id) }
-            } else null
+            blurHash = photo.blurHash,
+            onRetry = { onRetry(photo.id) },
+            onClick = { onPhotoClick(photo.id) }
         )
+    }
+
+    if (refreshState is LoadState.Loading) {
+        item(span = StaggeredGridItemSpan.FullLine) {
+            BottomLoadingIndicator()
+        }
+    }
+
+    if (refreshState is LoadState.Error) {
+        item(span = StaggeredGridItemSpan.FullLine) {
+            LoadMoreListError(
+                message = refreshState.error.localizedMessage ?: "Error loading photos",
+                onRetry = { photos.retry() }
+            )
+        }
+    }
+
+    if (refreshState is LoadState.NotLoading && photos.itemCount == 0) {
+        item(span = StaggeredGridItemSpan.FullLine) {
+            EmptyContentMessage("No photos found")
+        }
     }
 
     when (val appendState = photos.loadState.append) {
@@ -211,15 +243,20 @@ fun LazyStaggeredGridScope.renderPhotoItems(
             )
         }
 
-        else -> Unit
+        else -> {
+            Unit // No-Op
+        }
     }
 }
 
-fun LazyStaggeredGridScope.renderCollectionItems(
+private fun LazyStaggeredGridScope.renderCollectionItems(
     collections: LazyPagingItems<PhotoCollection>,
-    onCollectionClick: (PhotoCollection) -> Unit = {}
+    retryKeys: SnapshotStateMap<String, Int>,
+    onRetry: (String) -> Unit,
+    onCollectionClick: (String, String) -> Unit
 ) {
-    // Render collection items
+    val refreshState = collections.loadState.refresh
+
     items(
         count = collections.itemCount,
         key = { index ->
@@ -229,27 +266,51 @@ fun LazyStaggeredGridScope.renderCollectionItems(
     ) { index ->
         val collection = collections[index] ?: return@items
 
+        val retryKey = retryKeys[collection.id] ?: 0
+
+        val imageUrl = if (retryKey > 0) {
+            "${collection.coverPhoto?.regularUrl.orEmpty()}?retry=$retryKey"
+        } else {
+            collection.coverPhoto?.regularUrl.orEmpty()
+        }
+
         CollectionGridItem(
-            collection = collection,
-            onCollectionClick = { onCollectionClick(collection) },
-            modifier = Modifier
-                .animateContentSize()
-                .fillMaxWidth()
+            id = collection.id,
+            coverPhoto = imageUrl,
+            title = collection.title,
+            totalPhotos = collection.totalPhotos,
+            modifier = Modifier.fillMaxWidth(),
+            blurHash = collection.coverPhoto?.blurHash,
+            description = collection.description,
+            onRetry = { onRetry(collection.id) },
+            onCollectionClick = { onCollectionClick(collection.id, collection.title) }
         )
     }
 
+    if (refreshState is LoadState.Loading) {
+        item(span = StaggeredGridItemSpan.FullLine) {
+            BottomLoadingIndicator()
+        }
+    }
+
+    if (refreshState is LoadState.Error) {
+        item(span = StaggeredGridItemSpan.FullLine) {
+            LoadMoreListError(
+                message = refreshState.error.localizedMessage ?: "Error loading collections",
+                onRetry = { collections.retry() }
+            )
+        }
+    }
+
+    if (refreshState is LoadState.NotLoading && collections.itemCount == 0) {
+        item(span = StaggeredGridItemSpan.FullLine) {
+            EmptyContentMessage("No collections found")
+        }
+    }
+
     when (val appendState = collections.loadState.append) {
-        is LoadState.Loading -> {
-            item(span = StaggeredGridItemSpan.FullLine) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    ProgressIndicator()
-                }
-            }
+        is LoadState.Loading -> item(span = StaggeredGridItemSpan.FullLine) {
+            BottomLoadingIndicator()
         }
 
         is LoadState.Error -> {
@@ -261,34 +322,23 @@ fun LazyStaggeredGridScope.renderCollectionItems(
             }
         }
 
-        is LoadState.NotLoading -> {
-            if (collections.itemCount == 0) {
-                item(span = StaggeredGridItemSpan.FullLine) {
-                    Text(
-                        "No collections found.",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            }
+        else -> {
+            Unit // No-Op
         }
     }
 }
 
 @Composable
-fun StatItemTab(
+private fun StatItemTab(
     count: String,
     label: String,
     selected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = Modifier
-            .clickable { onClick() }
-            .padding(8.dp),
+        modifier = modifier
+            .clickable { onClick() },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(count, style = MaterialTheme.typography.headlineMedium)
@@ -308,23 +358,3 @@ fun StatItemTab(
     }
 }
 
-@Composable
-fun ProfilePhotoCard(
-    imageUrl: String,
-    onRetry: () -> Unit,
-    modifier: Modifier = Modifier,
-    blurHash: String? = null,
-    onClick: (() -> Unit)? = null
-) {
-    val clickableModifier = modifier
-        .clickable(enabled = onClick != null) { onClick?.invoke() }
-        .padding(8.dp)
-
-    PhotoImage(
-        imageUrl = imageUrl,
-        contentDescription = "User photo",
-        blurHash = blurHash,
-        onRetry = onRetry,
-        modifier = clickableModifier
-    )
-}

@@ -24,7 +24,7 @@ fun LoadMoreListError(message: String, onRetry: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = message,
+            text = "Error: $message",
             color = MaterialTheme.colorScheme.error,
             style = MaterialTheme.typography.labelMedium,
             textAlign = TextAlign.Center

@@ -21,9 +21,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.composegallery.R
-import com.example.composegallery.feature.gallery.domain.model.UnsplashUser
 import com.example.composegallery.feature.gallery.domain.model.UserStatistics
-import com.example.composegallery.feature.gallery.ui.common.MessageScreen
+import com.example.composegallery.feature.gallery.ui.common.InfoMessageScreen
 import com.example.composegallery.feature.gallery.ui.common.ProgressIndicator
 import com.example.composegallery.feature.gallery.ui.util.UiState
 
@@ -31,13 +30,13 @@ import com.example.composegallery.feature.gallery.ui.util.UiState
 @Composable
 fun UserProfileScreen(
     username: String,
+    onBack: () -> Unit,
     onPhotoClick: (String) -> Unit,
     onCollectionClick: (String, String) -> Unit,
-    onBack: () -> Unit,
     viewModel: UserProfileViewModel = hiltViewModel()
 ) {
-    val userProfileState by viewModel.userProfileState.collectAsStateWithLifecycle()
-    val userStatsState by viewModel.userStatisticsState.collectAsStateWithLifecycle()
+    val userProfileState = viewModel.userProfileState.collectAsStateWithLifecycle().value
+    val userStatsState = viewModel.userStatisticsState.collectAsStateWithLifecycle().value
     val photos = viewModel.userPhotos.collectAsLazyPagingItems()
     val userLikes = viewModel.userLikedPhotos.collectAsLazyPagingItems()
     val collections = viewModel.userCollectionsState.collectAsLazyPagingItems()
@@ -58,90 +57,120 @@ fun UserProfileScreen(
         }
 
         is UiState.Error -> {
-            MessageScreen(
+            InfoMessageScreen(
                 imageRes = R.drawable.error_icon,
                 title = "Failed to load user profile",
-                subtitle = (userProfileState as UiState.Error).message,
+                subtitle = "Reason: ${userProfileState.message}",
                 titleColor = MaterialTheme.colorScheme.error
             )
         }
 
         is UiState.Content -> {
-            val user = (userProfileState as UiState.Content<UnsplashUser>).data
+            val user = userProfileState.data
             UserProfileContent(
-                user = user,
+                name = user.name,
+                bio = user.bio,
+                location = user.location,
+                portfolioUrl = user.portfolioUrl,
+                instagramUsername = user.instagramUsername,
+                totalPhotos = user.totalPhotos,
+                totalLikes = user.totalLikes,
+                totalCollections = user.totalCollections,
+                profileImageUrl = user.profileImageLarge,
+                userPhotos = photos,
+                userLikes = userLikes,
+                userCollections = collections,
                 onPhotoClick = onPhotoClick,
                 onCollectionClick = onCollectionClick,
                 onStatsClick = { showStatsDialog = true },
                 onBack = onBack,
-                userPhotos = photos,
-                userLikes = userLikes,
-                userCollections = collections
             )
         }
     }
 
     // Show the stats dialog if requested
     if (showStatsDialog) {
-        when (userStatsState) {
-            is UiState.Content -> {
-                val stats = (userStatsState as UiState.Content<UserStatistics>).data
-                AlertDialog(
-                    onDismissRequest = { showStatsDialog = false },
-                    title = { Text("User Statistics") },
-                    text = {
-                        UserStatsChart(
-                            stats = stats,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(300.dp)
-                        )
-                    },
-                    confirmButton = {
-                        TextButton(onClick = { showStatsDialog = false }) {
-                            Text("Close")
-                        }
-                    }
-                )
-            }
+        UserStatsDialog(
+            state = userStatsState,
+            onDismiss = { showStatsDialog = false }
+        )
+    }
+}
 
-            is UiState.Loading -> {
-                AlertDialog(
-                    onDismissRequest = { showStatsDialog = false },
-                    title = { Text("Loading Stats...") },
-                    text = { ProgressIndicator() },
-                    confirmButton = {
-                        TextButton(onClick = { showStatsDialog = false }) {
-                            Text("Close")
-                        }
+@Composable
+private fun UserStatsDialog(
+    state: UiState<UserStatistics>,
+    onDismiss: () -> Unit
+) {
+    when (state) {
+        is UiState.Content -> {
+            val stats = state.data
+            AlertDialog(
+                onDismissRequest = onDismiss,
+                title = { Text("User Statistics", style = MaterialTheme.typography.headlineSmall) },
+                text = {
+                    UserStatsChart(
+                        downloadsValues = stats.downloads.historical.values.map { it.value.toFloat() },
+                        downloadsDays = stats.downloads.historical.quantity,
+                        viewsValues = stats.views.historical.values.map { it.value.toFloat() },
+                        viewsDays = stats.views.historical.quantity,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(300.dp)
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = onDismiss) {
+                        Text("Close")
                     }
-                )
-            }
+                }
+            )
+        }
 
-            is UiState.Error -> {
-                AlertDialog(
-                    onDismissRequest = { showStatsDialog = false },
-                    title = {
-                        Text(
-                            text = "Error Loading Stats",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    },
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Default.Error,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.error
-                        )
-                    },
-                    confirmButton = {
-                        TextButton(onClick = { showStatsDialog = false }) {
-                            Text("Close")
-                        }
+        is UiState.Loading -> {
+            AlertDialog(
+                onDismissRequest = onDismiss,
+                title = {
+                    Text(
+                        "Loading Stats...",
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                },
+                text = {
+                    ProgressIndicator()
+                },
+                confirmButton = {
+                    TextButton(onClick = onDismiss) {
+                        Text("Close")
                     }
-                )
-            }
+                }
+            )
+        }
+
+        is UiState.Error -> {
+            AlertDialog(
+                onDismissRequest = onDismiss,
+                title = {
+                    Text(
+                        text = "Error Loading Stats",
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.Error,
+                        contentDescription = "Error icon",
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = onDismiss) {
+                        Text("Close")
+                    }
+                }
+            )
         }
     }
 }
+

@@ -34,10 +34,10 @@ import com.example.composegallery.feature.gallery.ui.common.calculateResponsiveC
 @Composable
 fun PhotoGrid(
     photos: LazyPagingItems<Photo>,
-    sharedTransitionScope: SharedTransitionScope,
-    animatedVisibilityScope: AnimatedVisibilityScope,
+    onPhotoClick: (Photo) -> Unit,
     onSearchClick: () -> Unit,
-    onPhotoClick: (Photo) -> Unit
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope
 ) {
 
     val retryKeys = remember { mutableStateMapOf<String, Int>() }
@@ -54,14 +54,14 @@ fun PhotoGrid(
     ) {
         item(span = StaggeredGridItemSpan.FullLine) {
             GalleryHeader(
+                sharedTransitionScope = sharedTransitionScope,
+                animatedVisibilityScope = animatedVisibilityScope,
                 onSearchClick = onSearchClick,
                 modifier = Modifier
                     .padding(
                         top = WindowInsets.statusBars.asPaddingValues()
-                            .calculateTopPadding()// pushes header below status bar
-                    ),
-                sharedTransitionScope = sharedTransitionScope,
-                animatedVisibilityScope = animatedVisibilityScope
+                            .calculateTopPadding() // pushes header below status bar
+                    )
             )
         }
 
@@ -89,13 +89,13 @@ fun PhotoGrid(
                     imageUrl = url,
                     authorName = photo.authorName,
                     authorImageUrl = "${photo.authorProfileImageMediumResUrl}?retry=$retryKey",
-                    blurHash = photo.blurHash,
                     onRetry = { retryKeys[photo.id] = retryKey + 1 },
-                    onClick = takeIf { isGridClickable }?.let { { onPhotoClick(photo) } },
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(photo.width.toFloat() / photo.height)
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(RoundedCornerShape(12.dp)),
+                    blurHash = photo.blurHash,
+                    onClick = takeIf { isGridClickable }?.let { { onPhotoClick(photo) } }
                 )
             }
         }
@@ -112,7 +112,8 @@ fun PhotoGrid(
                 )
             }
 
-            else -> { /* no-op */
+            else -> {
+                Unit // No-Op
             }
         }
     }

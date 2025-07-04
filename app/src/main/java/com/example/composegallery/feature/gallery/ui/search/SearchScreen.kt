@@ -62,12 +62,13 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.domain.model.Photo
+import com.example.composegallery.feature.gallery.ui.common.InfoMessageScreen
 import com.example.composegallery.feature.gallery.ui.common.LoadMoreListError
-import com.example.composegallery.feature.gallery.ui.common.MessageScreen
 import com.example.composegallery.feature.gallery.ui.common.PhotoCard
 import com.example.composegallery.feature.gallery.ui.common.ProgressIndicator
 import com.example.composegallery.feature.gallery.ui.common.RetryButton
 import com.example.composegallery.feature.gallery.ui.common.SharedKeys
+import com.example.composegallery.feature.gallery.ui.common.calculateResponsiveColumnCount
 import com.example.composegallery.ui.theme.searchBar
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -107,18 +108,18 @@ fun SearchScreen(
     ) { padding ->
         SearchScreenContent(
             showWelcome = !firstSearchDone,
-            animatedVisibilityScope = animatedVisibilityScope,
             paddingValues = padding,
             photos = pagedPhotos,
             retryKeys = retryKeys,
-            onPhotoClick = onPhotoClick
+            onPhotoClick = onPhotoClick,
+            animatedVisibilityScope = animatedVisibilityScope
         )
     }
 }
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun SearchScreenTopBar(
+private fun SearchScreenTopBar(
     query: String,
     onQueryChange: (String) -> Unit,
     onSearchSubmit: () -> Unit,
@@ -201,13 +202,13 @@ fun SearchScreenTopBar(
 }
 
 @Composable
-fun SearchScreenContent(
+private fun SearchScreenContent(
     showWelcome: Boolean,
-    animatedVisibilityScope: AnimatedContentScope,
     paddingValues: PaddingValues,
     photos: LazyPagingItems<Photo>,
     retryKeys: SnapshotStateMap<String, Int>,
-    onPhotoClick: (String) -> Unit
+    onPhotoClick: (String) -> Unit,
+    animatedVisibilityScope: AnimatedContentScope
 ) {
     val loadState = photos.loadState
     val isEmpty = photos.itemCount == 0 && loadState.refresh is LoadState.NotLoading
@@ -231,7 +232,7 @@ fun SearchScreenContent(
             when {
 
                 showWelcome -> { // ie. if we haven't submitted a query yet
-                    MessageScreen(
+                    InfoMessageScreen(
                         imageRes = R.drawable.no_search_icon,
                         title = "Over 6 million photos",
                         subtitle = "Let’s look for something beautiful"
@@ -246,10 +247,11 @@ fun SearchScreenContent(
                 // Error on first page
                 loadState.refresh is LoadState.Error -> {
                     val error = (loadState.refresh as LoadState.Error).error
-                    MessageScreen(
+                    InfoMessageScreen(
                         imageRes = R.drawable.error_icon,
                         title = "Something went wrong",
-                        subtitle = error.localizedMessage ?: "Unknown error",
+                        subtitle = error.localizedMessage?.let { "Reason: $it" } ?: "Reason: Unknown error",
+                        titleColor = MaterialTheme.colorScheme.error,
                         content = {
                             RetryButton(
                                 onClick = { photos.retry() },
@@ -261,8 +263,8 @@ fun SearchScreenContent(
 
                 // No results after loading
                 isEmpty -> {
-                    MessageScreen(
-                        imageRes = R.drawable.error_icon,
+                    InfoMessageScreen(
+                        imageRes = R.drawable.no_results_icon,
                         title = "No results found",
                         subtitle = "Try a different search term"
                     )
@@ -271,7 +273,7 @@ fun SearchScreenContent(
                 // Content successfully loaded
                 else -> {
                     LazyVerticalGrid(
-                        columns = GridCells.Fixed(2),
+                        columns = GridCells.Fixed(calculateResponsiveColumnCount()),
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -315,12 +317,13 @@ fun SearchScreenContent(
                                 is LoadState.Error -> {
                                     val error = (loadState.append as LoadState.Error).error
                                     LoadMoreListError(
-                                        message = "Failed to load more",
+                                        message = error.localizedMessage ?: "Failed to load more",
                                         onRetry = { photos.retry() }
                                     )
                                 }
 
-                                else -> Unit // No-op on NotLoading
+                                else -> { /* no-op */
+                                }
                             }
                         }
                     }

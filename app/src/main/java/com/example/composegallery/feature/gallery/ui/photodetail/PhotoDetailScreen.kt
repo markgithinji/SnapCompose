@@ -33,21 +33,21 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.AsyncImage
 import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.domain.model.Photo
-import com.example.composegallery.feature.gallery.ui.common.MessageScreen
+import com.example.composegallery.feature.gallery.ui.common.InfoMessageScreen
 import com.example.composegallery.feature.gallery.ui.common.PhotoImage
 import com.example.composegallery.feature.gallery.ui.common.ProgressIndicator
+import com.example.composegallery.feature.gallery.ui.common.UserProfileImage
 import com.example.composegallery.feature.gallery.ui.gallery.GalleryViewModel
 import com.example.composegallery.feature.gallery.ui.util.UiState
 import java.util.Locale
@@ -62,6 +62,8 @@ fun PhotoDetailScreen(
     viewModel: GalleryViewModel = hiltViewModel()
 ) {
     val photoState by viewModel.uiState.collectAsState()
+    val retryKey = remember(photoId) { mutableIntStateOf(0) }
+
 
     LaunchedEffect(photoId) {
         viewModel.loadPhoto(photoId)
@@ -81,21 +83,14 @@ fun PhotoDetailScreen(
     ) { padding ->
         when (val state = photoState) {
             UiState.Loading -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding),
-                    contentAlignment = Alignment.Center
-                ) {
-                    ProgressIndicator()
-                }
+                ProgressIndicator()
             }
 
             is UiState.Error -> {
-                MessageScreen(
+                InfoMessageScreen(
                     imageRes = R.drawable.error_icon,
                     title = "Failed to load photo",
-                    subtitle = state.message,
+                    subtitle = "Reason: ${state.message}",
                     titleColor = MaterialTheme.colorScheme.error
                 )
             }
@@ -103,9 +98,11 @@ fun PhotoDetailScreen(
             is UiState.Content -> {
                 PhotoDetailContent(
                     photo = state.data,
+                    retryKey = retryKey.intValue,
+                    onRetry = { retryKey.intValue++ },
                     modifier = Modifier.padding(padding),
                     onExpandClick = onExpandClick,
-                    onUserClick = onUserClick
+                    onUserClick = onUserClick,
                 )
             }
         }
@@ -113,8 +110,10 @@ fun PhotoDetailScreen(
 }
 
 @Composable
-fun PhotoDetailContent(
+private fun PhotoDetailContent(
     photo: Photo,
+    retryKey: Int,
+    onRetry: () -> Unit,
     modifier: Modifier = Modifier,
     onExpandClick: (String) -> Unit,
     onUserClick: (String) -> Unit
@@ -130,15 +129,16 @@ fun PhotoDetailContent(
                 .height(halfScreenHeightDp)
         ) {
             PhotoImage(
-                imageUrl = photo.fullUrl,
+                imageUrl = "${photo.fullUrl}?retry=$retryKey",
                 contentDescription = photo.authorName,
-                blurHash = photo.blurHash,
-                onRetry = {},
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(halfScreenHeightDp) // Force fixed height
-                    .clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
+                    .clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp)),
+                blurHash = photo.blurHash,
+                onRetry = onRetry
             )
+
             IconButton(
                 onClick = { onExpandClick(photo.id) },
                 modifier = Modifier
@@ -174,7 +174,7 @@ fun PhotoDetailContent(
 
 
 @Composable
-fun PhotoDetailInfo(
+private fun PhotoDetailInfo(
     photo: Photo,
     onUserClick: (String) -> Unit
 ) {
@@ -194,14 +194,10 @@ fun PhotoDetailInfo(
                 .clickable { onUserClick(photo.username ?: photo.authorName) },
             verticalAlignment = Alignment.CenterVertically
         ) {
-            AsyncImage(
-                model = photo.authorProfileImageHighResUrl,
-                contentDescription = "${photo.authorName}'s profile picture",
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceVariant),
-                contentScale = ContentScale.Crop
+            UserProfileImage(
+                imageUrl = photo.authorProfileImageUrl,
+                contentDescription = photo.authorName,
+                modifier = Modifier.size(48.dp)
             )
 
             Spacer(modifier = Modifier.width(12.dp))
@@ -307,7 +303,7 @@ fun PhotoDetailInfo(
     }
 }
 
-fun String.formatToReadableDate(): String {
+private fun String.formatToReadableDate(): String {
     return try {
         val isoFormat =
             android.icu.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {

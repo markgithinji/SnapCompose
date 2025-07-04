@@ -27,8 +27,53 @@ import com.example.composegallery.feature.gallery.domain.model.StatValue
 import com.example.composegallery.feature.gallery.domain.model.UserStatistics
 
 @Composable
-fun LineChart(
-    values: List<Int>,
+fun UserStatsChart(
+    downloadsValues: List<Float>,
+    downloadsDays: Int,
+    viewsValues: List<Float>,
+    viewsDays: Int,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier.padding(16.dp)) {
+        Text(
+            text = "Downloads (Last $downloadsDays days)",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Start
+        )
+        Spacer(Modifier.height(8.dp))
+        LineChart(
+            values = downloadsValues,
+            lineColor = MaterialTheme.colorScheme.primaryContainer,
+            pointColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(120.dp)
+        )
+
+        Spacer(Modifier.height(10.dp))
+
+        Text(
+            text = "Views (Last $viewsDays days)",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Start
+        )
+        Spacer(Modifier.height(8.dp))
+        LineChart(
+            values = viewsValues,
+            lineColor = MaterialTheme.colorScheme.secondaryContainer,
+            pointColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(120.dp)
+        )
+    }
+}
+
+@Composable
+private fun LineChart(
+    values: List<Float>,
     modifier: Modifier = Modifier,
     lineColor: Color = Color.Blue,
     pointColor: Color = Color.Red,
@@ -36,14 +81,13 @@ fun LineChart(
 ) {
     if (values.isEmpty()) {
         Box(modifier) {
-            Text("No data", style = MaterialTheme.typography.bodySmall)
+            Text(text = "No data", style = MaterialTheme.typography.labelMedium)
         }
-
         return
     }
 
-    val maxValue = values.maxOrNull() ?: 0
-    val minValue = values.minOrNull() ?: 0
+    val maxValue = values.maxOrNull() ?: 0f
+    val minValue = values.minOrNull() ?: 0f
 
     val paddingLeft = 40f
     val paddingBottom = 40f
@@ -56,15 +100,16 @@ fun LineChart(
         val chartHeight = height - paddingBottom
 
         val stepX = chartWidth / (values.size - 1).coerceAtLeast(1)
-        val valueRange = (maxValue - minValue).takeIf { it != 0 } ?: 1
+        val valueRange = (maxValue - minValue).takeIf { it != 0f } ?: 1f
+
         // Map values to points in chart area
         val points = values.mapIndexed { index, value ->
             val x = paddingLeft + index * stepX
-            val y =
-                chartHeight - ((value - minValue) / valueRange.toFloat()) * chartHeight
+            val y = chartHeight - ((value - minValue) / valueRange) * chartHeight
             Offset(x, y)
         }
 
+        // Paint object for drawing text on Canvas
         val paintText = android.graphics.Paint().apply {
             textSize = 30f
             color = android.graphics.Color.BLACK
@@ -111,18 +156,18 @@ fun LineChart(
             )
         }
 
-        // Draw lines between points
-        for (i in 0 until points.size - 1) {
+        // Draw lines between points using zipWithNext (idiomatic)
+        points.zipWithNext().forEach { (start, end) ->
             drawLine(
                 color = lineColor,
-                start = points[i],
-                end = points[i + 1],
+                start = start,
+                end = end,
                 strokeWidth = strokeWidth.toPx(),
                 cap = StrokeCap.Round
             )
         }
 
-        // Draw points
+        // Draw points as circles
         points.forEach { point ->
             drawCircle(
                 color = pointColor,
@@ -133,55 +178,12 @@ fun LineChart(
     }
 }
 
-
-private fun formatNumber(value: Int): String {
+private fun formatNumber(value: Float): String {
     val absValue = kotlin.math.abs(value)
     return when {
-        absValue >= 1_000_000 -> "%.1fM".format(value / 1_000_000f)
-        absValue >= 1_000 -> "%.1fk".format(value / 1_000f)
-        else -> value.toString()
-    }
-}
-
-@Composable
-fun UserStatsChart(
-    stats: UserStatistics,
-    modifier: Modifier = Modifier
-) {
-    Column(modifier.padding(16.dp)) {
-        Text(
-            text = "Downloads (Last ${stats.downloads.historical.quantity} days)",
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Start
-        )
-        Spacer(Modifier.height(8.dp))
-        LineChart(
-            values = stats.downloads.historical.values.map { it.value },
-            lineColor = MaterialTheme.colorScheme.primaryContainer,
-            pointColor = MaterialTheme.colorScheme.onPrimaryContainer,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(120.dp)
-        )
-
-        Spacer(Modifier.height(10.dp))
-
-        Text(
-            text = "Views (Last ${stats.views.historical.quantity} days)",
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Start
-        )
-        Spacer(Modifier.height(8.dp))
-        LineChart(
-            values = stats.views.historical.values.map { it.value },
-            lineColor = MaterialTheme.colorScheme.secondaryContainer,
-            pointColor = MaterialTheme.colorScheme.onSecondaryContainer,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(120.dp)
-        )
+        absValue >= 1_000_000f -> "%.1fM".format(value / 1_000_000f)
+        absValue >= 1_000f -> "%.1fk".format(value / 1_000f)
+        else -> value.toInt().toString()
     }
 }
 
@@ -224,7 +226,15 @@ fun PreviewUserStatsChart() {
 
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
-            UserStatsChart(stats = mockStats)
+            UserStatsChart(
+                downloadsValues = mockStats.downloads.historical.values.map { it.value.toFloat() },
+                downloadsDays = mockStats.downloads.historical.quantity,
+                viewsValues = mockStats.views.historical.values.map { it.value.toFloat() },
+                viewsDays = mockStats.views.historical.quantity,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(300.dp)
+            )
         }
     }
 }

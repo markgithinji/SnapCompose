@@ -20,6 +20,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.example.composegallery.feature.gallery.ui.common.ProgressIndicator
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -51,13 +52,7 @@ fun FollowButton() {
         shape = RoundedCornerShape(50)
     ) {
         if (isLoading) {
-            CircularProgressIndicator(
-                color = Color.White,
-                modifier = Modifier
-                    .size(16.dp)
-                    .padding(end = 8.dp),
-                strokeWidth = 2.dp
-            )
+            ProgressIndicator()
         }
 
         Text(

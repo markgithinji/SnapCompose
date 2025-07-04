@@ -31,7 +31,7 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.domain.model.Photo
-import com.example.composegallery.feature.gallery.ui.common.MessageScreen
+import com.example.composegallery.feature.gallery.ui.common.InfoMessageScreen
 import com.example.composegallery.feature.gallery.ui.common.ProgressIndicator
 import com.example.composegallery.feature.gallery.ui.common.RetryButton
 
@@ -84,12 +84,12 @@ fun GalleryScreen(
         }
     ) {
         PhotoGridContent(
+            photos = photos,
             loadState = refreshState,
             hasLoadedOnce = hasLoadedOnce.value,
-            photos = photos,
-            onSearchClick = onSearchNavigate,
             onPhotoClick = onPhotoClick,
             onRetry = { photos.retry() },
+            onSearchClick = onSearchNavigate,
             sharedTransitionScope = sharedTransitionScope,
             animatedVisibilityScope = animatedVisibilityScope
         )
@@ -99,12 +99,12 @@ fun GalleryScreen(
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun PhotoGridContent(
+    photos: LazyPagingItems<Photo>,
     loadState: LoadState,
     hasLoadedOnce: Boolean,
-    photos: LazyPagingItems<Photo>,
-    onSearchClick: () -> Unit,
-    onRetry: () -> Unit,
     onPhotoClick: (String) -> Unit,
+    onRetry: () -> Unit,
+    onSearchClick: () -> Unit,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedContentScope
 ) {
@@ -126,10 +126,10 @@ private fun PhotoGridContent(
                 }
 
                 is LoadState.Error -> {
-                    MessageScreen(
-                        imageRes = R.drawable.error_icon,
+                    InfoMessageScreen(
                         title = "Failed to load images",
-                        subtitle = state.error.localizedMessage ?: "Unknown error",
+                        subtitle = state.error.localizedMessage?.let { "Reason: $it" } ?: "Unknown error",
+                        imageRes = R.drawable.error_icon,
                         titleColor = MaterialTheme.colorScheme.error
                     ) {
                         RetryButton(onClick = onRetry)
@@ -139,10 +139,10 @@ private fun PhotoGridContent(
                 else -> {
                     PhotoGrid(
                         photos = photos,
+                        onPhotoClick = { onPhotoClick(it.id) },
                         onSearchClick = onSearchClick,
                         sharedTransitionScope = sharedTransitionScope,
-                        animatedVisibilityScope = animatedVisibilityScope,
-                        onPhotoClick = { onPhotoClick(it.id) }
+                        animatedVisibilityScope = animatedVisibilityScope
                     )
                 }
             }

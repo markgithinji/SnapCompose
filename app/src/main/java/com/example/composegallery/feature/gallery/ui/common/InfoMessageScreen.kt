@@ -20,7 +20,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun MessageScreen(
+fun InfoMessageScreen(
     title: String,
     subtitle: String,
     @DrawableRes imageRes: Int,
