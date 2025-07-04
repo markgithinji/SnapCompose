@@ -7,8 +7,8 @@ import com.example.composegallery.feature.gallery.domain.model.Photo
 class UnsplashGetUserLikesPagingSource(
     private val api: UnsplashApi,
     private val username: String
-) : BasePhotoPagingSource<Photo>(
-    apiCall = { page, perPage ->
+) : BaseUnsplashPagingSource<Photo>(
+    api = { page, perPage ->
         api.getUserLikedPhotos(username = username, page = page, perPage = perPage)
             .mapNotNull { it.toDomainModel() }
     }

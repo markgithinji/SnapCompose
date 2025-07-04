@@ -7,8 +7,8 @@ import com.example.composegallery.feature.gallery.domain.model.PhotoCollection
 class UnsplashGetUserCollectionsPagingSource(
     private val api: UnsplashApi,
     private val username: String
-) : BasePhotoPagingSource<PhotoCollection>(
-    apiCall = { page, perPage ->
+) : BaseUnsplashPagingSource<PhotoCollection>(
+    api = { page, perPage ->
         api.getUserCollections(
             username = username,
             page = page,

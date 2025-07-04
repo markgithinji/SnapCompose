@@ -84,7 +84,6 @@ fun SearchScreen(
     val retryKeys = remember { mutableStateMapOf<String, Int>() }
     val pagedPhotos = viewModel.searchResults.collectAsLazyPagingItems()
 
-
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -281,8 +280,8 @@ fun SearchScreenContent(
                         items(
                             count = photos.itemCount,
                             key = { index ->
-                                val photo = photos[index]
-                                photo?.id?.let { "$it-$index" } ?: "item-$index"
+                                val item = photos.peek(index)
+                                item?.id ?: index
                             }
                         ) { index ->
                             val photo = photos[index]

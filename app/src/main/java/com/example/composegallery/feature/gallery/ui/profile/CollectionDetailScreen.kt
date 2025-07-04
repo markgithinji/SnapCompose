@@ -73,7 +73,10 @@ fun CollectionDetailScreen(
         ) {
             items(
                 count = photos.itemCount,
-                key = { index -> photos[index]?.id ?: index }
+                key = { index ->
+                    val item = photos.peek(index)
+                    item?.id ?: index
+                }
             ) { index ->
                 val photo = photos[index] ?: return@items
                 val retryKey = retryKeys[photo.id] ?: 0

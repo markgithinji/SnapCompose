@@ -174,7 +174,10 @@ fun LazyStaggeredGridScope.renderPhotoItems(
 
     items(
         count = photos.itemCount,
-        key = { index -> photos[index]?.id ?: index }
+        key = { index ->
+            val item = photos.peek(index)
+            item?.id ?: index
+        }
     ) { index ->
         val photo = photos[index] ?: return@items
 
@@ -217,7 +220,13 @@ fun LazyStaggeredGridScope.renderCollectionItems(
     onCollectionClick: (PhotoCollection) -> Unit = {}
 ) {
     // Render collection items
-    items(count = collections.itemCount) { index ->
+    items(
+        count = collections.itemCount,
+        key = { index ->
+            val item = collections.peek(index)
+            item?.id ?: index
+        }
+    ) { index ->
         val collection = collections[index] ?: return@items
 
         CollectionGridItem(

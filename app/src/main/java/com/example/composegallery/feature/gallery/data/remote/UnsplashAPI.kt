@@ -13,14 +13,14 @@ interface UnsplashApi {
     @GET("photos")
     suspend fun getPhotos(
         @Query("page") page: Int = 1,
-        @Query("per_page") perPage: Int = DEFAULT_PAGE_SIZE
+        @Query("per_page") perPage: Int
     ): List<UnsplashPhotoDto>
 
     @GET("search/photos")
     suspend fun searchPhotos(
         @Query("query") query: String,
         @Query("page") page: Int = 1,
-        @Query("per_page") perPage: Int = DEFAULT_PAGE_SIZE
+        @Query("per_page") perPage: Int
     ): SearchResponseDto
 
     @GET("photos/{id}")
@@ -33,21 +33,21 @@ interface UnsplashApi {
     suspend fun getUserPhotos(
         @Path("username") username: String,
         @Query("page") page: Int = 1,
-        @Query("per_page") perPage: Int = USER_PHOTO_PAGE_SIZE
+        @Query("per_page") perPage: Int
     ): List<UnsplashPhotoDto>
 
     @GET("users/{username}/collections")
     suspend fun getUserCollections(
         @Path("username") username: String,
         @Query("page") page: Int = 1,
-        @Query("per_page") perPage: Int = USER_COLLECTION_PAGE_SIZE
+        @Query("per_page") perPage: Int
     ): List<UnsplashCollectionDto>
 
     @GET("users/{username}/likes")
     suspend fun getUserLikedPhotos(
         @Path("username") username: String,
         @Query("page") page: Int = 1,
-        @Query("per_page") perPage: Int = USER_PHOTO_PAGE_SIZE
+        @Query("per_page") perPage: Int
     ): List<UnsplashPhotoDto>
 
     @GET("collections/{id}/photos")
@@ -62,7 +62,5 @@ interface UnsplashApi {
 
     companion object {
         const val DEFAULT_PAGE_SIZE = 20
-        const val USER_PHOTO_PAGE_SIZE = 10
-        const val USER_COLLECTION_PAGE_SIZE = 20
     }
 }

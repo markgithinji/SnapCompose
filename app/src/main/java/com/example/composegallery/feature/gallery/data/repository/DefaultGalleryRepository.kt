@@ -6,6 +6,7 @@ import androidx.paging.PagingData
 import androidx.paging.PagingSource
 import androidx.paging.filter
 import com.example.composegallery.feature.gallery.data.model.toDomainModel
+import com.example.composegallery.feature.gallery.data.pagingsource.PagingDefaults
 import com.example.composegallery.feature.gallery.data.pagingsource.UnsplashGetPhotosPagingSource
 import com.example.composegallery.feature.gallery.data.remote.UnsplashApi
 import com.example.composegallery.feature.gallery.data.util.Result
@@ -29,7 +30,11 @@ class DefaultGalleryRepository @Inject constructor(
         pagingSourceFactory: () -> PagingSource<Int, Photo>
     ): Flow<PagingData<Photo>> {
         return Pager(
-            config = PagingConfig(pageSize = UnsplashApi.DEFAULT_PAGE_SIZE),
+            config = PagingConfig(
+                pageSize = PagingDefaults.PAGE_SIZE,
+                initialLoadSize = PagingDefaults.INITIAL_LOAD_SIZE,
+                prefetchDistance = PagingDefaults.PREFETCH_DISTANCE
+            ),
             pagingSourceFactory = pagingSourceFactory
         ).flow
             .distinctUntilChanged()

@@ -5,6 +5,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.example.composegallery.feature.gallery.data.model.toDomain
 import com.example.composegallery.feature.gallery.data.model.toDomainModel
+import com.example.composegallery.feature.gallery.data.pagingsource.PagingDefaults
 import com.example.composegallery.feature.gallery.data.pagingsource.UnsplashGetCollectionPhotosPagingSource
 import com.example.composegallery.feature.gallery.data.pagingsource.UnsplashGetUserCollectionsPagingSource
 import com.example.composegallery.feature.gallery.data.pagingsource.UnsplashGetUserLikesPagingSource
@@ -33,7 +34,11 @@ class DefaultUserRepository @Inject constructor(
 
     override fun getUserPhotos(username: String): Flow<PagingData<Photo>> {
         return Pager(
-            config = PagingConfig(pageSize = UnsplashApi.USER_PHOTO_PAGE_SIZE),
+            config = PagingConfig(
+                pageSize = PagingDefaults.PAGE_SIZE,
+                initialLoadSize = PagingDefaults.INITIAL_LOAD_SIZE,
+                prefetchDistance = PagingDefaults.PREFETCH_DISTANCE
+            ),
             pagingSourceFactory = {
                 UnsplashGetUserPhotosPagingSource(api, username)
             }
@@ -42,7 +47,11 @@ class DefaultUserRepository @Inject constructor(
 
     override fun getUserCollections(username: String): Flow<PagingData<PhotoCollection>> {
         return Pager(
-            config = PagingConfig(pageSize = UnsplashApi.USER_COLLECTION_PAGE_SIZE),
+            config = PagingConfig(
+                pageSize = PagingDefaults.PAGE_SIZE,
+                initialLoadSize = PagingDefaults.INITIAL_LOAD_SIZE,
+                prefetchDistance = PagingDefaults.PREFETCH_DISTANCE
+            ),
             pagingSourceFactory = {
                 UnsplashGetUserCollectionsPagingSource(api, username)
             }
@@ -51,7 +60,11 @@ class DefaultUserRepository @Inject constructor(
 
     override fun getUserLikedPhotos(username: String): Flow<PagingData<Photo>> {
         return Pager(
-            config = PagingConfig(pageSize = UnsplashApi.USER_PHOTO_PAGE_SIZE),
+            config = PagingConfig(
+                pageSize = PagingDefaults.PAGE_SIZE,
+                initialLoadSize = PagingDefaults.INITIAL_LOAD_SIZE,
+                prefetchDistance = PagingDefaults.PREFETCH_DISTANCE
+            ),
             pagingSourceFactory = {
                 UnsplashGetUserLikesPagingSource(api, username)
             }
@@ -60,7 +73,11 @@ class DefaultUserRepository @Inject constructor(
 
     override fun getCollectionPhotos(collectionId: String): Flow<PagingData<Photo>> {
         return Pager(
-            config = PagingConfig(pageSize = UnsplashApi.DEFAULT_PAGE_SIZE),
+            config = PagingConfig(
+                pageSize = PagingDefaults.PAGE_SIZE,
+                initialLoadSize = PagingDefaults.INITIAL_LOAD_SIZE,
+                prefetchDistance = PagingDefaults.PREFETCH_DISTANCE
+            ),
             pagingSourceFactory = {
                 UnsplashGetCollectionPhotosPagingSource(api, collectionId)
             }

@@ -4,6 +4,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.example.composegallery.feature.gallery.data.local.RecentSearchDao
+import com.example.composegallery.feature.gallery.data.pagingsource.PagingDefaults
 import com.example.composegallery.feature.gallery.data.pagingsource.UnsplashSearchPagingSource
 import com.example.composegallery.feature.gallery.data.remote.UnsplashApi
 import com.example.composegallery.feature.gallery.data.util.Result
@@ -21,7 +22,11 @@ class DefaultSearchRepository @Inject constructor(
 
     override fun searchPagedPhotos(query: String): Flow<PagingData<Photo>> {
         return Pager(
-            config = PagingConfig(pageSize = UnsplashApi.DEFAULT_PAGE_SIZE),
+            config = PagingConfig(
+                pageSize = PagingDefaults.PAGE_SIZE,
+                initialLoadSize = PagingDefaults.INITIAL_LOAD_SIZE,
+                prefetchDistance = PagingDefaults.PREFETCH_DISTANCE
+            ),
             pagingSourceFactory = { UnsplashSearchPagingSource(api, query) }
         ).flow
     }
