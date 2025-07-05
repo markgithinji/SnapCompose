@@ -135,6 +135,7 @@ dependencies {
 // Misc UI Utilities
     implementation(libs.compose.shimmer)
     implementation(libs.androidx.material3.window.size.class1)
+    implementation(libs.androidx.core.splashscreen)
 
 // Testing
     testImplementation(libs.junit)

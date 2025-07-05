@@ -1,6 +1,7 @@
 [versions]
 # Android & Compose
 agp = "8.9.3"
+coreSplashscreen = "1.0.1"
 kotlin = "2.1.21"
 composeBom = "2025.06.01"
 activityCompose = "1.10.1"
@@ -52,6 +53,7 @@ spotless = "6.25.0"
 
 # AndroidX Core & Lifecycle
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 
