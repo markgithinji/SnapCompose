@@ -67,7 +67,7 @@ fun UserProfileContent(
     userLikes: LazyPagingItems<Photo>,
     userCollections: LazyPagingItems<PhotoCollection>,
     onPhotoClick: (String) -> Unit,
-    onCollectionClick: (String, String) -> Unit,
+    onCollectionClick: (String, String, Int) -> Unit,
     onStatsClick: () -> Unit,
     onBack: () -> Unit
 ) {
@@ -80,7 +80,13 @@ fun UserProfileContent(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "@${name}") },
+                title = {
+                    Text(
+                        text = "@${name}",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
@@ -260,7 +266,7 @@ private fun LazyStaggeredGridScope.renderCollectionItems(
     collections: LazyPagingItems<PhotoCollection>,
     retryKeys: SnapshotStateMap<String, Int>,
     onRetry: (String) -> Unit,
-    onCollectionClick: (String, String) -> Unit
+    onCollectionClick: (String, String, Int) -> Unit
 ) {
     val refreshState = collections.loadState.refresh
 
@@ -290,7 +296,13 @@ private fun LazyStaggeredGridScope.renderCollectionItems(
             blurHash = collection.coverPhoto?.blurHash,
             description = collection.description,
             onRetry = { onRetry(collection.id) },
-            onCollectionClick = { onCollectionClick(collection.id, collection.title) }
+            onCollectionClick = {
+                onCollectionClick(
+                    collection.id,
+                    collection.title,
+                    collection.totalPhotos
+                )
+            }
         )
     }
 

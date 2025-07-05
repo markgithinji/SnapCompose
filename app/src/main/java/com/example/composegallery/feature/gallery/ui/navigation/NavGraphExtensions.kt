@@ -57,7 +57,7 @@ fun NavGraphBuilder.photoDetailRoute(
                 navController.navigate(FullscreenPhotoRoute(photoId))
             },
             onUserClick = { username ->
-                navController.navigate(UserProfileRoute(username))
+                navController.navigate(UserProfileRoute(username = username))
             }
         )
     }
@@ -79,8 +79,14 @@ fun NavGraphBuilder.userProfileRoute(navController: NavController) {
             onPhotoClick = { photoId ->
                 navController.navigate(PhotoDetailRoute(photoId))
             },
-            onCollectionClick = { collectionId, title ->
-                navController.navigate(CollectionDetailRoute(collectionId, title))
+            onCollectionClick = { collectionId, title, totalPhotos ->
+                navController.navigate(
+                    CollectionDetailRoute(
+                        collectionId = collectionId,
+                        collectionTitle = title,
+                        totalPhotos = totalPhotos
+                    )
+                )
             }
         )
     }
@@ -92,6 +98,7 @@ fun NavGraphBuilder.collectionDetailRoute(navController: NavController) {
         CollectionDetailScreen(
             collectionId = args.collectionId,
             collectionTitle = args.collectionTitle,
+            totalPhotos = args.totalPhotos,
             onBack = { navController.popBackStack() },
             onPhotoClick = { photoId ->
                 navController.navigate(PhotoDetailRoute(photoId))

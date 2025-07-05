@@ -33,7 +33,7 @@ fun UserProfileScreen(
     username: String,
     onBack: () -> Unit,
     onPhotoClick: (String) -> Unit,
-    onCollectionClick: (String, String) -> Unit,
+    onCollectionClick: (String, String, Int) -> Unit,
     viewModel: UserProfileViewModel = hiltViewModel()
 ) {
     val userProfileState = viewModel.userProfileState.collectAsStateWithLifecycle().value
