@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ComposeGallery</string>
+    <string name="app_name">Snap</string>
 
     <string name="error_no_internet_connection">No internet connection</string>
     <string name="error_bad_request">Bad request. Something is wrong with the request.</string>
