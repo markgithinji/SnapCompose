@@ -40,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.composegallery.R
@@ -72,7 +73,7 @@ fun PhotoDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Photo Details") },
+                title = { Text(stringResource(R.string.photo_details_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -89,8 +90,8 @@ fun PhotoDetailScreen(
             is UiState.Error -> {
                 InfoMessageScreen(
                     imageRes = R.drawable.error_icon,
-                    title = "Failed to load photo",
-                    subtitle = "Reason: ${state.message}",
+                    title = stringResource(R.string.error_failed_load_photo),
+                    subtitle = stringResource(R.string.reason, state.message),
                     titleColor = MaterialTheme.colorScheme.error
                 )
             }
@@ -151,7 +152,7 @@ private fun PhotoDetailContent(
             ) {
                 Icon(
                     imageVector = Icons.Default.Fullscreen,
-                    contentDescription = "View Full Screen",
+                    contentDescription = stringResource(R.string.view_full_screen),
                     tint = MaterialTheme.colorScheme.onSurface
                 )
             }
@@ -226,7 +227,7 @@ private fun PhotoDetailInfo(
             if (locationText.isNotBlank()) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "📍 $locationText",
+                    text = stringResource(R.string.photo_location_prefix) + " $locationText",
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -237,7 +238,7 @@ private fun PhotoDetailInfo(
 
         // Photo Dimensions
         Text(
-            text = "Size: ${photo.width} × ${photo.height}",
+            text = stringResource(R.string.photo_size_label, photo.width, photo.height),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -246,7 +247,7 @@ private fun PhotoDetailInfo(
         photo.description?.takeIf { it.isNotBlank() }?.let { description ->
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Description:",
+                text = stringResource(R.string.photo_description_label),
                 style = MaterialTheme.typography.labelMedium
             )
             Text(
@@ -261,7 +262,7 @@ private fun PhotoDetailInfo(
         formattedDate?.let {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Created At:",
+                text = stringResource(R.string.photo_created_at_label),
                 style = MaterialTheme.typography.labelMedium
             )
             Text(
@@ -275,18 +276,18 @@ private fun PhotoDetailInfo(
         // EXIF Info
         photo.exif?.let { exif ->
             val infoList = listOfNotNull(
-                exif.make?.let { "Make" to it },
-                exif.model?.let { "Model" to it },
-                exif.aperture?.let { "Aperture" to it },
-                exif.shutterSpeed?.let { "Shutter Speed" to it },
-                exif.focalLength?.let { "Focal Length" to it },
-                exif.iso?.let { "ISO" to it }
+                exif.make?.let { stringResource(R.string.camera_make) to it },
+                exif.model?.let { stringResource(R.string.camera_model) to it },
+                exif.aperture?.let { stringResource(R.string.camera_aperture) to it },
+                exif.shutterSpeed?.let { stringResource(R.string.camera_shutter_speed) to it },
+                exif.focalLength?.let { stringResource(R.string.camera_focal_length) to it },
+                exif.iso?.let { stringResource(R.string.camera_iso) to it }
             )
 
             if (infoList.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Camera Info:",
+                    text = stringResource(R.string.camera_info_label),
                     style = MaterialTheme.typography.labelMedium
                 )
 

@@ -12,6 +12,8 @@ import com.example.composegallery.feature.gallery.data.repository.DefaultUserRep
 import com.example.composegallery.feature.gallery.domain.repository.GalleryRepository
 import com.example.composegallery.feature.gallery.domain.repository.SearchRepository
 import com.example.composegallery.feature.gallery.domain.repository.UserRepository
+import com.example.composegallery.feature.gallery.util.DefaultStringProvider
+import com.example.composegallery.feature.gallery.util.StringProvider
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
 import dagger.Provides
@@ -56,24 +58,39 @@ object NetworkModule {
             .create(UnsplashApi::class.java)
     }
 
+    // Provide the StringProvider for string resources access
     @Provides
     @Singleton
-    fun provideGalleryRepository(api: UnsplashApi): GalleryRepository {
-        return DefaultGalleryRepository(api)
+    fun provideStringProvider(@ApplicationContext context: Context): StringProvider {
+        return DefaultStringProvider(context)
     }
 
     @Provides
     @Singleton
-    fun provideUserRepository(api: UnsplashApi): UserRepository {
-        return DefaultUserRepository(api)
+    fun provideGalleryRepository(
+        api: UnsplashApi,
+        stringProvider: StringProvider
+    ): GalleryRepository {
+        return DefaultGalleryRepository(api, stringProvider)
     }
 
     @Provides
+    @Singleton
+    fun provideUserRepository(
+        api: UnsplashApi,
+        stringProvider: StringProvider
+    ): UserRepository {
+        return DefaultUserRepository(api, stringProvider)
+    }
+
+    @Provides
+    @Singleton
     fun provideSearchRepository(
         api: UnsplashApi,
-        recentSearchDao: RecentSearchDao
+        recentSearchDao: RecentSearchDao,
+        stringProvider: StringProvider
     ): SearchRepository {
-        return DefaultSearchRepository(api, recentSearchDao)
+        return DefaultSearchRepository(api, recentSearchDao, stringProvider)
     }
 
     @Provides

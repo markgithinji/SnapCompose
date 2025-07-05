@@ -29,8 +29,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.ui.common.ProgressIndicator
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -55,6 +57,9 @@ fun ConfettiButton( // An Experiment, still needs work. Could be replaced with a
         targetValue = if (isFollowing) Color.White else Color.Black,
         label = "textColor"
     )
+
+    val followLabel = stringResource(R.string.follow)
+    val followingLabel = stringResource(R.string.following)
 
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         if (triggerConfetti) {
@@ -96,7 +101,7 @@ fun ConfettiButton( // An Experiment, still needs work. Could be replaced with a
                     ProgressIndicator()
                 } else {
                     Text(
-                        text = if (isFollowing) "Following" else "Follow",
+                        text = if (isFollowing) followingLabel else followLabel,
                         style = MaterialTheme.typography.labelMedium,
                         color = textColor
                     )

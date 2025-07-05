@@ -1,48 +1,56 @@
 package com.example.composegallery.feature.gallery.data.util
 
+import com.example.composegallery.R
+import com.example.composegallery.feature.gallery.util.StringProvider
 import kotlinx.coroutines.CancellationException
+import retrofit2.HttpException
 import timber.log.Timber
 import java.io.IOException
 
-inline fun <T> safeApiCall(block: () -> T): Result<T> {
+inline fun <T> safeApiCall(stringProvider: StringProvider, block: () -> T): Result<T> {
     return try {
         Result.Success(block())
     } catch (e: CancellationException) {
-        throw e // Don't swallow coroutine cancellation
+        throw e
     } catch (e: IOException) {
-        Timber.tag("safeApiCall").e(e, "IO Exception: No internet connection")
-        Result.Error("No internet connection", e)
-    } catch (e: retrofit2.HttpException) {
+        val message = stringProvider.get(R.string.error_no_internet_connection)
+        Timber.tag("safeApiCall").e(e, "IO Exception: %s", message)
+        Result.Error(message, e)
+    } catch (e: HttpException) {
         val message = when (e.code()) {
-            400 -> "Bad request. Something is wrong with the request."
-            401 -> "Unauthorized. Please check your access token."
-            403 -> "Forbidden. You don't have permission to access this resource."
-            404 -> "Not found. The resource you're looking for doesn't exist."
-            500 -> "Server error. Something went wrong on Unsplash's end."
-            503 -> "Service unavailable. Try again later."
-            else -> "HTTP ${e.code()}: ${e.message()}"
+            400 -> stringProvider.get(R.string.error_bad_request)
+            401 -> stringProvider.get(R.string.error_unauthorized)
+            403 -> stringProvider.get(R.string.error_forbidden)
+            404 -> stringProvider.get(R.string.error_not_found)
+            500 -> stringProvider.get(R.string.error_server_error)
+            503 -> stringProvider.get(R.string.error_service_unavailable)
+            else -> stringProvider.get(R.string.error_http_generic, e.code(), e.message())
         }
-        Timber.tag("safeApiCall").e(e, "HTTP Exception: $message")
+        Timber.tag("safeApiCall").e(e, "HTTP Exception: %s", message)
         Result.Error(message, e)
     } catch (e: IllegalStateException) {
-        Timber.tag("safeApiCall").e(e, "Invalid or missing data from the API")
-        Result.Error("Invalid data received from the server.", e)
+        val message = stringProvider.get(R.string.error_invalid_data_received)
+        Timber.tag("safeApiCall").e(e)
+        Result.Error(message, e)
     } catch (e: IllegalArgumentException) {
-        Timber.tag("safeApiCall").e(e, "Invalid argument or model mapping")
-        Result.Error("Unexpected data format received.", e)
+        val message = stringProvider.get(R.string.error_unexpected_data_format)
+        Timber.tag("safeApiCall").e(e)
+        Result.Error(message, e)
     } catch (e: Exception) {
-        Timber.tag("safeApiCall").e(e, "Unexpected error")
-        Result.Error("Unexpected error", e)
+        val message = stringProvider.get(R.string.error_unexpected)
+        Timber.tag("safeApiCall").e(e)
+        Result.Error(message, e)
     }
 }
 
-inline fun <T> safeDbCall(block: () -> T): Result<T> {
+inline fun <T> safeDbCall(stringProvider: StringProvider, block: () -> T): Result<T> {
     return try {
         Result.Success(block())
     } catch (e: CancellationException) {
-        throw e // Don't swallow coroutine cancellation
+        throw e
     } catch (e: Exception) {
-        Timber.tag("safeDbCall").e(e, "Database error")
-        Result.Error(message = "Database error", throwable = e)
+        val message = stringProvider.get(R.string.error_database)
+        Timber.tag("safeDbCall").e(e)
+        Result.Error(message, e)
     }
 }

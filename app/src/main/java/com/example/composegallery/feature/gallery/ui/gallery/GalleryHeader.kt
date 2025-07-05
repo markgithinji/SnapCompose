@@ -28,7 +28,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.ui.common.SharedKeys
 import com.example.composegallery.ui.theme.searchBar
 
@@ -46,14 +48,14 @@ fun GalleryHeader(
             .padding(horizontal = 16.dp, vertical = 24.dp)
     ) {
         Text(
-            text = "Snap",
+            text = stringResource(R.string.app_title),
             style = MaterialTheme.typography.displayLarge
         )
 
         Spacer(modifier = Modifier.height(4.dp))
 
         Text(
-            text = "Beautiful, free photos.",
+            text = stringResource(R.string.app_tagline),
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.75f)
         )
@@ -121,14 +123,14 @@ fun DummySearchBar(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Search photos...",
+                    text = stringResource(R.string.search_hint),
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                     style = MaterialTheme.typography.headlineSmall,
                     modifier = Modifier.weight(1f)
                 )
                 Icon(
                     imageVector = Icons.Default.Search,
-                    contentDescription = "Search"
+                    contentDescription = stringResource(R.string.search_icon_description)
                 )
             }
         }

@@ -39,9 +39,11 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
+import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.domain.model.PhotoCollection
 import com.example.composegallery.feature.gallery.ui.common.BottomLoadingIndicator
@@ -81,7 +83,10 @@ fun UserProfileContent(
                 title = { Text(text = "@${name}") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.back)
+                        )
                     }
                 },
                 actions = {
@@ -89,7 +94,7 @@ fun UserProfileContent(
                         Icon(
                             Icons.Default.BarChart,
                             tint = MaterialTheme.colorScheme.primary,
-                            contentDescription = "Stats"
+                            contentDescription = stringResource(R.string.stats)
                         )
                     }
                 }
@@ -129,21 +134,21 @@ fun UserProfileContent(
                 ) {
                     StatItemTab(
                         count = totalPhotos.toString(),
-                        label = "Photos",
+                        label = stringResource(R.string.photos),
                         selected = selectedTab == UserTab.PHOTOS,
                         onClick = { selectedTab = UserTab.PHOTOS },
                         modifier = Modifier.weight(1f)
                     )
                     StatItemTab(
                         count = totalLikes.toString(),
-                        label = "Liked",
+                        label = stringResource(R.string.liked),
                         selected = selectedTab == UserTab.LIKES,
                         onClick = { selectedTab = UserTab.LIKES },
                         modifier = Modifier.weight(1f)
                     )
                     StatItemTab(
                         count = totalCollections.toString(),
-                        label = "Collections",
+                        label = stringResource(R.string.collections),
                         selected = selectedTab == UserTab.COLLECTIONS,
                         onClick = { selectedTab = UserTab.COLLECTIONS },
                         modifier = Modifier.weight(1f)
@@ -219,7 +224,8 @@ private fun LazyStaggeredGridScope.renderPhotoItems(
     if (refreshState is LoadState.Error) {
         item(span = StaggeredGridItemSpan.FullLine) {
             LoadMoreListError(
-                message = refreshState.error.localizedMessage ?: "Error loading photos",
+                message = refreshState.error.localizedMessage
+                    ?: stringResource(R.string.error_loading_photos),
                 onRetry = { photos.retry() }
             )
         }
@@ -227,7 +233,7 @@ private fun LazyStaggeredGridScope.renderPhotoItems(
 
     if (refreshState is LoadState.NotLoading && photos.itemCount == 0) {
         item(span = StaggeredGridItemSpan.FullLine) {
-            EmptyContentMessage("No photos found")
+            EmptyContentMessage(stringResource(R.string.no_photos_found))
         }
     }
 
@@ -238,7 +244,8 @@ private fun LazyStaggeredGridScope.renderPhotoItems(
 
         is LoadState.Error -> item(span = StaggeredGridItemSpan.FullLine) {
             LoadMoreListError(
-                message = appendState.error.localizedMessage ?: "Error loading more",
+                message = appendState.error.localizedMessage
+                    ?: stringResource(R.string.error_loading_photos),
                 onRetry = { photos.retry() }
             )
         }
@@ -296,7 +303,8 @@ private fun LazyStaggeredGridScope.renderCollectionItems(
     if (refreshState is LoadState.Error) {
         item(span = StaggeredGridItemSpan.FullLine) {
             LoadMoreListError(
-                message = refreshState.error.localizedMessage ?: "Error loading collections",
+                message = refreshState.error.localizedMessage
+                    ?: stringResource(R.string.error_loading_collections),
                 onRetry = { collections.retry() }
             )
         }
@@ -304,7 +312,7 @@ private fun LazyStaggeredGridScope.renderCollectionItems(
 
     if (refreshState is LoadState.NotLoading && collections.itemCount == 0) {
         item(span = StaggeredGridItemSpan.FullLine) {
-            EmptyContentMessage("No collections found")
+            EmptyContentMessage(stringResource(R.string.no_collections_found))
         }
     }
 
@@ -316,7 +324,8 @@ private fun LazyStaggeredGridScope.renderCollectionItems(
         is LoadState.Error -> {
             item(span = StaggeredGridItemSpan.FullLine) {
                 LoadMoreListError(
-                    message = appendState.error.localizedMessage ?: "Error loading more",
+                    message = appendState.error.localizedMessage
+                        ?: stringResource(R.string.error_loading_collections),
                     onRetry = { collections.retry() }
                 )
             }
@@ -327,6 +336,7 @@ private fun LazyStaggeredGridScope.renderCollectionItems(
         }
     }
 }
+
 
 @Composable
 private fun StatItemTab(

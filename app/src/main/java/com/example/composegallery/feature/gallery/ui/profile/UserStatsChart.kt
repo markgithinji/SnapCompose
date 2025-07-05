@@ -17,10 +17,12 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.domain.model.HistoricalData
 import com.example.composegallery.feature.gallery.domain.model.StatData
 import com.example.composegallery.feature.gallery.domain.model.StatValue
@@ -34,9 +36,12 @@ fun UserStatsChart(
     viewsDays: Int,
     modifier: Modifier = Modifier
 ) {
+
+    val noDataText = stringResource(R.string.no_data)
+
     Column(modifier.padding(16.dp)) {
         Text(
-            text = "Downloads (Last $downloadsDays days)",
+            text = stringResource(R.string.downloads_last_days, downloadsDays),
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Start
@@ -44,17 +49,18 @@ fun UserStatsChart(
         Spacer(Modifier.height(8.dp))
         LineChart(
             values = downloadsValues,
-            lineColor = MaterialTheme.colorScheme.primaryContainer,
-            pointColor = MaterialTheme.colorScheme.onPrimaryContainer,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(120.dp)
+                .height(120.dp),
+            lineColor = MaterialTheme.colorScheme.primaryContainer,
+            pointColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            noDataText = noDataText
         )
 
         Spacer(Modifier.height(10.dp))
 
         Text(
-            text = "Views (Last $viewsDays days)",
+            text = stringResource(R.string.views_last_days, viewsDays),
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Start
@@ -62,11 +68,13 @@ fun UserStatsChart(
         Spacer(Modifier.height(8.dp))
         LineChart(
             values = viewsValues,
-            lineColor = MaterialTheme.colorScheme.secondaryContainer,
-            pointColor = MaterialTheme.colorScheme.onSecondaryContainer,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(120.dp)
+                .height(120.dp),
+            lineColor = MaterialTheme.colorScheme.secondaryContainer,
+            pointColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            noDataText = noDataText
+
         )
     }
 }
@@ -77,11 +85,12 @@ private fun LineChart(
     modifier: Modifier = Modifier,
     lineColor: Color = Color.Blue,
     pointColor: Color = Color.Red,
-    strokeWidth: Dp = 2.dp
+    strokeWidth: Dp = 2.dp,
+    noDataText: String = "No data",
 ) {
     if (values.isEmpty()) {
         Box(modifier) {
-            Text(text = "No data", style = MaterialTheme.typography.labelMedium)
+            Text(text = noDataText, style = MaterialTheme.typography.labelMedium)
         }
         return
     }

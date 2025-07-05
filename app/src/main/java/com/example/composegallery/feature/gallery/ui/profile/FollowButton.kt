@@ -19,7 +19,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.ui.common.ProgressIndicator
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -30,7 +32,9 @@ fun FollowButton() {
     var isLoading by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
-    val buttonText = if (isFollowing) "Following" else "Follow"
+    val followText = stringResource(id = R.string.follow)
+    val followingText = stringResource(id = R.string.following)
+    val buttonText = if (isFollowing) followingText else followText
     val backgroundColor by animateColorAsState(
         targetValue = if (isFollowing) Color(0xFFB2DFDB) else Color(0xFFFF6E6E),
         label = "buttonColor"

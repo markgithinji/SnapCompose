@@ -16,6 +16,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -59,8 +60,8 @@ fun UserProfileScreen(
         is UiState.Error -> {
             InfoMessageScreen(
                 imageRes = R.drawable.error_icon,
-                title = "Failed to load user profile",
-                subtitle = "Reason: ${userProfileState.message}",
+                title = stringResource(R.string.failed_to_load_user_profile),
+                subtitle = stringResource(R.string.reason, userProfileState.message),
                 titleColor = MaterialTheme.colorScheme.error
             )
         }
@@ -107,7 +108,12 @@ private fun UserStatsDialog(
             val stats = state.data
             AlertDialog(
                 onDismissRequest = onDismiss,
-                title = { Text("User Statistics", style = MaterialTheme.typography.headlineSmall) },
+                title = {
+                    Text(
+                        text = stringResource(R.string.user_statistics),
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                },
                 text = {
                     UserStatsChart(
                         downloadsValues = stats.downloads.historical.values.map { it.value.toFloat() },
@@ -121,7 +127,7 @@ private fun UserStatsDialog(
                 },
                 confirmButton = {
                     TextButton(onClick = onDismiss) {
-                        Text("Close")
+                        Text(text = stringResource(R.string.close))
                     }
                 }
             )
@@ -132,7 +138,7 @@ private fun UserStatsDialog(
                 onDismissRequest = onDismiss,
                 title = {
                     Text(
-                        "Loading Stats...",
+                        text = stringResource(R.string.loading_stats),
                         style = MaterialTheme.typography.headlineSmall
                     )
                 },
@@ -141,7 +147,7 @@ private fun UserStatsDialog(
                 },
                 confirmButton = {
                     TextButton(onClick = onDismiss) {
-                        Text("Close")
+                        Text(text = stringResource(R.string.close))
                     }
                 }
             )
@@ -152,7 +158,7 @@ private fun UserStatsDialog(
                 onDismissRequest = onDismiss,
                 title = {
                     Text(
-                        text = "Error Loading Stats",
+                        text = stringResource(R.string.error_loading_stats),
                         style = MaterialTheme.typography.headlineSmall,
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -160,13 +166,13 @@ private fun UserStatsDialog(
                 icon = {
                     Icon(
                         imageVector = Icons.Default.Error,
-                        contentDescription = "Error icon",
+                        contentDescription = stringResource(R.string.error_icon_description),
                         tint = MaterialTheme.colorScheme.error
                     )
                 },
                 confirmButton = {
                     TextButton(onClick = onDismiss) {
-                        Text("Close")
+                        Text(text = stringResource(R.string.close))
                     }
                 }
             )

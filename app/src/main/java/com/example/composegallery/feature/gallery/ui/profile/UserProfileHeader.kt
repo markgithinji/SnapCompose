@@ -22,10 +22,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.ui.common.UserProfileImage
 import java.net.URI
 
@@ -48,7 +50,7 @@ fun UserProfileHeader(
 
         UserProfileImage(
             imageUrl = profileImage,
-            contentDescription = "$name's profile picture",
+            stringResource(R.string.profile_picture_desc, name),
             modifier = Modifier
                 .size(140.dp)
                 .constrainAs(profileImageRef) {
@@ -88,7 +90,7 @@ fun UserProfileHeader(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         Icons.Default.Place,
-                        contentDescription = "Location",
+                        contentDescription = stringResource(R.string.location),
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(Modifier.width(4.dp))
@@ -108,7 +110,7 @@ fun UserProfileHeader(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         Icons.Default.Link,
-                        contentDescription = "Portfolio",
+                        contentDescription = stringResource(R.string.portfolio),
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(Modifier.width(4.dp))
@@ -126,7 +128,7 @@ fun UserProfileHeader(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         Icons.Default.CameraAlt,
-                        contentDescription = "Instagram",
+                        contentDescription = stringResource(R.string.instagram),
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(Modifier.width(4.dp))

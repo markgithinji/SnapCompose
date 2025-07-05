@@ -21,9 +21,11 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
+import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.ui.common.BottomLoadingIndicator
 import com.example.composegallery.feature.gallery.ui.common.LoadMoreListError
@@ -107,7 +109,7 @@ fun PhotoGrid(
 
             is LoadState.Error -> item(span = StaggeredGridItemSpan.FullLine) {
                 LoadMoreListError(
-                    message = appendState.error.localizedMessage ?: "Error loading more",
+                    message = appendState.error.localizedMessage ?: stringResource(R.string.error_loading_more),
                     onRetry = { photos.retry() }
                 )
             }

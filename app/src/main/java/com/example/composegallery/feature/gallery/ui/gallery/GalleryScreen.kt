@@ -24,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
@@ -108,6 +109,7 @@ private fun PhotoGridContent(
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedContentScope
 ) {
+
     Column {
         AnimatedContent(
             targetState = loadState,
@@ -126,9 +128,13 @@ private fun PhotoGridContent(
                 }
 
                 is LoadState.Error -> {
+                    val reason = state.error.localizedMessage?.let {
+                        stringResource(R.string.error_reason_prefix, it)
+                    } ?: stringResource(R.string.unknown_error)
+
                     InfoMessageScreen(
-                        title = "Failed to load images",
-                        subtitle = state.error.localizedMessage?.let { "Reason: $it" } ?: "Unknown error",
+                        title = stringResource(R.string.error_load_photos),
+                        subtitle = reason,
                         imageRes = R.drawable.error_icon,
                         titleColor = MaterialTheme.colorScheme.error
                     ) {

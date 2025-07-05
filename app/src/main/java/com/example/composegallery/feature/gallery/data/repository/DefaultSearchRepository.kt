@@ -12,12 +12,14 @@ import com.example.composegallery.feature.gallery.data.util.safeDbCall
 import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.domain.model.RecentSearch
 import com.example.composegallery.feature.gallery.domain.repository.SearchRepository
+import com.example.composegallery.feature.gallery.util.StringProvider
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class DefaultSearchRepository @Inject constructor(
     private val api: UnsplashApi,
-    private val recentSearchDao: RecentSearchDao
+    private val recentSearchDao: RecentSearchDao,
+    private val stringProvider: StringProvider
 ) : SearchRepository {
 
     override fun searchPagedPhotos(query: String): Flow<PagingData<Photo>> {
@@ -25,9 +27,8 @@ class DefaultSearchRepository @Inject constructor(
             config = PagingConfig(
                 pageSize = PagingDefaults.PAGE_SIZE,
                 initialLoadSize = PagingDefaults.INITIAL_LOAD_SIZE,
-                prefetchDistance = PagingDefaults.PREFETCH_DISTANCE
             ),
-            pagingSourceFactory = { UnsplashSearchPagingSource(api, query) }
+            pagingSourceFactory = { UnsplashSearchPagingSource(api, query, stringProvider) }
         ).flow
     }
 
@@ -36,14 +37,14 @@ class DefaultSearchRepository @Inject constructor(
     }
 
     override suspend fun saveRecentSearch(query: String): Result<Unit> {
-        return safeDbCall {
+        return safeDbCall(stringProvider) {
             recentSearchDao.deleteSearchIgnoreCase(query)
             recentSearchDao.insertSearch(RecentSearch(query = query))
         }
     }
 
     override suspend fun clearRecentSearches(): Result<Unit> {
-        return safeDbCall {
+        return safeDbCall(stringProvider) {
             recentSearchDao.clearSearches()
         }
     }

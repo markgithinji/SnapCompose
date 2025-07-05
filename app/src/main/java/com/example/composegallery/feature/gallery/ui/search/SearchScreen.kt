@@ -54,6 +54,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -166,7 +167,7 @@ private fun SearchScreenTopBar(
                 textStyle = MaterialTheme.typography.headlineSmall,
                 placeholder = {
                     Text(
-                        "Search Unsplash...",
+                        text = stringResource(R.string.search_unsplash),
                         style = MaterialTheme.typography.headlineSmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
                         modifier = Modifier.alpha(textFieldInnerContentAlpha)
@@ -234,8 +235,8 @@ private fun SearchScreenContent(
                 showWelcome -> { // ie. if we haven't submitted a query yet
                     InfoMessageScreen(
                         imageRes = R.drawable.no_search_icon,
-                        title = "Over 6 million photos",
-                        subtitle = "Let’s look for something beautiful"
+                        title = stringResource(R.string.over_6_million_photos),
+                        subtitle = stringResource(R.string.search_suggestion)
                     )
                 }
 
@@ -249,8 +250,11 @@ private fun SearchScreenContent(
                     val error = (loadState.refresh as LoadState.Error).error
                     InfoMessageScreen(
                         imageRes = R.drawable.error_icon,
-                        title = "Something went wrong",
-                        subtitle = error.localizedMessage?.let { "Reason: $it" } ?: "Reason: Unknown error",
+                        title = stringResource(R.string.search_error_title),
+                        subtitle = stringResource(
+                            R.string.search_error_subtitle,
+                            error.localizedMessage ?: stringResource(R.string.unknown_error)
+                        ),
                         titleColor = MaterialTheme.colorScheme.error,
                         content = {
                             RetryButton(
@@ -265,8 +269,8 @@ private fun SearchScreenContent(
                 isEmpty -> {
                     InfoMessageScreen(
                         imageRes = R.drawable.no_results_icon,
-                        title = "No results found",
-                        subtitle = "Try a different search term"
+                        title = stringResource(R.string.no_results_title),
+                        subtitle = stringResource(R.string.no_results_subtitle)
                     )
                 }
 
@@ -317,12 +321,14 @@ private fun SearchScreenContent(
                                 is LoadState.Error -> {
                                     val error = (loadState.append as LoadState.Error).error
                                     LoadMoreListError(
-                                        message = error.localizedMessage ?: "Failed to load more",
+                                        message = error.localizedMessage
+                                            ?: stringResource(R.string.failed_to_load_more),
                                         onRetry = { photos.retry() }
                                     )
                                 }
 
-                                else -> { /* no-op */
+                                else -> {
+                                    Unit // No-Op
                                 }
                             }
                         }

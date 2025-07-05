@@ -18,15 +18,17 @@ import com.example.composegallery.feature.gallery.domain.model.PhotoCollection
 import com.example.composegallery.feature.gallery.domain.model.UnsplashUser
 import com.example.composegallery.feature.gallery.domain.model.UserStatistics
 import com.example.composegallery.feature.gallery.domain.repository.UserRepository
+import com.example.composegallery.feature.gallery.util.StringProvider
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class DefaultUserRepository @Inject constructor(
-    private val api: UnsplashApi
+    private val api: UnsplashApi,
+    private val stringProvider: StringProvider
 ) : UserRepository {
 
     override suspend fun getUserProfile(username: String): Result<UnsplashUser> {
-        return safeApiCall {
+        return safeApiCall(stringProvider) {
             val response = api.getUser(username = username)
             response.toDomainModel()
         }
@@ -40,7 +42,11 @@ class DefaultUserRepository @Inject constructor(
                 prefetchDistance = PagingDefaults.PREFETCH_DISTANCE
             ),
             pagingSourceFactory = {
-                UnsplashGetUserPhotosPagingSource(api, username)
+                UnsplashGetUserPhotosPagingSource(
+                    api,
+                    username,
+                    stringProvider
+                )
             }
         ).flow
     }
@@ -53,7 +59,11 @@ class DefaultUserRepository @Inject constructor(
                 prefetchDistance = PagingDefaults.PREFETCH_DISTANCE
             ),
             pagingSourceFactory = {
-                UnsplashGetUserCollectionsPagingSource(api, username)
+                UnsplashGetUserCollectionsPagingSource(
+                    api,
+                    username,
+                    stringProvider
+                )
             }
         ).flow
     }
@@ -66,7 +76,11 @@ class DefaultUserRepository @Inject constructor(
                 prefetchDistance = PagingDefaults.PREFETCH_DISTANCE
             ),
             pagingSourceFactory = {
-                UnsplashGetUserLikesPagingSource(api, username)
+                UnsplashGetUserLikesPagingSource(
+                    api,
+                    username,
+                    stringProvider
+                )
             }
         ).flow
     }
@@ -79,13 +93,17 @@ class DefaultUserRepository @Inject constructor(
                 prefetchDistance = PagingDefaults.PREFETCH_DISTANCE
             ),
             pagingSourceFactory = {
-                UnsplashGetCollectionPhotosPagingSource(api, collectionId)
+                UnsplashGetCollectionPhotosPagingSource(
+                    api,
+                    collectionId,
+                    stringProvider
+                )
             }
         ).flow
     }
 
     override suspend fun getUserStatistics(username: String): Result<UserStatistics> {
-        return safeApiCall {
+        return safeApiCall(stringProvider) {
             val statsDto = api.getUserStatistics(username)
             statsDto.toDomain()
         }

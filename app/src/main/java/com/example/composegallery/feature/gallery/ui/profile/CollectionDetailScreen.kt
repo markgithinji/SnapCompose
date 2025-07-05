@@ -24,11 +24,13 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.ui.common.BottomLoadingIndicator
 import com.example.composegallery.feature.gallery.ui.common.LoadMoreListError
 import com.example.composegallery.feature.gallery.ui.common.ProgressIndicator
@@ -55,7 +57,10 @@ fun CollectionDetailScreen(
                 title = { Text(collectionTitle, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.back_button_content_description)
+                        )
                     }
                 }
             )
@@ -68,7 +73,8 @@ fun CollectionDetailScreen(
 
             is LoadState.Error -> {
                 LoadMoreListError(
-                    message = refreshState.error.localizedMessage ?: "Failed to load photos.",
+                    message = refreshState.error.localizedMessage
+                        ?: stringResource(R.string.error_failed_to_load_photos),
                     onRetry = { photos.retry() }
                 )
             }
@@ -116,7 +122,7 @@ fun CollectionDetailScreen(
                         is LoadState.Error -> item(span = StaggeredGridItemSpan.FullLine) {
                             LoadMoreListError(
                                 message = appendState.error.localizedMessage
-                                    ?: "Error loading more",
+                                    ?: stringResource(R.string.error_loading_more),
                                 onRetry = { photos.retry() }
                             )
                         }

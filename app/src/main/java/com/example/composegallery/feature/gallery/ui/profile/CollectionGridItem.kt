@@ -13,8 +13,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.ui.common.PhotoImage
 
 @Composable
@@ -37,7 +39,7 @@ fun CollectionGridItem(
     ) {
         PhotoImage(
             imageUrl = coverPhoto,
-            contentDescription = "Cover of $title collection",
+            contentDescription = stringResource(R.string.cover_of_collection, title),
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(1.4f)
@@ -68,7 +70,7 @@ fun CollectionGridItem(
         }
 
         Text(
-            text = "$totalPhotos photos",
+            text = stringResource(R.string.total_photos_format, totalPhotos),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier

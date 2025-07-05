@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.SubcomposeAsyncImage
 import com.example.composegallery.R
@@ -76,7 +77,8 @@ fun PhotoViewerScreen(
 
                 SubcomposeAsyncImage(
                     model = photo.fullUrl,
-                    contentDescription = photo.description ?: "Zoomable image",
+                    contentDescription = photo.description
+                        ?: stringResource(R.string.photo_zoom_description),
                     contentScale = ContentScale.Fit,
                     modifier = Modifier
                         .fillMaxSize()
@@ -104,7 +106,7 @@ fun PhotoViewerScreen(
 
         is UiState.Error -> {
             InfoMessageScreen(
-                title = "Failed to load photo",
+                title = stringResource(R.string.error_photo_load_title),
                 subtitle = "Reason: ${uiState.message}",
                 imageRes = R.drawable.error_icon,
                 titleColor = MaterialTheme.colorScheme.error

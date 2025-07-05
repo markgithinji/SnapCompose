@@ -19,9 +19,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.example.composegallery.R
 import com.example.composegallery.ui.theme.ComposeGalleryTheme
 
 @Composable
@@ -55,13 +57,14 @@ fun PhotoCard(
 
 @Composable
 fun AuthorInfoRow(authorName: String, authorImageUrl: String) {
+    val contentDesc = stringResource(id = R.string.profile_picture_desc, authorName)
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(start = 4.dp)
     ) {
         AsyncImage(
             model = authorImageUrl,
-            contentDescription = "$authorName's profile picture",
+            contentDescription = contentDesc,
             modifier = Modifier
                 .size(25.dp)
                 .clip(RoundedCornerShape(50))

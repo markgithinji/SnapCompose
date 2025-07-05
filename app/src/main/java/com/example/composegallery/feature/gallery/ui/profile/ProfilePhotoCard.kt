@@ -4,7 +4,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.ui.common.PhotoImage
 
 @Composable
@@ -20,9 +22,11 @@ fun ProfilePhotoCard(
             if (onClick != null) Modifier.clickable { onClick() } else Modifier
         )
         .padding(8.dp)
+    val contentDescription = stringResource(id = R.string.user_photo)
+
     PhotoImage(
         imageUrl = imageUrl,
-        contentDescription = "User photo",
+        contentDescription = contentDescription,
         modifier = clickableModifier,
         blurHash = blurHash,
         onRetry = onRetry
