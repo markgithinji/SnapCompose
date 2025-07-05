@@ -4,6 +4,13 @@ import com.example.composegallery.feature.gallery.data.util.Result
 import com.example.composegallery.feature.gallery.domain.repository.SearchRepository
 import javax.inject.Inject
 
+/**
+ * Use case for submitting a search query.
+ *
+ * This use case handles the logic of validating and saving a search query.
+ *
+ * @property repository The [SearchRepository] responsible for data operations related to searches.
+ */
 class SubmitSearchUseCase @Inject constructor(
     private val repository: SearchRepository
 ) {

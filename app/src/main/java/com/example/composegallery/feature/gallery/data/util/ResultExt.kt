@@ -7,6 +7,26 @@ import retrofit2.HttpException
 import timber.log.Timber
 import java.io.IOException
 
+/**
+ * Executes a given block of code, typically an API call, and wraps the result in a [Result] object.
+ * This function handles common exceptions that might occur during the execution, such as network errors,
+ * HTTP errors, and data parsing errors, providing localized error messages.
+ *
+ * It uses a [StringProvider] to fetch localized error messages.
+ * Logs exceptions using Timber for debugging purposes.
+ *
+ * [CancellationException]s are re-thrown as they indicate that the coroutine executing the block
+ * has been cancelled and should not be caught as a general error.
+ *
+ * @param T The type of the result expected from the block.
+ * @param stringProvider An instance of [StringProvider] used to retrieve localized error messages.
+ * @param block A lambda function representing the operation to be executed (e.g., an API call).
+ *              This block is expected to return a value of type [T].
+ * @return A [Result] object which is either:
+ *         - [Result.Success] containing the successful result of type [T] from the [block].
+ *         - [Result.Error] containing a localized error message and the original [Exception] if an error occurred.
+ * @throws CancellationException if the coroutine executing the block is cancelled.
+ */
 inline fun <T> safeApiCall(stringProvider: StringProvider, block: () -> T): Result<T> {
     return try {
         Result.Success(block())
@@ -43,6 +63,25 @@ inline fun <T> safeApiCall(stringProvider: StringProvider, block: () -> T): Resu
     }
 }
 
+/**
+ * Wraps a database call in a try-catch block to handle potential exceptions.
+ *
+ * This function is designed to be used for executing database operations that might throw exceptions.
+ * It ensures that any `CancellationException` is re-thrown, allowing for proper coroutine cancellation.
+ * For other `Exception` types, it catches the exception, logs it using Timber,
+ * and returns a `Result.Error` containing a generic error message retrieved from the `stringProvider`
+ * and the original exception.
+ * If the database call is successful, it returns a `Result.Success` with the result of the `block`.
+ *
+ * @param T The type of the result expected from the database call.
+ * @param stringProvider An instance of [StringProvider] used to retrieve localized error messages.
+ * @param block A lambda function representing the database call to be executed.
+ *              This lambda should return a value of type `T`.
+ * @return A [Result] object, which is either [Result.Success] containing the data of type `T`
+ *         if the call was successful, or [Result.Error] containing an error message and the
+ *         original exception if an error occurred.
+ * @throws CancellationException if the underlying database call is cancelled.
+ */
 inline fun <T> safeDbCall(stringProvider: StringProvider, block: () -> T): Result<T> {
     return try {
         Result.Success(block())

@@ -6,6 +6,13 @@ import kotlin.math.cos
 import kotlin.math.pow
 import kotlin.math.withSign
 
+/**
+ * Object responsible for decoding BlurHash strings into Bitmaps.
+ *
+ * This object provides functionality to convert a compact BlurHash string representation
+ * back into a visual image (Bitmap). It utilizes caching for cosine calculations
+ * to optimize performance when decoding multiple images of the same dimensions.
+ */
 object BlurHashDecoder {
 
     // cache Math.cos() calculations to improve performance.
