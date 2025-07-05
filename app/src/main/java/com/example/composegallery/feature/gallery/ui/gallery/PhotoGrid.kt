@@ -21,6 +21,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
@@ -49,7 +50,9 @@ fun PhotoGrid(
 
     LazyVerticalStaggeredGrid(
         columns = StaggeredGridCells.Fixed(calculateResponsiveColumnCount()),
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .testTag("PhotoGrid"),
         contentPadding = PaddingValues(8.dp),
         verticalItemSpacing = 8.dp,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -95,7 +98,8 @@ fun PhotoGrid(
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(photo.width.toFloat() / photo.height)
-                        .clip(RoundedCornerShape(12.dp)),
+                        .clip(RoundedCornerShape(12.dp))
+                        .testTag("PhotoItem_${photo.id}"),
                     blurHash = photo.blurHash,
                     onClick = takeIf { isGridClickable }?.let { { onPhotoClick(photo) } }
                 )
@@ -109,7 +113,8 @@ fun PhotoGrid(
 
             is LoadState.Error -> item(span = StaggeredGridItemSpan.FullLine) {
                 LoadMoreListError(
-                    message = appendState.error.localizedMessage ?: stringResource(R.string.error_loading_more),
+                    message = appendState.error.localizedMessage
+                        ?: stringResource(R.string.error_loading_more),
                     onRetry = { photos.retry() }
                 )
             }

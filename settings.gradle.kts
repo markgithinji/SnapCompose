@@ -21,4 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "ComposeGallery"
 include(":app")
- 
+include(":baselineprofile")
