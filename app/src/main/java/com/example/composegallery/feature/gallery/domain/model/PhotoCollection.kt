@@ -8,3 +8,4 @@ data class PhotoCollection(
     val coverPhoto: Photo?,
     val authorName: String
 )
+

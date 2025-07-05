@@ -50,9 +50,14 @@ fun ConfettiButton( // An Experiment, still needs work. Could be replaced with a
     val scope = rememberCoroutineScope()
 
     val backgroundColor by animateColorAsState(
-        targetValue = if (isFollowing) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primaryContainer,
+        targetValue = if (isFollowing) {
+            MaterialTheme.colorScheme.secondaryContainer
+        } else {
+            MaterialTheme.colorScheme.primaryContainer
+        },
         label = "buttonColor"
     )
+
     val textColor by animateColorAsState(
         targetValue = if (isFollowing) Color.White else Color.Black,
         label = "textColor"

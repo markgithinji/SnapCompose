@@ -9,3 +9,4 @@ interface GalleryRepository {
     fun getPagedPhotos(): Flow<PagingData<Photo>>
     suspend fun getPhoto(photoId: String): Result<Photo>
 }
+

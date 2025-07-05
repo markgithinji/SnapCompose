@@ -4,3 +4,4 @@ data class PhotoLocation(
     val city: String?,
     val country: String?
 )
+

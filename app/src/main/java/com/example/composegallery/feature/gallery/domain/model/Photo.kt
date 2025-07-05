@@ -18,3 +18,4 @@ data class Photo(
     val createdAt: String? = null,
     val exif: Exif? = null
 )
+

@@ -1,5 +1,5 @@
 package com.example.composegallery.feature.gallery.ui.common
 
-object SharedKeys {
+object SharedTransitionKeys {
     const val SEARCH_BAR = "searchBarElement"
 }

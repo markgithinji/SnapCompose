@@ -27,6 +27,8 @@ import com.example.composegallery.feature.gallery.domain.model.HistoricalData
 import com.example.composegallery.feature.gallery.domain.model.StatData
 import com.example.composegallery.feature.gallery.domain.model.StatValue
 import com.example.composegallery.feature.gallery.domain.model.UserStatistics
+import java.util.Locale
+import kotlin.math.abs
 
 @Composable
 fun UserStatsChart(
@@ -187,12 +189,24 @@ private fun LineChart(
     }
 }
 
-private fun formatNumber(value: Float): String {
-    val absValue = kotlin.math.abs(value)
+private const val THOUSAND = 1_000f
+private const val MILLION = 1_000_000f
+
+fun formatNumber(value: Float): String {
+    val absValue = abs(value)
+
     return when {
-        absValue >= 1_000_000f -> "%.1fM".format(value / 1_000_000f)
-        absValue >= 1_000f -> "%.1fk".format(value / 1_000f)
+        absValue >= MILLION -> formatCompact(value / MILLION, "M")
+        absValue >= THOUSAND -> formatCompact(value / THOUSAND, "k")
         else -> value.toInt().toString()
+    }
+}
+
+private fun formatCompact(number: Float, suffix: String): String {
+    return if (number % 1f == 0f) {
+        number.toInt().toString() + suffix
+    } else {
+        String.format(Locale.getDefault(), "%.1f%s", number, suffix)
     }
 }
 

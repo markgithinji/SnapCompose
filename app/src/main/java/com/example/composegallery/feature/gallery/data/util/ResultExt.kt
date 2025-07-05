@@ -1,11 +1,11 @@
 package com.example.composegallery.feature.gallery.data.util
-
 import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.util.StringProvider
 import kotlinx.coroutines.CancellationException
 import retrofit2.HttpException
 import timber.log.Timber
 import java.io.IOException
+import java.net.HttpURLConnection
 
 /**
  * Executes a given block of code, typically an API call, and wraps the result in a [Result] object.
@@ -38,12 +38,12 @@ inline fun <T> safeApiCall(stringProvider: StringProvider, block: () -> T): Resu
         Result.Error(message, e)
     } catch (e: HttpException) {
         val message = when (e.code()) {
-            400 -> stringProvider.get(R.string.error_bad_request)
-            401 -> stringProvider.get(R.string.error_unauthorized)
-            403 -> stringProvider.get(R.string.error_forbidden)
-            404 -> stringProvider.get(R.string.error_not_found)
-            500 -> stringProvider.get(R.string.error_server_error)
-            503 -> stringProvider.get(R.string.error_service_unavailable)
+            HttpURLConnection.HTTP_BAD_REQUEST -> stringProvider.get(R.string.error_bad_request)          // 400
+            HttpURLConnection.HTTP_UNAUTHORIZED -> stringProvider.get(R.string.error_unauthorized)        // 401
+            HttpURLConnection.HTTP_FORBIDDEN -> stringProvider.get(R.string.error_forbidden)              // 403
+            HttpURLConnection.HTTP_NOT_FOUND -> stringProvider.get(R.string.error_not_found)              // 404
+            HttpURLConnection.HTTP_INTERNAL_ERROR -> stringProvider.get(R.string.error_server_error)      // 500
+            HttpURLConnection.HTTP_UNAVAILABLE -> stringProvider.get(R.string.error_service_unavailable)  // 503
             else -> stringProvider.get(R.string.error_http_generic, e.code(), e.message())
         }
         Timber.tag("safeApiCall").e(e, "HTTP Exception: %s", message)

@@ -6,6 +6,8 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.detekt)
+    alias(libs.plugins.spotless)
 }
 
 val unsplashApiKey: String = project.findProperty("UNSPLASH_API_KEY") as? String
@@ -55,6 +57,22 @@ hilt {
     // Disables the aggregating task to work around a known issue with JavaPoet:
     // "Unable to find method 'java.lang.String com.squareup.javapoet.ClassName.canonicalName()'"
     enableAggregatingTask = false
+}
+
+spotless {
+    kotlin {
+        target("**/*.kt")
+        targetExclude("**/build/**/*.kt")
+        ktlint("1.2.1")
+
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+
+    kotlinGradle {
+        target("**/*.gradle.kts")
+        ktlint()
+    }
 }
 
 dependencies {

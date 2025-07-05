@@ -68,7 +68,7 @@ import com.example.composegallery.feature.gallery.ui.common.LoadMoreListError
 import com.example.composegallery.feature.gallery.ui.common.PhotoCard
 import com.example.composegallery.feature.gallery.ui.common.ProgressIndicator
 import com.example.composegallery.feature.gallery.ui.common.RetryButton
-import com.example.composegallery.feature.gallery.ui.common.SharedKeys
+import com.example.composegallery.feature.gallery.ui.common.SharedTransitionKeys
 import com.example.composegallery.feature.gallery.ui.common.calculateResponsiveColumnCount
 import com.example.composegallery.ui.theme.searchBar
 
@@ -178,7 +178,7 @@ private fun SearchScreenTopBar(
                     .weight(1f)
                     .height(56.dp)
                     .sharedElement(
-                        sharedContentState = rememberSharedContentState(key = SharedKeys.SEARCH_BAR),
+                        sharedContentState = rememberSharedContentState(key = SharedTransitionKeys.SEARCH_BAR),
                         animatedVisibilityScope = animatedVisibilityScope
                     )
                     .alpha(textFieldInnerContentAlpha),

@@ -31,7 +31,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.composegallery.R
-import com.example.composegallery.feature.gallery.ui.common.SharedKeys
+import com.example.composegallery.feature.gallery.ui.common.SharedTransitionKeys
 import com.example.composegallery.ui.theme.searchBar
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -91,7 +91,7 @@ fun DummySearchBar(
                 if (targetState != EnterExitState.Visible) {
                     tween(durationMillis = 150) // Fade out quickly when this composable is going away
                 } else {
-                    tween(durationMillis = 0) // When going back to GalleryScreen (this composable becomes visible), appear instantly
+                    tween(durationMillis = 0) // When going back to GalleryScreen, appear instantly
                 }
             },
             label = "dummy_search_bar_alpha"
@@ -103,7 +103,7 @@ fun DummySearchBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .sharedElement(
-                    sharedContentState = rememberSharedContentState(key = SharedKeys.SEARCH_BAR),
+                    sharedContentState = rememberSharedContentState(key = SharedTransitionKeys.SEARCH_BAR),
                     animatedVisibilityScope = animatedVisibilityScope
                 )
                 .clickable(

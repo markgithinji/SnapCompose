@@ -37,11 +37,15 @@ class ObserveSearchResultsUseCase @Inject constructor(
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     operator fun invoke(queryFlow: StateFlow<String>): Flow<PagingData<Photo>> {
         return queryFlow
-            .debounce(300L)
+            .debounce(SEARCH_DEBOUNCE_MILLIS)
             .distinctUntilChanged()
             .filter { it.isNotBlank() }
             .flatMapLatest { query ->
                 searchRepository.searchPagedPhotos(query)
             }
+    }
+
+    companion object {
+        private const val SEARCH_DEBOUNCE_MILLIS = 300L
     }
 }
