@@ -21,6 +21,7 @@ constraintlayoutCompose = "1.1.1"
 composeShimmer = "1.0.5"
 
 # Paging, Room
+pagingCommon = "3.3.6"
 pagingRuntime = "3.3.6"
 roomRuntime = "2.7.2"
 
@@ -70,6 +71,8 @@ androidx-activity-compose = { group = "androidx.activity", name = "activity-comp
 
 # Compose BOM & Core UI
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-paging-common = { module = "androidx.paging:paging-common", version.ref = "pagingCommon" }
+androidx-paging-testing = { module = "androidx.paging:paging-testing", version.ref = "pagingCommon" }
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }

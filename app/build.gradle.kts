@@ -147,6 +147,7 @@ dependencies {
     testImplementation(libs.mockito.kotlin)
     testImplementation(libs.mockwebserver)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation (libs.androidx.paging.testing)
 
 
     androidTestImplementation(libs.ui.test.junit4)
