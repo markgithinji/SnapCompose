@@ -142,10 +142,14 @@ dependencies {
 
 // Testing
     testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation (libs.ui.test.manifest)
+    testImplementation(libs.truth)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.kotlin)
+    testImplementation(libs.mockwebserver)
+    testImplementation(libs.kotlinx.coroutines.test)
 
+
+    androidTestImplementation(libs.ui.test.junit4)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.truth)
 }
