@@ -1,6 +1,6 @@
 package com.example.composegallery.feature.gallery.domain.model
 
-data class Collection(
+data class PhotoCollection(
     val id: String,
     val title: String,
     val description: String?,
@@ -8,3 +8,4 @@ data class Collection(
     val coverPhoto: Photo?,
     val authorName: String
 )
+

@@ -17,32 +17,88 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.domain.model.HistoricalData
 import com.example.composegallery.feature.gallery.domain.model.StatData
 import com.example.composegallery.feature.gallery.domain.model.StatValue
 import com.example.composegallery.feature.gallery.domain.model.UserStatistics
+import java.util.Locale
+import kotlin.math.abs
 
 @Composable
-fun LineChart(
-    values: List<Int>,
+fun UserStatsChart(
+    downloadsValues: List<Float>,
+    downloadsDays: Int,
+    viewsValues: List<Float>,
+    viewsDays: Int,
+    modifier: Modifier = Modifier
+) {
+
+    val noDataText = stringResource(R.string.no_data)
+
+    Column(modifier.padding(16.dp)) {
+        Text(
+            text = stringResource(R.string.downloads_last_days, downloadsDays),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Start
+        )
+        Spacer(Modifier.height(8.dp))
+        LineChart(
+            values = downloadsValues,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(120.dp),
+            lineColor = MaterialTheme.colorScheme.primaryContainer,
+            pointColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            noDataText = noDataText
+        )
+
+        Spacer(Modifier.height(10.dp))
+
+        Text(
+            text = stringResource(R.string.views_last_days, viewsDays),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Start
+        )
+        Spacer(Modifier.height(8.dp))
+        LineChart(
+            values = viewsValues,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(120.dp),
+            lineColor = MaterialTheme.colorScheme.secondaryContainer,
+            pointColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            noDataText = noDataText
+
+        )
+    }
+}
+
+@Composable
+private fun LineChart(
+    values: List<Float>,
     modifier: Modifier = Modifier,
     lineColor: Color = Color.Blue,
     pointColor: Color = Color.Red,
-    strokeWidth: Dp = 2.dp
+    strokeWidth: Dp = 2.dp,
+    noDataText: String = "No data",
 ) {
     if (values.isEmpty()) {
         Box(modifier) {
-            Text("No data", style = MaterialTheme.typography.bodySmall)
+            Text(text = noDataText, style = MaterialTheme.typography.labelMedium)
         }
         return
     }
 
-    val maxValue = values.maxOrNull() ?: 0
-    val minValue = values.minOrNull() ?: 0
+    val maxValue = values.maxOrNull() ?: 0f
+    val minValue = values.minOrNull() ?: 0f
 
     val paddingLeft = 40f
     val paddingBottom = 40f
@@ -55,15 +111,16 @@ fun LineChart(
         val chartHeight = height - paddingBottom
 
         val stepX = chartWidth / (values.size - 1).coerceAtLeast(1)
+        val valueRange = (maxValue - minValue).takeIf { it != 0f } ?: 1f
 
         // Map values to points in chart area
         val points = values.mapIndexed { index, value ->
             val x = paddingLeft + index * stepX
-            val y =
-                chartHeight - ((value - minValue) / (maxValue - minValue).toFloat()) * chartHeight
+            val y = chartHeight - ((value - minValue) / valueRange) * chartHeight
             Offset(x, y)
         }
 
+        // Paint object for drawing text on Canvas
         val paintText = android.graphics.Paint().apply {
             textSize = 30f
             color = android.graphics.Color.BLACK
@@ -110,18 +167,18 @@ fun LineChart(
             )
         }
 
-        // Draw lines between points
-        for (i in 0 until points.size - 1) {
+        // Draw lines between points using zipWithNext (idiomatic)
+        points.zipWithNext().forEach { (start, end) ->
             drawLine(
                 color = lineColor,
-                start = points[i],
-                end = points[i + 1],
+                start = start,
+                end = end,
                 strokeWidth = strokeWidth.toPx(),
                 cap = StrokeCap.Round
             )
         }
 
-        // Draw points
+        // Draw points as circles
         points.forEach { point ->
             drawCircle(
                 color = pointColor,
@@ -132,55 +189,24 @@ fun LineChart(
     }
 }
 
+private const val THOUSAND = 1_000f
+private const val MILLION = 1_000_000f
 
-private fun formatNumber(value: Int): String {
-    val absValue = kotlin.math.abs(value)
+fun formatNumber(value: Float): String {
+    val absValue = abs(value)
+
     return when {
-        absValue >= 1_000_000 -> String.format("%.1fM", value / 1_000_000f)
-        absValue >= 1_000 -> String.format("%.1fk", value / 1_000f)
-        else -> value.toString()
+        absValue >= MILLION -> formatCompact(value / MILLION, "M")
+        absValue >= THOUSAND -> formatCompact(value / THOUSAND, "k")
+        else -> value.toInt().toString()
     }
 }
 
-@Composable
-fun UserStatsChart(
-    stats: UserStatistics,
-    modifier: Modifier = Modifier
-) {
-    Column(modifier.padding(16.dp)) {
-        Text(
-            text = "Downloads (Last ${stats.downloads.historical.quantity} days)",
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Start
-        )
-        Spacer(Modifier.height(8.dp))
-        LineChart(
-            values = stats.downloads.historical.values.map { it.value },
-            lineColor = MaterialTheme.colorScheme.primaryContainer,
-            pointColor = MaterialTheme.colorScheme.onPrimaryContainer,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(120.dp)
-        )
-
-        Spacer(Modifier.height(10.dp))
-
-        Text(
-            text = "Views (Last ${stats.views.historical.quantity} days)",
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Start
-        )
-        Spacer(Modifier.height(8.dp))
-        LineChart(
-            values = stats.views.historical.values.map { it.value },
-            lineColor = MaterialTheme.colorScheme.secondaryContainer,
-            pointColor = MaterialTheme.colorScheme.onSecondaryContainer,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(120.dp)
-        )
+private fun formatCompact(number: Float, suffix: String): String {
+    return if (number % 1f == 0f) {
+        number.toInt().toString() + suffix
+    } else {
+        String.format(Locale.getDefault(), "%.1f%s", number, suffix)
     }
 }
 
@@ -223,7 +249,15 @@ fun PreviewUserStatsChart() {
 
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
-            UserStatsChart(stats = mockStats)
+            UserStatsChart(
+                downloadsValues = mockStats.downloads.historical.values.map { it.value.toFloat() },
+                downloadsDays = mockStats.downloads.historical.quantity,
+                viewsValues = mockStats.views.historical.values.map { it.value.toFloat() },
+                viewsDays = mockStats.views.historical.quantity,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(300.dp)
+            )
         }
     }
 }

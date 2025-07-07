@@ -8,3 +8,4 @@ data class RecentSearch(
     @PrimaryKey val query: String,
     val timestamp: Long = System.currentTimeMillis()
 )
+

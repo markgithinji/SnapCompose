@@ -23,3 +23,4 @@ data class StatValue(
     val date: String,
     val value: Int
 )
+

@@ -18,4 +18,8 @@ data class FullscreenPhotoRoute(val photoId: String)
 data class UserProfileRoute(val username: String)
 
 @Serializable
-data class CollectionDetailRoute(val collectionId: String, val collectionTitle: String)
+data class CollectionDetailRoute(
+    val collectionId: String,
+    val collectionTitle: String,
+    val totalPhotos: Int
+)

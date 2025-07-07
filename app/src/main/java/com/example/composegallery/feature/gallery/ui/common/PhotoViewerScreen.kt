@@ -6,7 +6,7 @@ import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -21,11 +21,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.SubcomposeAsyncImage
+import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.ui.gallery.GalleryViewModel
 import com.example.composegallery.feature.gallery.ui.util.UiState
-import com.example.composegallery.feature.gallery.ui.gallery.ProgressIndicator
 
 @Composable
 fun PhotoViewerScreen(
@@ -56,10 +57,15 @@ fun PhotoViewerScreen(
 
                 val maxX = ((scale - 1f) * containerWidth) / 2f
                 val maxY = ((scale - 1f) * containerHeight) / 2f
+                val minZoom = 1f
+                val maxZoom = 5f
 
                 val transformableState =
                     rememberTransformableState { zoomChange, offsetChange, rotationChange ->
-                        scale = (scale * zoomChange).coerceIn(1f, 5f) // Limit zoom to bounds of the image
+                        scale = (scale * zoomChange).coerceIn( // Limit zoom to bounds of the image
+                            minZoom,
+                            maxZoom
+                        )
                         rotation += rotationChange
 
                         val newOffset = offset + offsetChange
@@ -71,10 +77,12 @@ fun PhotoViewerScreen(
 
                 SubcomposeAsyncImage(
                     model = photo.fullUrl,
-                    contentDescription = "Full screen photo",
+                    contentDescription = photo.description
+                        ?: stringResource(R.string.photo_zoom_description),
                     contentScale = ContentScale.Fit,
                     modifier = Modifier
                         .fillMaxSize()
+                        .transformable(transformableState)
                         .graphicsLayer {
                             scaleX = scale
                             scaleY = scale
@@ -82,7 +90,6 @@ fun PhotoViewerScreen(
                             translationY = offset.y
                             rotationZ = rotation
                         }
-                        .transformable(transformableState)
                         .pointerInput(Unit) {
                             detectTapGestures(onDoubleTap = {
                                 scale = 1f
@@ -94,7 +101,16 @@ fun PhotoViewerScreen(
             }
         }
 
-        is UiState.Loading -> ProgressIndicator()
-        is UiState.Error -> Text("Error loading photo", color = Color.Red)
+        is UiState.Loading ->
+            ProgressIndicator()
+
+        is UiState.Error -> {
+            InfoMessageScreen(
+                title = stringResource(R.string.error_photo_load_title),
+                subtitle = "Reason: ${uiState.message}",
+                imageRes = R.drawable.error_icon,
+                titleColor = MaterialTheme.colorScheme.error
+            )
+        }
     }
 }

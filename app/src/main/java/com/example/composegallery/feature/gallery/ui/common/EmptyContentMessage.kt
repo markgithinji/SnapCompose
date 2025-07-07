@@ -1,6 +1,5 @@
 package com.example.composegallery.feature.gallery.ui.common
 
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,55 +13,33 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.example.composegallery.R
 
 @Composable
-fun MessageScreen(
-    @DrawableRes imageRes: Int,
-    title: String,
-    subtitle: String,
-    titleColor: Color = MaterialTheme.colorScheme.onSurface,
-    modifier: Modifier = Modifier,
-    content: (@Composable () -> Unit)? = null
-) {
+fun EmptyContentMessage(message: String) {
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Image(
-            painter = painterResource(id = imageRes),
+            painter = painterResource(id = R.drawable.no_content_found_icon),
             contentDescription = null,
             modifier = Modifier.fillMaxWidth(0.2f)
         )
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(20.dp))
         Text(
-            text = title,
-            style = MaterialTheme.typography.headlineLarge,
-            textAlign = TextAlign.Center,
-            color = titleColor,
-            maxLines = 1,
-            modifier = Modifier.padding(vertical = 6.dp)
-        )
-        Text(
-            text = subtitle,
-            style = MaterialTheme.typography.headlineSmall,
-            textAlign = TextAlign.Center,
-            maxLines = 4,
-            softWrap = true,
+            text = message,
             modifier = Modifier
-                .fillMaxWidth(0.6f)
-                .padding(horizontal = 16.dp)
-                .align(Alignment.CenterHorizontally)
+                .fillMaxWidth()
+                .padding(16.dp),
+            style = MaterialTheme.typography.labelMedium,
+            textAlign = TextAlign.Center
         )
-        content?.let {
-            Spacer(modifier = Modifier.height(24.dp))
-            it()
-        }
     }
 }

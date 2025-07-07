@@ -1,8 +1,12 @@
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,9 +29,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.composegallery.feature.gallery.ui.gallery.ProgressIndicator
+import com.example.composegallery.R
+import com.example.composegallery.feature.gallery.ui.common.ProgressIndicator
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.random.Random
@@ -44,13 +50,21 @@ fun ConfettiButton( // An Experiment, still needs work. Could be replaced with a
     val scope = rememberCoroutineScope()
 
     val backgroundColor by animateColorAsState(
-        targetValue = if (isFollowing) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primaryContainer,
+        targetValue = if (isFollowing) {
+            MaterialTheme.colorScheme.secondaryContainer
+        } else {
+            MaterialTheme.colorScheme.primaryContainer
+        },
         label = "buttonColor"
     )
+
     val textColor by animateColorAsState(
         targetValue = if (isFollowing) Color.White else Color.Black,
         label = "textColor"
     )
+
+    val followLabel = stringResource(R.string.follow)
+    val followingLabel = stringResource(R.string.following)
 
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         if (triggerConfetti) {
@@ -77,20 +91,33 @@ fun ConfettiButton( // An Experiment, still needs work. Could be replaced with a
                 .height(38.dp),
             shape = RoundedCornerShape(50)
         ) {
-            if (isLoading) {
-                ProgressIndicator()
+            AnimatedContent(
+                targetState = isLoading,
+                transitionSpec = {
+                    fadeIn(animationSpec = tween(300)) togetherWith fadeOut(
+                        animationSpec = tween(
+                            200
+                        )
+                    )
+                },
+                label = "FollowButtonAnimation"
+            ) { loading ->
+                if (loading) {
+                    ProgressIndicator()
+                } else {
+                    Text(
+                        text = if (isFollowing) followingLabel else followLabel,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = textColor
+                    )
+                }
             }
-            Text(
-                text = if (isFollowing) "Following" else "Follow",
-                style = MaterialTheme.typography.labelMedium,
-                color = textColor
-            )
         }
     }
 }
 
 @Composable
-fun ConfettiEffect(
+private fun ConfettiEffect(
     onEffectComplete: () -> Unit,
     particles: MutableList<Offset>
 ) {
@@ -98,6 +125,11 @@ fun ConfettiEffect(
     val animates = remember {
         List(particleCount) {
             Animatable(Offset(0f, 0f), Offset.VectorConverter)
+        }
+    }
+    val colors = remember {
+        List(particleCount) {
+            Color(Random.nextInt(256), Random.nextInt(256), Random.nextInt(256))
         }
     }
 
@@ -123,10 +155,8 @@ fun ConfettiEffect(
         onEffectComplete()
     }
 
-    Canvas(
-        modifier = Modifier
-    ) {
-        animates.forEach {
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        animates.forEach { animatable ->
             drawCircle(
                 color = Color(
                     Random.nextInt(256),
@@ -134,7 +164,7 @@ fun ConfettiEffect(
                     Random.nextInt(256)
                 ),
                 radius = 6f,
-                center = Offset(center.x + it.value.x, center.y + it.value.y)
+                center = Offset(center.x + animatable.value.x, center.y + animatable.value.y)
             )
         }
     }

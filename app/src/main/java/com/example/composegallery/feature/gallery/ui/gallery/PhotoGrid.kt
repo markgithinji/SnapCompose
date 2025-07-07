@@ -1,56 +1,48 @@
 package com.example.composegallery.feature.gallery.ui.gallery
 
-import android.app.Activity
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
-import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
+import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.domain.model.Photo
+import com.example.composegallery.feature.gallery.ui.common.BottomLoadingIndicator
+import com.example.composegallery.feature.gallery.ui.common.LoadMoreListError
 import com.example.composegallery.feature.gallery.ui.common.PhotoCard
-import com.example.composegallery.feature.gallery.ui.common.RetryButton
+import com.example.composegallery.feature.gallery.ui.common.calculateResponsiveColumnCount
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun PhotoGrid(
     photos: LazyPagingItems<Photo>,
-    sharedTransitionScope: SharedTransitionScope,
-    animatedVisibilityScope: AnimatedVisibilityScope,
+    onPhotoClick: (Photo) -> Unit,
     onSearchClick: () -> Unit,
-    onPhotoClick: (Photo) -> Unit
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope
 ) {
+
     val retryKeys = remember { mutableStateMapOf<String, Int>() }
     val isGridClickable =
         photos.loadState.refresh !is LoadState.Loading &&
@@ -58,30 +50,35 @@ fun PhotoGrid(
 
     LazyVerticalStaggeredGrid(
         columns = StaggeredGridCells.Fixed(calculateResponsiveColumnCount()),
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .testTag("PhotoGrid"),
         contentPadding = PaddingValues(8.dp),
         verticalItemSpacing = 8.dp,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         item(span = StaggeredGridItemSpan.FullLine) {
             GalleryHeader(
+                sharedTransitionScope = sharedTransitionScope,
+                animatedVisibilityScope = animatedVisibilityScope,
                 onSearchClick = onSearchClick,
                 modifier = Modifier
                     .padding(
                         top = WindowInsets.statusBars.asPaddingValues()
-                            .calculateTopPadding()// pushes header below status bar
-                    ),
-                sharedTransitionScope = sharedTransitionScope,
-                animatedVisibilityScope = animatedVisibilityScope
+                            .calculateTopPadding() // pushes header below status bar
+                    )
             )
         }
 
         items(
             count = photos.itemCount,
-            key = { index -> photos[index]?.id ?: index },
+            key = { index ->
+                val item = photos.peek(index)
+                item?.id ?: index
+            },
             span = { index ->
                 if ((index + 1) % 5 == 0) {
-                    StaggeredGridItemSpan.FullLine // Show a featured photo item in near full size at every 5th position
+                    StaggeredGridItemSpan.FullLine
                 } else {
                     StaggeredGridItemSpan.SingleLane
                 }
@@ -98,14 +95,13 @@ fun PhotoGrid(
                     authorName = photo.authorName,
                     authorImageUrl = "${photo.authorProfileImageMediumResUrl}?retry=$retryKey",
                     onRetry = { retryKeys[photo.id] = retryKey + 1 },
-                    blurHash = photo.blurHash,
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(photo.width.toFloat() / photo.height)
-                        .clip(RoundedCornerShape(12.dp)),
-                    onClick = if (isGridClickable) {
-                        { onPhotoClick(photo) }
-                    } else null
+                        .clip(RoundedCornerShape(12.dp))
+                        .testTag("PhotoItem_${photo.id}"),
+                    blurHash = photo.blurHash,
+                    onClick = takeIf { isGridClickable }?.let { { onPhotoClick(photo) } }
                 )
             }
         }
@@ -117,61 +113,15 @@ fun PhotoGrid(
 
             is LoadState.Error -> item(span = StaggeredGridItemSpan.FullLine) {
                 LoadMoreListError(
-                    message = appendState.error.localizedMessage ?: "Error loading more",
+                    message = appendState.error.localizedMessage
+                        ?: stringResource(R.string.error_loading_more),
                     onRetry = { photos.retry() }
                 )
             }
 
-            else -> Unit
+            else -> {
+                Unit // No-Op
+            }
         }
-    }
-}
-
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-@Composable
-fun calculateResponsiveColumnCount(): Int {
-    val context = LocalContext.current
-    val activity = context as? Activity ?: return 2 // default fallback
-
-    val windowSizeClass = calculateWindowSizeClass(activity)
-
-    return when (windowSizeClass.widthSizeClass) {
-        WindowWidthSizeClass.Compact -> 2
-        WindowWidthSizeClass.Medium -> 3
-        WindowWidthSizeClass.Expanded -> 4
-        else -> 2
-    }
-}
-
-@Composable
-fun BottomLoadingIndicator() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .navigationBarsPadding(),
-        contentAlignment = Alignment.Center
-    ) {
-        ProgressIndicator()
-    }
-}
-
-@Composable
-fun LoadMoreListError(message: String, onRetry: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(24.dp)
-            .navigationBarsPadding(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = message,
-            color = MaterialTheme.colorScheme.error,
-            style = MaterialTheme.typography.labelMedium,
-            textAlign = TextAlign.Center
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        RetryButton(onClick = onRetry)
     }
 }

@@ -33,24 +33,24 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.AsyncImage
 import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.domain.model.Photo
-import com.example.composegallery.feature.gallery.ui.common.MessageScreen
+import com.example.composegallery.feature.gallery.ui.common.InfoMessageScreen
 import com.example.composegallery.feature.gallery.ui.common.PhotoImage
-import com.example.composegallery.feature.gallery.ui.common.RetryButton
+import com.example.composegallery.feature.gallery.ui.common.ProgressIndicator
+import com.example.composegallery.feature.gallery.ui.common.UserProfileImage
 import com.example.composegallery.feature.gallery.ui.gallery.GalleryViewModel
-import com.example.composegallery.feature.gallery.ui.gallery.ProgressIndicator
 import com.example.composegallery.feature.gallery.ui.util.UiState
 import java.util.Locale
 
@@ -64,15 +64,24 @@ fun PhotoDetailScreen(
     viewModel: GalleryViewModel = hiltViewModel()
 ) {
     val photoState by viewModel.uiState.collectAsState()
+    val retryKey = remember(photoId) { mutableIntStateOf(0) }
+
 
     LaunchedEffect(photoId) {
         viewModel.loadPhoto(photoId)
     }
 
     Scaffold(
+        modifier = Modifier.testTag("PhotoDetailScreen"),
         topBar = {
             TopAppBar(
-                title = { Text("Photo Details") },
+                title = {
+                    Text(
+                        text = stringResource(R.string.photo_details_title),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -83,21 +92,14 @@ fun PhotoDetailScreen(
     ) { padding ->
         when (val state = photoState) {
             UiState.Loading -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding),
-                    contentAlignment = Alignment.Center
-                ) {
-                    ProgressIndicator()
-                }
+                ProgressIndicator()
             }
 
             is UiState.Error -> {
-                MessageScreen(
+                InfoMessageScreen(
                     imageRes = R.drawable.error_icon,
-                    title = "Failed to load photo",
-                    subtitle = state.message,
+                    title = stringResource(R.string.error_failed_load_photo),
+                    subtitle = stringResource(R.string.reason, state.message),
                     titleColor = MaterialTheme.colorScheme.error
                 )
             }
@@ -105,9 +107,11 @@ fun PhotoDetailScreen(
             is UiState.Content -> {
                 PhotoDetailContent(
                     photo = state.data,
+                    retryKey = retryKey.intValue,
+                    onRetry = { retryKey.intValue++ },
                     modifier = Modifier.padding(padding),
                     onExpandClick = onExpandClick,
-                    onUserClick = onUserClick
+                    onUserClick = onUserClick,
                 )
             }
         }
@@ -115,8 +119,10 @@ fun PhotoDetailScreen(
 }
 
 @Composable
-fun PhotoDetailContent(
+private fun PhotoDetailContent(
     photo: Photo,
+    retryKey: Int,
+    onRetry: () -> Unit,
     modifier: Modifier = Modifier,
     onExpandClick: (String) -> Unit,
     onUserClick: (String) -> Unit
@@ -132,15 +138,16 @@ fun PhotoDetailContent(
                 .height(halfScreenHeightDp)
         ) {
             PhotoImage(
-                imageUrl = photo.fullUrl,
+                imageUrl = "${photo.fullUrl}?retry=$retryKey",
                 contentDescription = photo.authorName,
-                blurHash = photo.blurHash,
-                onRetry = {},
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(halfScreenHeightDp) // Force fixed height
-                    .clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
+                    .clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp)),
+                blurHash = photo.blurHash,
+                onRetry = onRetry
             )
+
             IconButton(
                 onClick = { onExpandClick(photo.id) },
                 modifier = Modifier
@@ -153,7 +160,7 @@ fun PhotoDetailContent(
             ) {
                 Icon(
                     imageVector = Icons.Default.Fullscreen,
-                    contentDescription = "View Full Screen",
+                    contentDescription = stringResource(R.string.view_full_screen),
                     tint = MaterialTheme.colorScheme.onSurface
                 )
             }
@@ -176,7 +183,7 @@ fun PhotoDetailContent(
 
 
 @Composable
-fun PhotoDetailInfo(
+private fun PhotoDetailInfo(
     photo: Photo,
     onUserClick: (String) -> Unit
 ) {
@@ -196,14 +203,10 @@ fun PhotoDetailInfo(
                 .clickable { onUserClick(photo.username ?: photo.authorName) },
             verticalAlignment = Alignment.CenterVertically
         ) {
-            AsyncImage(
-                model = photo.authorProfileImageHighResUrl,
-                contentDescription = "${photo.authorName}'s profile picture",
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceVariant),
-                contentScale = ContentScale.Crop
+            UserProfileImage(
+                imageUrl = photo.authorProfileImageUrl,
+                contentDescription = photo.authorName,
+                modifier = Modifier.size(48.dp)
             )
 
             Spacer(modifier = Modifier.width(12.dp))
@@ -232,7 +235,7 @@ fun PhotoDetailInfo(
             if (locationText.isNotBlank()) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "📍 $locationText",
+                    text = stringResource(R.string.photo_location_prefix) + " $locationText",
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -243,7 +246,7 @@ fun PhotoDetailInfo(
 
         // Photo Dimensions
         Text(
-            text = "Size: ${photo.width} × ${photo.height}",
+            text = stringResource(R.string.photo_size_label, photo.width, photo.height),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -252,7 +255,7 @@ fun PhotoDetailInfo(
         photo.description?.takeIf { it.isNotBlank() }?.let { description ->
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Description:",
+                text = stringResource(R.string.photo_description_label),
                 style = MaterialTheme.typography.labelMedium
             )
             Text(
@@ -267,7 +270,7 @@ fun PhotoDetailInfo(
         formattedDate?.let {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Created At:",
+                text = stringResource(R.string.photo_created_at_label),
                 style = MaterialTheme.typography.labelMedium
             )
             Text(
@@ -281,18 +284,18 @@ fun PhotoDetailInfo(
         // EXIF Info
         photo.exif?.let { exif ->
             val infoList = listOfNotNull(
-                exif.make?.let { "Make" to it },
-                exif.model?.let { "Model" to it },
-                exif.aperture?.let { "Aperture" to it },
-                exif.shutterSpeed?.let { "Shutter Speed" to it },
-                exif.focalLength?.let { "Focal Length" to it },
-                exif.iso?.let { "ISO" to it }
+                exif.make?.let { stringResource(R.string.camera_make) to it },
+                exif.model?.let { stringResource(R.string.camera_model) to it },
+                exif.aperture?.let { stringResource(R.string.camera_aperture) to it },
+                exif.shutterSpeed?.let { stringResource(R.string.camera_shutter_speed) to it },
+                exif.focalLength?.let { stringResource(R.string.camera_focal_length) to it },
+                exif.iso?.let { stringResource(R.string.camera_iso) to it }
             )
 
             if (infoList.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Camera Info:",
+                    text = stringResource(R.string.camera_info_label),
                     style = MaterialTheme.typography.labelMedium
                 )
 
@@ -309,7 +312,7 @@ fun PhotoDetailInfo(
     }
 }
 
-fun String.formatToReadableDate(): String {
+private fun String.formatToReadableDate(): String {
     return try {
         val isoFormat =
             android.icu.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).apply {

@@ -1,6 +1,6 @@
 package com.example.composegallery.feature.gallery.data.model
 
-import com.example.composegallery.feature.gallery.domain.model.Collection
+import com.example.composegallery.feature.gallery.domain.model.PhotoCollection
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -14,8 +14,8 @@ data class UnsplashCollectionDto(
     val user: UserDto
 )
 
-fun UnsplashCollectionDto.toDomainModel(): Collection {
-    return Collection(
+fun UnsplashCollectionDto.toDomainModel(): PhotoCollection {
+    return PhotoCollection(
         id = id,
         title = title,
         description = description,

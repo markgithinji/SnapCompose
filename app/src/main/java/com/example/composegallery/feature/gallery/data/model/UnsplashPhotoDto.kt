@@ -21,15 +21,7 @@ data class UnsplashPhotoDto(
 )
 
 internal fun UnsplashPhotoDto.toDomainModel(): Photo? {
-    if (
-        urls.thumb.isBlank() ||
-        urls.full.isBlank() ||
-        urls.regular.isBlank() ||
-        user.name.isBlank() ||
-        user.profileImage.small.isBlank() ||
-        user.profileImage.medium.isBlank() ||
-        user.profileImage.large.isBlank()
-    ) return null
+    if (!isValid()) return null
 
     return Photo(
         id = id,
@@ -51,7 +43,17 @@ internal fun UnsplashPhotoDto.toDomainModel(): Photo? {
     )
 }
 
-fun String?.toPhotoLocation(): PhotoLocation? {
+private fun UnsplashPhotoDto.isValid(): Boolean {
+    return urls.thumb.isNotBlank()
+            && urls.full.isNotBlank()
+            && urls.regular.isNotBlank()
+            && user.name.isNotBlank()
+            && user.profileImage.small.isNotBlank()
+            && user.profileImage.medium.isNotBlank()
+            && user.profileImage.large.isNotBlank()
+}
+
+private fun String?.toPhotoLocation(): PhotoLocation? {
     if (this.isNullOrBlank()) return null
 
     val parts = this.split(",").map { it.trim() }

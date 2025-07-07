@@ -6,6 +6,9 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.detekt)
+    alias(libs.plugins.spotless)
+    alias(libs.plugins.baselineprofile)
 }
 
 val unsplashApiKey: String = project.findProperty("UNSPLASH_API_KEY") as? String
@@ -57,45 +60,92 @@ hilt {
     enableAggregatingTask = false
 }
 
+spotless {
+    kotlin {
+        target("**/*.kt")
+        targetExclude("**/build/**/*.kt")
+        ktlint("1.2.1")
+
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+
+    kotlinGradle {
+        target("**/*.gradle.kts")
+        ktlint()
+    }
+}
+
 dependencies {
 
+    // Kotlin & Core Libraries
     implementation(libs.androidx.core.ktx)
+    implementation(libs.kotlinx.serialization.json)
+
+// Lifecycle & Activity
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
+
+// Compose BOM
     implementation(platform(libs.androidx.compose.bom))
+
+// Compose UI
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material3)
+    implementation(libs.androidx.profileinstaller)
+    "baselineProfile"(project(":baselineprofile"))
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
 
-    implementation(libs.coil.compose)
-    implementation(libs.retrofit)
-    implementation(libs.kotlinx.serialization.json)
-    implementation(libs.retrofit2.kotlinx.serialization.converter)
-    implementation(libs.jakewharton.timber)
+// Material Design
+    implementation(libs.androidx.material3)
+    implementation(libs.material3) // e.g., LoadingIndicator, PullToRefreshBox
+    implementation(libs.androidx.material.icons.extended)
+
+// Navigation
+    implementation(libs.androidx.navigation.compose)
+
+// Hilt & DI
     implementation(libs.hilt.android)
-    implementation(libs.androidx.hilt.navigation.compose)
-    implementation(libs.androidx.constraintlayout.compose)
-    implementation(libs.ui)
     ksp(libs.hilt.android.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
+
+// Coil (Image loading)
+    implementation(libs.coil.compose)
+
+// Retrofit & Serialization
+    implementation(libs.retrofit)
+    implementation(libs.retrofit2.kotlinx.serialization.converter)
+
+// Timber (Logging)
+    implementation(libs.jakewharton.timber)
+
+// Paging
     implementation(libs.androidx.paging.runtime)
     implementation(libs.androidx.paging.compose)
-    implementation(libs.compose.shimmer)
-    implementation(libs.accompanist.swiperefresh)
-    implementation(libs.material3) // LoadingIndicator, PullToRefreshBox
-    implementation(libs.androidx.material3.window.size.class1)
-    implementation(libs.androidx.navigation.compose)
-    implementation(libs.androidx.material.icons.extended)
+
+// Room (Database)
     implementation(libs.androidx.room.runtime)
-    ksp (libs.androidx.room.compiler)
+    ksp(libs.androidx.room.compiler)
 
+// ConstraintLayout
+    implementation(libs.androidx.constraintlayout.compose)
 
+// Accompanist
+    implementation(libs.accompanist.swiperefresh)
 
+// Misc UI Utilities
+    implementation(libs.compose.shimmer)
+    implementation(libs.androidx.material3.window.size.class1)
+    implementation(libs.androidx.core.splashscreen)
+
+// Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
+    debugImplementation (libs.ui.test.manifest)
+
 }

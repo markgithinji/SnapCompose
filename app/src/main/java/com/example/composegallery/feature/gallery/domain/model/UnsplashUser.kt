@@ -15,3 +15,4 @@ data class UnsplashUser(
     val totalLikes: Int,
     val totalCollections: Int
 )
+

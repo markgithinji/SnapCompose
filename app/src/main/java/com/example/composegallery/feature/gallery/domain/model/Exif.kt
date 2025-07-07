@@ -8,3 +8,4 @@ data class Exif(
     val focalLength: String?,
     val iso: Int?
 )
+
