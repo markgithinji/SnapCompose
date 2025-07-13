@@ -20,13 +20,16 @@ A modern Android app built with **Jetpack Compose**, showcasing best practices a
 
 ## 🧱 Tech Stack
 
-- **UI**: Jetpack Compose, Material 3
-- **Architecture**: MVVM + Clean Architecture
-- **Dependency Injection**: Hilt
-- **Networking**: Retrofit + Kotlinx Serialization
-- **Pagination**: Paging 3
-- **Asynchronous**: Kotlin Coroutines + Flow
-- **Testing**: JUnit, Mockito, Turbine, Compose UI Testing (WIP)
+- **UI**: Jetpack Compose, Material 3, Shimmer (valentinilk)
+- **Architecture**: MVVM + Clean Architecture  
+- **Dependency Injection**: Hilt  
+- **Networking**: Retrofit + Kotlinx Serialization  
+- **Pagination**: Paging 3  
+- **Asynchronous**: Kotlin Coroutines + Flow  
+- **Image Loading**: Coil
+- **Logging**: Timber  
+- **Code Quality**: Spotless (code formatting), Detekt (static analysis)  
+- **Testing**: JUnit, Mockito, Turbine, Compose UI Testing (WIP)  
 - **Build**: Gradle (KTS), GitHub Actions (WIP)
 
 ---
