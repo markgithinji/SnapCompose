@@ -47,6 +47,7 @@ This app demonstrates attention to smooth user experiences with:
 - Shared element transitions for visual continuity
 - Compose animation APIs like `AnimatedVisibility`, `Crossfade`, `updateTransition`, `Animatable `
 - Responsive staggered grid layout for the gallery, adapting to screen size (similar to Pinterest-style layouts)
+- Gesture support for panning and zooming images for an immersive photo viewing experience
 
 ---
 
