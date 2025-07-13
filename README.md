@@ -33,10 +33,9 @@ A modern Android app built with **Jetpack Compose**, showcasing best practices a
 
 ## 📷 Screenshots
 
-| Gallery Screen        | Photo Detail         | User Profile          |
-|------------------------|-----------------------|------------------------|
-| ![Gallery](assets/Screenshot_gallery.png) | ![Detail](assets/Screenshot_photo_details.png) | ![Profile](assets/Screenshot_user_profile_confetti.png) |
-
+| Gallery Screen        | Search Screen         | Photo Detail         | User Profile          |
+|------------------------|------------------------|-----------------------|------------------------|
+| ![Gallery](assets/Screenshot_gallery.png) | ![Search](assets/Screenshot_search_results.png) | ![Detail](assets/Screenshot_photo_details.png) | ![Profile](assets/Screenshot_user_profile_confetti.png) |
 
 ---
 
@@ -46,7 +45,8 @@ This app demonstrates attention to smooth user experiences with:
 
 - Confetti animation to celebrate actions
 - Shared element transitions for visual continuity
-- Compose animation APIs like `AnimatedVisibility`, `Crossfade`, `updateTransition`
+- Compose animation APIs like `AnimatedVisibility`, `Crossfade`, `updateTransition`, `Animatable `
+- Responsive staggered grid layout for the gallery, adapting to screen size (similar to Pinterest-style layouts)
 
 ---
 
@@ -91,7 +91,7 @@ java/
     │       ├── photodetail/                 # Photo detail screen and ViewModel
     │       ├── profile/                     # User profile screen, stats, charts, confetti
     │       ├── search/                      # Search screen and related components
-    │       └── util/                        # UI utilities (blurhash decoder, photo cards, etc.)
+    │       └── util/                        # UI utilities (blurhash decoder, UIState)
     ├── ui.theme/                            # App theme (colors, typography, shapes)
     ├── GalleryApplication.kt                # Application class (Hilt setup, global config)
     └── MainActivity.kt                      # Main activity, entry point for Compose
@@ -102,5 +102,5 @@ res/
 └── values/                                  # Strings, colors, styles, themes
     └── strings.xml
 
-
+```
 
