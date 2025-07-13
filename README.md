@@ -36,9 +36,7 @@ A modern Android app built with **Jetpack Compose**, showcasing best practices a
 
 ## 📷 Screenshots
 
-| Gallery Screen        | Search Screen         | Photo Detail         | User Profile          |
-|------------------------|------------------------|-----------------------|------------------------|
-| ![Gallery](assets/Screenshot_gallery.png) | ![Search](assets/Screenshot_search_results.png) | ![Detail](assets/Screenshot_photo_details.png) | ![Profile](assets/Screenshot_user_profile_confetti.png) |
+![App Preview](assets/snap_preview.png)
 
 ---
 
