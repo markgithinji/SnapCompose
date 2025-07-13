@@ -44,7 +44,8 @@ internal fun UnsplashPhotoDto.toDomainModel(): Photo? {
 }
 
 private fun UnsplashPhotoDto.isValid(): Boolean {
-    return urls.thumb.isNotBlank()
+    return id.isNotBlank() &&
+            urls.thumb.isNotBlank()
             && urls.full.isNotBlank()
             && urls.regular.isNotBlank()
             && user.name.isNotBlank()
