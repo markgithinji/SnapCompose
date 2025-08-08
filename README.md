@@ -20,7 +20,7 @@ A modern Android app built with **Jetpack Compose**, showcasing best practices a
 
 ## 🧱 Tech Stack
 
-- **UI**: Jetpack Compose, Material 3, Shimmer (valentinilk)
+- **UI**: Jetpack Compose, Material 3, Shimmer (valentinilk), BlurHash (woltapp)
 - **Architecture**: MVVM + Clean Architecture  
 - **Dependency Injection**: Hilt  
 - **Networking**: Retrofit + Kotlinx Serialization  
