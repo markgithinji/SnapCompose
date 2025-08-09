@@ -29,7 +29,7 @@ A modern Android app built with **Jetpack Compose**, showcasing best practices a
 - **Image Loading**: Coil
 - **Logging**: Timber  
 - **Code Quality**: Spotless (code formatting), Detekt (static analysis)  
-- **Testing**: JUnit, Mockito, Turbine, Compose UI Testing (WIP)  
+- **Testing**: JUnit, Mockito, Turbine, Truth, Compose UI Testing (WIP) 
 - **Build**: Gradle (KTS), GitHub Actions (WIP)
 
 ---
