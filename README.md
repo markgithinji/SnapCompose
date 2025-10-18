@@ -4,6 +4,12 @@ A modern Android app built with **Jetpack Compose**, showcasing best practices a
 
 ---
 
+## 📷 Screenshots
+
+![App Preview](assets/snap_preview.png)
+
+---
+
 ## 🚀 Features
 
 - 🔍 **Search Unsplash photos** with infinite scroll
@@ -31,12 +37,6 @@ A modern Android app built with **Jetpack Compose**, showcasing best practices a
 - **Code Quality**: Spotless (code formatting), Detekt (static analysis)  
 - **Testing**: JUnit, Mockito, Turbine, Truth, Compose UI Testing (WIP) 
 - **Build**: Gradle (KTS), GitHub Actions (WIP)
-
----
-
-## 📷 Screenshots
-
-![App Preview](assets/snap_preview.png)
 
 ---
 
