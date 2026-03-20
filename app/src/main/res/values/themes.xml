@@ -1,11 +1,18 @@
 <resources>
 
-    <style name="Theme.ComposeGallery" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.ComposeGallery" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Optional: match your Compose background -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
 
+    <!-- Splash theme -->
     <style name="Theme.MyApp.Splash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/white</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/snap_app_icon</item>
-        <item name="windowSplashScreenAnimationDuration">500</item> <!-- 1 second -->
+        <item name="windowSplashScreenAnimationDuration">500</item>
+
         <item name="postSplashScreenTheme">@style/Theme.ComposeGallery</item>
     </style>
+
 </resources>
