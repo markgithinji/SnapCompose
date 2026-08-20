@@ -63,6 +63,7 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.domain.model.Photo
+import com.example.composegallery.feature.gallery.ui.common.BottomLoadingIndicator
 import com.example.composegallery.feature.gallery.ui.common.InfoMessageScreen
 import com.example.composegallery.feature.gallery.ui.common.LoadMoreListError
 import com.example.composegallery.feature.gallery.ui.common.PhotoCard
@@ -242,7 +243,7 @@ private fun SearchScreenContent(
 
                 // Initial loading state (first page)
                 loadState.refresh is LoadState.Loading -> {
-                    ProgressIndicator()
+                    ProgressIndicator(modifier = Modifier.fillMaxSize())
                 }
 
                 // Error on first page
@@ -315,7 +316,7 @@ private fun SearchScreenContent(
                         item(span = { GridItemSpan(maxCurrentLineSpan) }) {
                             when (loadState.append) {
                                 is LoadState.Loading -> {
-                                    ProgressIndicator()
+                                    BottomLoadingIndicator()
                                 }
 
                                 is LoadState.Error -> {

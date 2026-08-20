@@ -78,7 +78,7 @@ fun GalleryScreen(
                         .size(40.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    ProgressIndicator()
+                    ProgressIndicator(indicatorSize = 20.dp)
                 }
             }
         }
@@ -122,7 +122,7 @@ private fun PhotoGridContent(
                     // Show only if first load to prevent showing both main ProgressIndicator
                     // and PullToRefreshBox indicator simultaneously
                     if (!hasLoadedOnce) {
-                        ProgressIndicator()
+                        ProgressIndicator(modifier = Modifier.fillMaxSize())
                     }
                 }
 

@@ -92,7 +92,7 @@ fun PhotoDetailScreen(
     ) { padding ->
         when (val state = photoState) {
             UiState.Loading -> {
-                ProgressIndicator()
+                ProgressIndicator(modifier = Modifier.fillMaxSize())
             }
 
             is UiState.Error -> {

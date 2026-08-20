@@ -106,7 +106,7 @@ fun CollectionDetailScreen(
     { padding ->
         when (val refreshState = photos.loadState.refresh) {
             is LoadState.Loading -> {
-                ProgressIndicator()
+                ProgressIndicator(modifier = Modifier.fillMaxSize())
             }
 
             is LoadState.Error -> {

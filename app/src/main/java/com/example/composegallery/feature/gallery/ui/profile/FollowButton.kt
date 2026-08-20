@@ -72,7 +72,11 @@ fun FollowButton() {
         shape = RoundedCornerShape(50)
     ) {
         if (isLoading) {
-            ProgressIndicator(color = contentColor)
+            ProgressIndicator(
+                modifier = Modifier.padding(end = 8.dp),
+                color = contentColor,
+                indicatorSize = 18.dp
+            )
         }
 
         Text(

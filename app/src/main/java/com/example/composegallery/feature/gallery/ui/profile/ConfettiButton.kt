@@ -107,7 +107,10 @@ fun ConfettiButton( // An Experiment, still needs work. Could be replaced with a
                 label = "FollowButtonAnimation"
             ) { loading ->
                 if (loading) {
-                    ProgressIndicator(color = textColor)
+                    ProgressIndicator(
+                        color = textColor,
+                        indicatorSize = 20.dp
+                    )
                 } else {
                     Text(
                         text = if (isFollowing) followingLabel else followLabel,

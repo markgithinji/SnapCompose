@@ -4,7 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
-import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -15,12 +15,14 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.SubcomposeAsyncImage
@@ -43,17 +45,18 @@ fun PhotoViewerScreen(
         is UiState.Content -> {
             val photo = uiState.data
 
+            val containerSize = LocalWindowInfo.current.containerSize
             var scale by remember { mutableFloatStateOf(1f) }
             var rotation by remember { mutableFloatStateOf(0f) }
             var offset by remember { mutableStateOf(Offset.Zero) }
 
-            BoxWithConstraints(
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color.Black)
             ) {
-                val containerWidth = constraints.maxWidth.toFloat()
-                val containerHeight = constraints.maxHeight.toFloat()
+                val containerWidth = containerSize.width.toFloat()
+                val containerHeight = containerSize.height.toFloat()
 
                 val maxX = ((scale - 1f) * containerWidth) / 2f
                 val maxY = ((scale - 1f) * containerHeight) / 2f
@@ -80,6 +83,14 @@ fun PhotoViewerScreen(
                     contentDescription = photo.description
                         ?: stringResource(R.string.photo_zoom_description),
                     contentScale = ContentScale.Fit,
+                    loading = {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            ProgressIndicator()
+                        }
+                    },
                     modifier = Modifier
                         .fillMaxSize()
                         .transformable(transformableState)
@@ -102,7 +113,7 @@ fun PhotoViewerScreen(
         }
 
         is UiState.Loading ->
-            ProgressIndicator()
+            ProgressIndicator(modifier = Modifier.fillMaxSize())
 
         is UiState.Error -> {
             InfoMessageScreen(
