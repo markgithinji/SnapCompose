@@ -78,6 +78,6 @@
     <string name="failed_to_load_more">Failed to load more</string>
     <string name="read_more">Read more</string>
     <string name="show_less">Show less</string>
-
+    <string name="retry">Retry</string>
 
 </resources>

@@ -91,8 +91,8 @@ fun ConfettiButton( // An Experiment, still needs work. Could be replaced with a
             },
             colors = ButtonDefaults.buttonColors(containerColor = backgroundColor),
             modifier = Modifier
-                .fillMaxWidth(1f) // 60% of parent width
-                .height(38.dp),
+                .fillMaxWidth(1f) // 100% of parent width
+                .height(40.dp),
             shape = RoundedCornerShape(50)
         ) {
             AnimatedContent(

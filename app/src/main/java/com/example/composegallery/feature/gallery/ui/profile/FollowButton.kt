@@ -36,8 +36,21 @@ fun FollowButton() {
     val followingText = stringResource(id = R.string.following)
     val buttonText = if (isFollowing) followingText else followText
     val backgroundColor by animateColorAsState(
-        targetValue = if (isFollowing) Color(0xFFB2DFDB) else Color(0xFFFF6E6E),
+        targetValue = if (isFollowing) {
+            MaterialTheme.colorScheme.secondaryContainer
+        } else {
+            MaterialTheme.colorScheme.primary
+        },
         label = "buttonColor"
+    )
+
+    val contentColor by animateColorAsState(
+        targetValue = if (isFollowing) {
+            MaterialTheme.colorScheme.onSecondaryContainer
+        } else {
+            MaterialTheme.colorScheme.onPrimary
+        },
+        label = "contentColor"
     )
 
     Button(
@@ -50,19 +63,21 @@ fun FollowButton() {
             }
         },
         modifier = Modifier
-            .height(36.dp)
+            .height(40.dp)
             .defaultMinSize(minWidth = 96.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = backgroundColor),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = backgroundColor,
+            contentColor = contentColor
+        ),
         shape = RoundedCornerShape(50)
     ) {
         if (isLoading) {
-            ProgressIndicator()
+            ProgressIndicator(color = contentColor)
         }
 
         Text(
             buttonText,
-            style = MaterialTheme.typography.labelMedium,
-            color = Color.White
+            style = MaterialTheme.typography.labelMedium
         )
     }
 }
