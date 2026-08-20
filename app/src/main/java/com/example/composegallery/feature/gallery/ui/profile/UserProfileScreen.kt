@@ -65,6 +65,7 @@ fun UserProfileScreen(
         is UiState.Content -> {
             val user = userProfileState.data
             UserProfileContent(
+                username = username,
                 name = user.name,
                 bio = user.bio,
                 location = user.location,

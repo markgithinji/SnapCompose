@@ -5,12 +5,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
-import coil.compose.SubcomposeAsyncImage
-import coil.compose.SubcomposeAsyncImageContent
 import com.valentinilk.shimmer.ShimmerBounds
 import com.valentinilk.shimmer.rememberShimmer
 import com.valentinilk.shimmer.shimmer
@@ -22,45 +25,31 @@ fun UserProfileImage(
     modifier: Modifier = Modifier
 ) {
     val shimmer = rememberShimmer(shimmerBounds = ShimmerBounds.View)
+    var isLoading by remember { mutableStateOf(true) }
 
-    SubcomposeAsyncImage(
-        model = imageUrl,
-        contentDescription = contentDescription,
-        contentScale = ContentScale.Crop,
+    Box(
         modifier = modifier
             .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.surfaceVariant)
     ) {
-        val state = painter.state
-
-        when (state) {
-            is AsyncImagePainter.State.Loading,
-            is AsyncImagePainter.State.Empty -> {
-                // Show shimmer during loading
-                Box(
-                    modifier = Modifier
-                        .matchParentSize()
-                        .shimmer(shimmer)
-                        .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
-                )
-            }
-
-            is AsyncImagePainter.State.Success -> {
-                SubcomposeAsyncImageContent(
-                    modifier = Modifier
-                        .matchParentSize()
-                        .clip(CircleShape)
-                )
-            }
-
-            is AsyncImagePainter.State.Error -> {
-                // Fallback background if image fails
-                Box(
-                    modifier = Modifier
-                        .matchParentSize()
-                        .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
-                )
-            }
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .shimmer(shimmer)
+                    .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
+            )
         }
+
+        AsyncImage(
+            model = imageUrl,
+            contentDescription = contentDescription,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.matchParentSize(),
+            onState = { state ->
+                isLoading = state is AsyncImagePainter.State.Loading || state is AsyncImagePainter.State.Empty
+            }
+        )
     }
 }
 

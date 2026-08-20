@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridScope
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -56,6 +57,7 @@ import com.example.composegallery.feature.gallery.ui.common.calculateResponsiveC
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserProfileContent(
+    username: String,
     name: String,
     bio: String?,
     location: String?,
@@ -74,7 +76,12 @@ fun UserProfileContent(
     onBack: () -> Unit,
     onTabSelected: (UserTab) -> Unit = {}
 ) {
-    var selectedTab by rememberSaveable { mutableStateOf(UserTab.PHOTOS) }
+    var selectedTab by rememberSaveable(inputs = arrayOf(username)) { 
+        mutableStateOf(UserTab.PHOTOS) 
+    }
+
+    val gridState = rememberLazyStaggeredGridState()
+    
     val retryKeys = remember { mutableStateMapOf<String, Int>() }
     val retryHandler: (String) -> Unit = { id ->
         retryKeys[id] = retryKeys.getOrDefault(id, 0) + 1
@@ -118,6 +125,7 @@ fun UserProfileContent(
 
         LazyVerticalStaggeredGrid(
             columns = StaggeredGridCells.Fixed(columnCount),
+            state = gridState,
             contentPadding = PaddingValues(16.dp),
             verticalItemSpacing = 12.dp,
             horizontalArrangement = Arrangement.spacedBy(12.dp),

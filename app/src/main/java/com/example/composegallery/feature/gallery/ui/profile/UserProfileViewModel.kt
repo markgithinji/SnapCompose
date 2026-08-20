@@ -33,6 +33,7 @@ class UserProfileViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _username = MutableStateFlow<String?>(null)
+    private val _collectionId = MutableStateFlow<String?>(null)
 
     val userProfileState: StateFlow<UiState<UnsplashUser>> = _username
         .filterNotNull()
@@ -50,18 +51,33 @@ class UserProfileViewModel @Inject constructor(
             initialValue = UiState.Loading
         )
 
-    private val _userPhotos = MutableStateFlow(PagingData.empty<Photo>())
-    val userPhotos: StateFlow<PagingData<Photo>> = _userPhotos
+    val userPhotos: Flow<PagingData<Photo>> = _username
+        .filterNotNull()
+        .flatMapLatest { username ->
+            userRepository.getUserPhotos(username)
+        }
+        .cachedIn(viewModelScope)
 
-    private val _userCollectionsState =
-        MutableStateFlow<PagingData<PhotoCollection>>(PagingData.empty())
-    val userCollectionsState: StateFlow<PagingData<PhotoCollection>> = _userCollectionsState
+    val userCollectionsState: Flow<PagingData<PhotoCollection>> = _username
+        .filterNotNull()
+        .flatMapLatest { username ->
+            userRepository.getUserCollections(username)
+        }
+        .cachedIn(viewModelScope)
 
-    private val _collectionPhotos = MutableStateFlow(PagingData.empty<Photo>())
-    val collectionPhotos: StateFlow<PagingData<Photo>> = _collectionPhotos
+    val userLikedPhotos: Flow<PagingData<Photo>> = _username
+        .filterNotNull()
+        .flatMapLatest { username ->
+            userRepository.getUserLikedPhotos(username)
+        }
+        .cachedIn(viewModelScope)
 
-    private val _userLikedPhotos = MutableStateFlow<PagingData<Photo>>(PagingData.empty())
-    val userLikedPhotos: StateFlow<PagingData<Photo>> = _userLikedPhotos
+    val collectionPhotos: Flow<PagingData<Photo>> = _collectionId
+        .filterNotNull()
+        .flatMapLatest { collectionId ->
+            userRepository.getCollectionPhotos(collectionId)
+        }
+        .cachedIn(viewModelScope)
 
     val userStatisticsState: StateFlow<UiState<UserStatistics>> = _username
         .filterNotNull()
@@ -85,47 +101,16 @@ class UserProfileViewModel @Inject constructor(
         }
     }
 
-    fun loadUserPhotos(username: String) {
-        viewModelScope.launch {
-            userRepository.getUserPhotos(username)
-                .cachedIn(viewModelScope)
-                .collectLatest { pagingData ->
-                    _userPhotos.value = pagingData
-                }
+    fun setCollectionId(collectionId: String) {
+        if (_collectionId.value != collectionId) {
+            _collectionId.value = collectionId
         }
     }
 
-    fun loadUserCollections(username: String) {
-        viewModelScope.launch {
-            userRepository.getUserCollections(username)
-                .cachedIn(viewModelScope)
-                .collect { pagingData ->
-                    _userCollectionsState.value = pagingData
-                }
-        }
-    }
-
-    fun loadUserLikedPhotos(username: String) {
-        viewModelScope.launch {
-            userRepository.getUserLikedPhotos(username)
-                .cachedIn(viewModelScope)
-                .collectLatest {
-                    _userLikedPhotos.value = it
-                }
-        }
-    }
-
-    fun loadCollectionPhotos(collectionId: String) {
-        viewModelScope.launch {
-            userRepository.getCollectionPhotos(collectionId)
-                .cachedIn(viewModelScope)
-                .collectLatest {
-                    _collectionPhotos.value = it
-                }
-        }
-    }
-
-    fun loadUserStatistics(username: String) {
-        // Handled reactively by userStatisticsState
-    }
+    // No-op methods kept for compatibility with UI calls, but refactored to be reactive
+    fun loadUserPhotos(username: String) {}
+    fun loadUserCollections(username: String) {}
+    fun loadUserLikedPhotos(username: String) {}
+    fun loadCollectionPhotos(collectionId: String) {}
+    fun loadUserStatistics(username: String) {}
 }

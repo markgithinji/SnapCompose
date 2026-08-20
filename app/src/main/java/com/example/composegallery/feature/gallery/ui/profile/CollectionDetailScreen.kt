@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -39,6 +40,7 @@ import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.ui.common.BottomLoadingIndicator
 import com.example.composegallery.feature.gallery.ui.common.LoadMoreListError
 import com.example.composegallery.feature.gallery.ui.common.ProgressIndicator
+import com.example.composegallery.feature.gallery.ui.common.calculateResponsiveColumnCount
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,9 +54,10 @@ fun CollectionDetailScreen(
 ) {
     val photos = viewModel.collectionPhotos.collectAsLazyPagingItems()
     val retryKeys = remember { mutableStateMapOf<String, Int>() }
+    val gridState = rememberLazyStaggeredGridState()
 
     LaunchedEffect(collectionId) {
-        viewModel.loadCollectionPhotos(collectionId)
+        viewModel.setCollectionId(collectionId)
     }
 
     Scaffold(
@@ -113,7 +116,8 @@ fun CollectionDetailScreen(
 
             else -> {
                 LazyVerticalStaggeredGrid(
-                    columns = StaggeredGridCells.Fixed(2),
+                    columns = StaggeredGridCells.Fixed(calculateResponsiveColumnCount()),
+                    state = gridState,
                     modifier = Modifier
                         .padding(padding)
                         .fillMaxSize(),
@@ -131,7 +135,7 @@ fun CollectionDetailScreen(
                         val photo = photos[index] ?: return@items
                         val retryKey = retryKeys[photo.id] ?: 0
                         val url =
-                            if (retryKey > 0) "${photo.fullUrl}?retry=$retryKey" else photo.fullUrl
+                            if (retryKey > 0) "${photo.smallUrl}?retry=$retryKey" else photo.smallUrl
 
                         ProfilePhotoCard(
                             imageUrl = url,
