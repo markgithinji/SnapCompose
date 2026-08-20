@@ -51,15 +51,19 @@ fun ConfettiButton( // An Experiment, still needs work. Could be replaced with a
 
     val backgroundColor by animateColorAsState(
         targetValue = if (isFollowing) {
-            MaterialTheme.colorScheme.secondaryContainer
+            MaterialTheme.colorScheme.tertiary
         } else {
-            MaterialTheme.colorScheme.primaryContainer
+            MaterialTheme.colorScheme.primary
         },
         label = "buttonColor"
     )
 
     val textColor by animateColorAsState(
-        targetValue = if (isFollowing) Color.White else Color.Black,
+        targetValue = if (isFollowing) {
+            MaterialTheme.colorScheme.onTertiary
+        } else {
+            MaterialTheme.colorScheme.onPrimary
+        },
         label = "textColor"
     )
 
@@ -103,7 +107,7 @@ fun ConfettiButton( // An Experiment, still needs work. Could be replaced with a
                 label = "FollowButtonAnimation"
             ) { loading ->
                 if (loading) {
-                    ProgressIndicator()
+                    ProgressIndicator(color = textColor)
                 } else {
                     Text(
                         text = if (isFollowing) followingLabel else followLabel,

@@ -40,6 +40,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
@@ -288,9 +289,9 @@ private fun LazyStaggeredGridScope.renderCollectionItems(
         val retryKey = retryKeys[collection.id] ?: 0
 
         val imageUrl = if (retryKey > 0) {
-            "${collection.coverPhoto?.regularUrl.orEmpty()}?retry=$retryKey"
+            "${collection.coverPhoto?.smallUrl.orEmpty()}?retry=$retryKey"
         } else {
-            collection.coverPhoto?.regularUrl.orEmpty()
+            collection.coverPhoto?.smallUrl.orEmpty()
         }
 
         CollectionGridItem(
@@ -364,25 +365,40 @@ private fun StatItemTab(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val contentColor = if (selected) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
+
     Column(
         modifier = modifier
-            .clickable { onClick() },
+            .clip(RoundedCornerShape(8.dp))
+            .clickable { onClick() }
+            .padding(vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(count, style = MaterialTheme.typography.headlineMedium)
         Text(
-            label,
-            style = MaterialTheme.typography.labelMedium,
+            text = count,
+            style = MaterialTheme.typography.headlineMedium,
+            color = contentColor
         )
-        if (selected) {
-            Box(
-                modifier = Modifier
-                    .padding(top = 2.dp)
-                    .height(2.dp)
-                    .width(24.dp)
-                    .background(MaterialTheme.colorScheme.secondaryContainer)
-            )
-        }
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            color = contentColor
+        )
+        Box(
+            modifier = Modifier
+                .padding(top = 4.dp)
+                .height(3.dp)
+                .width(32.dp)
+                .clip(RoundedCornerShape(2.dp))
+                .background(
+                    if (selected) MaterialTheme.colorScheme.primary 
+                    else Color.Transparent
+                )
+        )
     }
 }
 
