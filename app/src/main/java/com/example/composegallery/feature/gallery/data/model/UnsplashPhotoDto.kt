@@ -28,6 +28,7 @@ internal fun UnsplashPhotoDto.toDomainModel(): Photo? {
         width = width,
         height = height,
         thumbUrl = urls.thumb,
+        smallUrl = urls.small,
         fullUrl = urls.full,
         regularUrl = urls.regular,
         authorName = user.name,

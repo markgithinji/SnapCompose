@@ -29,6 +29,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -69,12 +70,17 @@ fun UserProfileContent(
     onPhotoClick: (String) -> Unit,
     onCollectionClick: (String, String, Int) -> Unit,
     onStatsClick: () -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onTabSelected: (UserTab) -> Unit = {}
 ) {
     var selectedTab by rememberSaveable { mutableStateOf(UserTab.PHOTOS) }
     val retryKeys = remember { mutableStateMapOf<String, Int>() }
     val retryHandler: (String) -> Unit = { id ->
         retryKeys[id] = retryKeys.getOrDefault(id, 0) + 1
+    }
+
+   LaunchedEffect(selectedTab) {
+        onTabSelected(selectedTab)
     }
 
     Scaffold(
@@ -207,7 +213,7 @@ private fun LazyStaggeredGridScope.renderPhotoItems(
         val photo = photos[index] ?: return@items
 
         val retryKey = retryKeys[photo.id] ?: 0
-        val url = if (retryKey > 0) "${photo.fullUrl}?retry=$retryKey" else photo.fullUrl
+        val url = if (retryKey > 0) "${photo.smallUrl}?retry=$retryKey" else photo.smallUrl
 
         ProfilePhotoCard(
             imageUrl = url,

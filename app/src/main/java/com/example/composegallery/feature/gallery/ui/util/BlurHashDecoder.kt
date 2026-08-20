@@ -2,6 +2,7 @@ package com.example.composegallery.feature.gallery.ui.util
 
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.util.LruCache
 import kotlin.math.cos
 import kotlin.math.pow
 import kotlin.math.withSign
@@ -16,19 +17,16 @@ import kotlin.math.withSign
 object BlurHashDecoder {
 
     // cache Math.cos() calculations to improve performance.
-    // The number of calculations can be huge for many bitmaps: width * height * numCompX * numCompY * 2 * nBitmaps
-    // the cache is enabled by default, it is recommended to disable it only when just a few images are displayed
-    private val cacheCosinesX = HashMap<Int, DoubleArray>()
-    private val cacheCosinesY = HashMap<Int, DoubleArray>()
+    // Use LruCache to automatically manage memory and avoid leaks.
+    private val cacheCosinesX = LruCache<Int, DoubleArray>(100)
+    private val cacheCosinesY = LruCache<Int, DoubleArray>(100)
 
     /**
      * Clear calculations stored in memory cache.
-     * The cache is not big, but will increase when many image sizes are used,
-     * if the app needs memory it is recommended to clear it.
      */
     fun clearCache() {
-        cacheCosinesX.clear()
-        cacheCosinesY.clear()
+        cacheCosinesX.evictAll()
+        cacheCosinesY.evictAll()
     }
 
     /**
@@ -117,9 +115,9 @@ object BlurHashDecoder {
     ): Bitmap {
         // use an array for better performance when writing pixel colors
         val imageArray = IntArray(width * height)
-        val calculateCosX = !useCache || !cacheCosinesX.containsKey(width * numCompX)
+        val calculateCosX = !useCache || cacheCosinesX.get(width * numCompX) == null
         val cosinesX = getArrayForCosinesX(calculateCosX, width, numCompX)
-        val calculateCosY = !useCache || !cacheCosinesY.containsKey(height * numCompY)
+        val calculateCosY = !useCache || cacheCosinesY.get(height * numCompY) == null
         val cosinesY = getArrayForCosinesY(calculateCosY, height, numCompY)
         for (y in 0 until height) {
             for (x in 0 until width) {
@@ -147,23 +145,23 @@ object BlurHashDecoder {
     private fun getArrayForCosinesY(calculate: Boolean, height: Int, numCompY: Int) = when {
         calculate -> {
             DoubleArray(height * numCompY).also {
-                cacheCosinesY[height * numCompY] = it
+                cacheCosinesY.put(height * numCompY, it)
             }
         }
 
         else -> {
-            cacheCosinesY[height * numCompY]!!
+            cacheCosinesY.get(height * numCompY)!!
         }
     }
 
     private fun getArrayForCosinesX(calculate: Boolean, width: Int, numCompX: Int) = when {
         calculate -> {
             DoubleArray(width * numCompX).also {
-                cacheCosinesX[width * numCompX] = it
+                cacheCosinesX.put(width * numCompX, it)
             }
         }
 
-        else -> cacheCosinesX[width * numCompX]!!
+        else -> cacheCosinesX.get(width * numCompX)!!
     }
 
     private fun DoubleArray.getCos(

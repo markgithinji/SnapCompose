@@ -294,7 +294,7 @@ private fun SearchScreenContent(
                             if (photo != null) {
                                 val retryKey = retryKeys[photo.id] ?: 0
                                 val url =
-                                    if (retryKey > 0) "${photo.fullUrl}?retry=$retryKey" else photo.fullUrl
+                                    if (retryKey > 0) "${photo.smallUrl}?retry=$retryKey" else photo.smallUrl
 
                                 PhotoCard(
                                     imageUrl = url,

@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
@@ -62,11 +62,7 @@ fun PhotoGrid(
                 sharedTransitionScope = sharedTransitionScope,
                 animatedVisibilityScope = animatedVisibilityScope,
                 onSearchClick = onSearchClick,
-                modifier = Modifier
-                    .padding(
-                        top = WindowInsets.statusBars.asPaddingValues()
-                            .calculateTopPadding() // pushes header below status bar
-                    )
+                modifier = Modifier.statusBarsPadding()
             )
         }
 
@@ -88,7 +84,7 @@ fun PhotoGrid(
             if (photo != null) {
 
                 val retryKey = retryKeys[photo.id] ?: 0
-                val url = if (retryKey > 0) "${photo.fullUrl}?retry=$retryKey" else photo.fullUrl
+                val url = if (retryKey > 0) "${photo.smallUrl}?retry=$retryKey" else photo.smallUrl
 
                 PhotoCard(
                     imageUrl = url,

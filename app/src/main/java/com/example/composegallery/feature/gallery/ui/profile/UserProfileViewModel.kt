@@ -12,20 +12,43 @@ import com.example.composegallery.feature.gallery.domain.model.UserStatistics
 import com.example.composegallery.feature.gallery.domain.repository.UserRepository
 import com.example.composegallery.feature.gallery.ui.util.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class UserProfileViewModel @Inject constructor(
     private val userRepository: UserRepository
 ) : ViewModel() {
 
-    private val _userProfileState = MutableStateFlow<UiState<UnsplashUser>>(UiState.Loading)
-    val userProfileState: StateFlow<UiState<UnsplashUser>> = _userProfileState.asStateFlow()
+    private val _username = MutableStateFlow<String?>(null)
+
+    val userProfileState: StateFlow<UiState<UnsplashUser>> = _username
+        .filterNotNull()
+        .flatMapLatest { username ->
+            flow {
+                emit(UiState.Loading)
+                when (val result = userRepository.getUserProfile(username)) {
+                    is Result.Success -> emit(UiState.Content(result.data))
+                    is Result.Error -> emit(UiState.Error(result.message))
+                }
+            }
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = UiState.Loading
+        )
 
     private val _userPhotos = MutableStateFlow(PagingData.empty<Photo>())
     val userPhotos: StateFlow<PagingData<Photo>> = _userPhotos
@@ -40,16 +63,25 @@ class UserProfileViewModel @Inject constructor(
     private val _userLikedPhotos = MutableStateFlow<PagingData<Photo>>(PagingData.empty())
     val userLikedPhotos: StateFlow<PagingData<Photo>> = _userLikedPhotos
 
-    private val _userStatisticsState = MutableStateFlow<UiState<UserStatistics>>(UiState.Loading)
-    val userStatisticsState: StateFlow<UiState<UserStatistics>> = _userStatisticsState.asStateFlow()
-
-    fun loadUserProfile(username: String) {
-        viewModelScope.launch {
-            _userProfileState.value = UiState.Loading
-            when (val result = userRepository.getUserProfile(username)) {
-                is Result.Success -> _userProfileState.value = UiState.Content(result.data)
-                is Result.Error -> _userProfileState.value = UiState.Error(result.message)
+    val userStatisticsState: StateFlow<UiState<UserStatistics>> = _username
+        .filterNotNull()
+        .flatMapLatest { username ->
+            flow {
+                emit(UiState.Loading)
+                when (val result = userRepository.getUserStatistics(username)) {
+                    is Result.Success -> emit(UiState.Content(result.data))
+                    is Result.Error -> emit(UiState.Error(result.message))
+                }
             }
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = UiState.Loading
+        )
+
+    fun setUsername(username: String) {
+        if (_username.value != username) {
+            _username.value = username
         }
     }
 
@@ -94,12 +126,6 @@ class UserProfileViewModel @Inject constructor(
     }
 
     fun loadUserStatistics(username: String) {
-        viewModelScope.launch {
-            _userStatisticsState.value = UiState.Loading
-            when (val result = userRepository.getUserStatistics(username)) {
-                is Result.Success -> _userStatisticsState.value = UiState.Content(result.data)
-                is Result.Error -> _userStatisticsState.value = UiState.Error(result.message)
-            }
-        }
+        // Handled reactively by userStatisticsState
     }
 }

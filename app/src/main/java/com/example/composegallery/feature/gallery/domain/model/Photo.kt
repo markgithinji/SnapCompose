@@ -5,6 +5,7 @@ data class Photo(
     val width: Int,
     val height: Int,
     val thumbUrl: String,
+    val smallUrl: String,
     val regularUrl: String,
     val fullUrl: String,
     val authorName: String,

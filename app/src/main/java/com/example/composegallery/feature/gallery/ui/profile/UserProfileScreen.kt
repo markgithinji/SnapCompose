@@ -44,12 +44,8 @@ fun UserProfileScreen(
 
     var showStatsDialog by remember { mutableStateOf(false) }
 
-    LaunchedEffect(username) { // TODO: Load each item on request
-        viewModel.loadUserProfile(username)
-        viewModel.loadUserPhotos(username)
-        viewModel.loadUserCollections(username)
-        viewModel.loadUserLikedPhotos(username)
-        viewModel.loadUserStatistics(username)
+    LaunchedEffect(username) {
+        viewModel.setUsername(username)
     }
 
     when (userProfileState) {
@@ -85,6 +81,13 @@ fun UserProfileScreen(
                 onCollectionClick = onCollectionClick,
                 onStatsClick = { showStatsDialog = true },
                 onBack = onBack,
+                onTabSelected = { tab ->
+                    when (tab) {
+                        UserTab.PHOTOS -> viewModel.loadUserPhotos(username)
+                        UserTab.LIKES -> viewModel.loadUserLikedPhotos(username)
+                        UserTab.COLLECTIONS -> viewModel.loadUserCollections(username)
+                    }
+                }
             )
         }
     }

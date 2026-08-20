@@ -64,8 +64,7 @@ fun GalleryScreen(
         onRefresh = { photos.refresh() },
         state = pullRefreshState,
         modifier = Modifier
-            .fillMaxSize()
-            .safeDrawingPadding(),
+            .fillMaxSize(),
         indicator = {
             val progress = pullRefreshState.distanceFraction.coerceIn(0f, 1f)
             if (progress > 0f || isRefreshing) {
