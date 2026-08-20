@@ -46,6 +46,7 @@
     <string name="liked">Liked</string>
     <string name="collections">Collections</string>
     <string name="no_photos_found">No photos found</string>
+    <string name="no_photos_found_in_collection">No photos found in this collection</string>
     <string name="error_loading_photos">Error loading photos</string>
     <string name="no_collections_found">No collections found</string>
     <string name="error_loading_collections">Error loading collections</string>

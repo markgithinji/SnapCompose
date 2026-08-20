@@ -19,9 +19,12 @@ import androidx.compose.ui.unit.dp
 import com.example.composegallery.R
 
 @Composable
-fun EmptyContentMessage(message: String) {
+fun EmptyContentMessage(
+    message: String,
+    modifier: Modifier = Modifier
+) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,

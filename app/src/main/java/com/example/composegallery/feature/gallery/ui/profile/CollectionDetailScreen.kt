@@ -38,8 +38,11 @@ import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.ui.common.BottomLoadingIndicator
+import com.example.composegallery.feature.gallery.ui.common.EmptyContentMessage
+import com.example.composegallery.feature.gallery.ui.common.InfoMessageScreen
 import com.example.composegallery.feature.gallery.ui.common.LoadMoreListError
 import com.example.composegallery.feature.gallery.ui.common.ProgressIndicator
+import com.example.composegallery.feature.gallery.ui.common.RetryButton
 import com.example.composegallery.feature.gallery.ui.common.calculateResponsiveColumnCount
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -107,64 +110,77 @@ fun CollectionDetailScreen(
             }
 
             is LoadState.Error -> {
-                LoadMoreListError(
-                    message = refreshState.error.localizedMessage
-                        ?: stringResource(R.string.error_failed_to_load_photos),
-                    onRetry = { photos.retry() }
-                )
+                InfoMessageScreen(
+                    imageRes = R.drawable.error_icon,
+                    title = stringResource(R.string.error_failed_to_load_photos),
+                    subtitle = stringResource(
+                        R.string.reason,
+                        refreshState.error.localizedMessage ?: stringResource(R.string.unknown_error)
+                    ),
+                    titleColor = MaterialTheme.colorScheme.error
+                ) {
+                    RetryButton(onClick = { photos.retry() })
+                }
             }
 
             else -> {
-                LazyVerticalStaggeredGrid(
-                    columns = StaggeredGridCells.Fixed(calculateResponsiveColumnCount()),
-                    state = gridState,
-                    modifier = Modifier
-                        .padding(padding)
-                        .fillMaxSize(),
-                    contentPadding = PaddingValues(12.dp),
-                    verticalItemSpacing = 12.dp,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(
-                        count = photos.itemCount,
-                        key = { index ->
-                            val item = photos.peek(index)
-                            item?.id ?: index
-                        }
-                    ) { index ->
-                        val photo = photos[index] ?: return@items
-                        val retryKey = retryKeys[photo.id] ?: 0
-                        val url =
-                            if (retryKey > 0) "${photo.smallUrl}?retry=$retryKey" else photo.smallUrl
+                if (photos.itemCount == 0 && refreshState is LoadState.NotLoading) {
+                    EmptyContentMessage(
+                        message = stringResource(R.string.no_photos_found_in_collection),
+                        modifier = Modifier.padding(padding)
+                    )
+                } else {
+                    LazyVerticalStaggeredGrid(
+                        columns = StaggeredGridCells.Fixed(calculateResponsiveColumnCount()),
+                        state = gridState,
+                        modifier = Modifier
+                            .padding(padding)
+                            .fillMaxSize(),
+                        contentPadding = PaddingValues(12.dp),
+                        verticalItemSpacing = 12.dp,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(
+                            count = photos.itemCount,
+                            key = { index ->
+                                val item = photos.peek(index)
+                                item?.id ?: index
+                            }
+                        ) { index ->
+                            val photo = photos[index] ?: return@items
+                            val retryKey = retryKeys[photo.id] ?: 0
+                            val url =
+                                if (retryKey > 0) "${photo.smallUrl}?retry=$retryKey" else photo.smallUrl
 
-                        ProfilePhotoCard(
-                            imageUrl = url,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .aspectRatio(photo.width.toFloat() / photo.height)
-                                .clip(RoundedCornerShape(12.dp)),
-                            blurHash = photo.blurHash,
-                            onRetry = { retryKeys[photo.id] = retryKey + 1 },
-                            onClick = { onPhotoClick(photo.id) }
-                        )
-                    }
-
-                    // Pagination footer
-                    when (val appendState = photos.loadState.append) {
-                        is LoadState.Loading -> item(span = StaggeredGridItemSpan.FullLine) {
-                            BottomLoadingIndicator()
-                        }
-
-                        is LoadState.Error -> item(span = StaggeredGridItemSpan.FullLine) {
-                            LoadMoreListError(
-                                message = appendState.error.localizedMessage
-                                    ?: stringResource(R.string.error_loading_more),
-                                onRetry = { photos.retry() }
+                            ProfilePhotoCard(
+                                imageUrl = url,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .aspectRatio(photo.width.toFloat() / photo.height)
+                                    .clip(RoundedCornerShape(12.dp)),
+                                blurHash = photo.blurHash,
+                                onRetry = { retryKeys[photo.id] = retryKey + 1 },
+                                onClick = { onPhotoClick(photo.id) }
                             )
                         }
 
-                        is LoadState.NotLoading -> {
-                            Unit // No-Op
+                        // Pagination footer
+                        when (val appendState = photos.loadState.append) {
+                            is LoadState.Loading -> item(span = StaggeredGridItemSpan.FullLine) {
+                                BottomLoadingIndicator()
+                            }
+
+                            is LoadState.Error -> item(span = StaggeredGridItemSpan.FullLine) {
+                                LoadMoreListError(
+                                    message = appendState.error.localizedMessage
+                                        ?: stringResource(R.string.error_loading_more),
+                                    onRetry = { photos.retry() }
+                                )
+                            }
+
+                            else -> {
+                                Unit // No-Op
+                            }
                         }
                     }
                 }
