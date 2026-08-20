@@ -204,7 +204,7 @@ private fun PhotoDetailInfo(
             verticalAlignment = Alignment.CenterVertically
         ) {
             UserProfileImage(
-                imageUrl = photo.authorProfileImageUrl,
+                imageUrl = photo.authorProfileImageHighResUrl,
                 contentDescription = photo.authorName,
                 modifier = Modifier.size(48.dp)
             )

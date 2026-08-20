@@ -76,6 +76,8 @@
     <string name="no_results_title">No results found</string>
     <string name="no_results_subtitle">Try a different search term</string>
     <string name="failed_to_load_more">Failed to load more</string>
+    <string name="read_more">Read more</string>
+    <string name="show_less">Show less</string>
 
 
 </resources>

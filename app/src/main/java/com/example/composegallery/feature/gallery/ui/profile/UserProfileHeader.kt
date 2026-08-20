@@ -1,6 +1,7 @@
 package com.example.composegallery.feature.gallery.ui.profile
 
 import ConfettiButton
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,12 +20,18 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.example.composegallery.R
@@ -41,10 +48,13 @@ fun UserProfileHeader(
     instagramUsername: String?,
     modifier: Modifier = Modifier
 ) {
+    var isBioExpanded by remember { mutableStateOf(false) }
+
     ConstraintLayout(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 16.dp)
+            .animateContentSize()
     ) {
         val (profileImageRef, columnContent) = createRefs()
 
@@ -72,17 +82,39 @@ fun UserProfileHeader(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.Start
         ) {
+            var isTruncated by remember { mutableStateOf(false) }
+
             Text(name, style = MaterialTheme.typography.headlineLarge)
             Spacer(Modifier.height(4.dp))
 
             bio?.let {
-                Text(
-                    it,
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 8
-                )
+                Column(modifier = Modifier.animateContentSize()) {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = if (isBioExpanded) Int.MAX_VALUE else 3, // Shorter default to show more clearly
+                        onTextLayout = { textLayoutResult ->
+                            if (!isBioExpanded) {
+                                isTruncated = textLayoutResult.hasVisualOverflow
+                            }
+                        }
+                    )
+                    if (isTruncated || isBioExpanded) {
+                        Text(
+                            text = if (isBioExpanded) stringResource(R.string.show_less) else stringResource(R.string.read_more),
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 0.5.sp
+                            ),
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier
+                                .clickable { isBioExpanded = !isBioExpanded }
+                                .padding(vertical = 4.dp)
+                        )
+                    }
+                }
                 Spacer(Modifier.height(4.dp))
             }
 
