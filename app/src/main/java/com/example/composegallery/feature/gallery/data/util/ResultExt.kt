@@ -46,7 +46,8 @@ inline fun <T> safeApiCall(stringProvider: StringProvider, block: () -> T): Resu
             HttpURLConnection.HTTP_UNAVAILABLE -> stringProvider.get(R.string.error_service_unavailable)  // 503
             else -> stringProvider.get(R.string.error_http_generic, e.code(), e.message())
         }
-        Timber.tag("safeApiCall").e(e, "HTTP Exception: %s", message)
+        val errorBody = e.response()?.errorBody()?.string()
+        Timber.tag("safeApiCall").e(e, "HTTP Exception [%d]: %s. Body: %s", e.code(), message, errorBody)
         Result.Error(message, e)
     } catch (e: IllegalStateException) {
         val message = stringProvider.get(R.string.error_invalid_data_received)

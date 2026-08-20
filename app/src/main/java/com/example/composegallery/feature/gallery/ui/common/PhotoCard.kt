@@ -73,7 +73,8 @@ fun AuthorInfoRow(authorName: String, authorImageUrl: String) {
         )
         Spacer(modifier = Modifier.width(10.dp))
         Text(
-            text = authorName, style = MaterialTheme.typography.labelLarge
+            text = authorName,
+            style = MaterialTheme.typography.labelLarge
         )
     }
 }

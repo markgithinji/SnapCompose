@@ -79,5 +79,6 @@
     <string name="read_more">Read more</string>
     <string name="show_less">Show less</string>
     <string name="retry">Retry</string>
+    <string name="attribution_format">Photo by %1$s on Unsplash</string>
 
 </resources>

@@ -67,6 +67,7 @@ fun UserProfileContent(
     totalPhotos: Int,
     totalLikes: Int,
     totalCollections: Int,
+    unsplashProfileUrl: String,
     userPhotos: LazyPagingItems<Photo>,
     userLikes: LazyPagingItems<Photo>,
     userCollections: LazyPagingItems<PhotoCollection>,
@@ -141,7 +142,8 @@ fun UserProfileContent(
                     bio = bio,
                     location = location,
                     portfolioUrl = portfolioUrl,
-                    instagramUsername = instagramUsername
+                    instagramUsername = instagramUsername,
+                    unsplashProfileUrl = unsplashProfileUrl
                 )
             }
 

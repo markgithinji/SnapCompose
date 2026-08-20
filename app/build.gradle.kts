@@ -120,6 +120,7 @@ dependencies {
 
 // Timber (Logging)
     implementation(libs.jakewharton.timber)
+    implementation(libs.okhttp.logging.interceptor)
 
 // Paging
     implementation(libs.androidx.paging.runtime)

@@ -36,5 +36,11 @@ class GalleryViewModel @Inject constructor(
             }
         }
     }
+
+    fun reportDownload(downloadUrl: String) {
+        viewModelScope.launch {
+            galleryRepository.reportDownload(downloadUrl)
+        }
+    }
 }
 

@@ -8,6 +8,7 @@ import com.example.composegallery.feature.gallery.data.model.UserStatisticsDto
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
+import retrofit2.http.Url
 
 interface UnsplashApi {
     @GET("photos")
@@ -59,6 +60,9 @@ interface UnsplashApi {
 
     @GET("users/{username}/statistics")
     suspend fun getUserStatistics(@Path("username") username: String): UserStatisticsDto
+
+    @GET
+    suspend fun triggerDownload(@Url url: String)
 
     companion object {
         const val DEFAULT_PAGE_SIZE = 20

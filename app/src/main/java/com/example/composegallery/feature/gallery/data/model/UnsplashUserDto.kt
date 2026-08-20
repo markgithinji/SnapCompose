@@ -13,6 +13,7 @@ data class UnsplashUserDto(
     val location: String? = null,
     @SerialName("portfolio_url") val portfolioUrl: String? = null,
     @SerialName("profile_image") val profileImage: ProfileImageDto,
+    val links: UserLinksDto? = null,
     @SerialName("instagram_username") val instagramUsername: String? = null,
     @SerialName("total_photos") val totalPhotos: Int = 0,
     @SerialName("total_likes") val totalLikes: Int = 0,
@@ -32,5 +33,6 @@ fun UnsplashUserDto.toDomainModel(): UnsplashUser = UnsplashUser(
     instagramUsername = instagramUsername,
     totalPhotos = totalPhotos,
     totalLikes = totalLikes,
-    totalCollections = totalCollections
+    totalCollections = totalCollections,
+    unsplashProfileUrl = links?.html ?: ""
 )

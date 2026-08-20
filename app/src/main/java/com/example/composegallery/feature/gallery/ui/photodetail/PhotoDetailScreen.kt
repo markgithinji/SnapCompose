@@ -38,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -112,6 +113,11 @@ fun PhotoDetailScreen(
                     modifier = Modifier.padding(padding),
                     onExpandClick = onExpandClick,
                     onUserClick = onUserClick,
+                    onImageLoad = {
+                        state.data.downloadLocationUrl?.let { url ->
+                            viewModel.reportDownload(url)
+                        }
+                    }
                 )
             }
         }
@@ -125,7 +131,8 @@ private fun PhotoDetailContent(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
     onExpandClick: (String) -> Unit,
-    onUserClick: (String) -> Unit
+    onUserClick: (String) -> Unit,
+    onImageLoad: () -> Unit
 ) {
     val containerSize = LocalWindowInfo.current.containerSize
     val density = LocalDensity.current
@@ -145,6 +152,7 @@ private fun PhotoDetailContent(
                     .height(halfScreenHeightDp) // Force fixed height
                     .clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp)),
                 blurHash = photo.blurHash,
+                onSuccess = onImageLoad,
                 onRetry = onRetry
             )
 
@@ -217,12 +225,38 @@ private fun PhotoDetailInfo(
                     style = MaterialTheme.typography.headlineMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
-                photo.username?.let {
-                    Text(
-                        text = "@$it",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    photo.username?.let {
+                        Text(
+                            text = "@$it",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    photo.authorUnsplashUrl?.let { url ->
+                        val uriHandler = LocalUriHandler.current
+                        val appName = stringResource(R.string.app_name)
+                        if (photo.username != null) {
+                            Text(
+                                text = " • ",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Text(
+                            text = "Unsplash",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.clickable {
+                                val utmUrl = if (url.contains("?")) {
+                                    "$url&utm_source=$appName&utm_medium=referral"
+                                } else {
+                                    "$url?utm_source=$appName&utm_medium=referral"
+                                }
+                                uriHandler.openUri(utmUrl)
+                            }
+                        )
+                    }
                 }
             }
         }

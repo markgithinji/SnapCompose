@@ -83,12 +83,17 @@ fun PhotoViewerScreen(
                     contentDescription = photo.description
                         ?: stringResource(R.string.photo_zoom_description),
                     contentScale = ContentScale.Fit,
+                    onSuccess = {
+                        photo.downloadLocationUrl?.let { url ->
+                            viewModel.reportDownload(url)
+                        }
+                    },
                     loading = {
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
-                            ProgressIndicator()
+                            ProgressIndicator(color = Color.White)
                         }
                     },
                     modifier = Modifier
@@ -113,7 +118,12 @@ fun PhotoViewerScreen(
         }
 
         is UiState.Loading ->
-            ProgressIndicator(modifier = Modifier.fillMaxSize())
+            ProgressIndicator(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black),
+                color = Color.White
+            )
 
         is UiState.Error -> {
             InfoMessageScreen(

@@ -13,6 +13,7 @@ data class UnsplashUser(
     val instagramUsername: String?,
     val totalPhotos: Int,
     val totalLikes: Int,
-    val totalCollections: Int
+    val totalCollections: Int,
+    val unsplashProfileUrl: String
 )
 

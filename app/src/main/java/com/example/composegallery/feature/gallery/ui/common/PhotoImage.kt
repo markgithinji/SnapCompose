@@ -40,6 +40,7 @@ fun PhotoImage(
     contentDescription: String,
     modifier: Modifier = Modifier,
     blurHash: String? = null,
+    onSuccess: (() -> Unit)? = null,
     onRetry: () -> Unit
 ) {
     val blurBitmap: ImageBitmap? = remember(blurHash) {
@@ -82,6 +83,9 @@ fun PhotoImage(
             modifier = Modifier.matchParentSize(),
             onState = { state ->
                 isError = state is AsyncImagePainter.State.Error
+                if (state is AsyncImagePainter.State.Success) {
+                    onSuccess?.invoke()
+                }
             }
         )
 

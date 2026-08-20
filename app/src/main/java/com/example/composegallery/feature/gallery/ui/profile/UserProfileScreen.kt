@@ -90,6 +90,7 @@ fun UserProfileScreen(
                 totalLikes = user.totalLikes,
                 totalCollections = user.totalCollections,
                 profileImageUrl = user.profileImageLarge,
+                unsplashProfileUrl = user.unsplashProfileUrl,
                 userPhotos = photos,
                 userLikes = userLikes,
                 userCollections = collections,

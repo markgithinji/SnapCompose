@@ -44,6 +44,7 @@ kotlinxSerializationJson = "1.8.1"
 
 # Logging
 jakewhartonTimber = "5.0.1"
+okhttpLoggingInterceptor = "4.12.0"
 
 # Testing
 junit = "4.13.2"
@@ -121,6 +122,7 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 
 # Logging
 jakewharton-timber = { module = "com.jakewharton.timber:timber", version.ref = "jakewhartonTimber" }
+okhttp-logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "okhttpLoggingInterceptor" }
 
 # Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }

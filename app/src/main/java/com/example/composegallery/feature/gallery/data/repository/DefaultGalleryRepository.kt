@@ -47,6 +47,14 @@ class DefaultGalleryRepository @Inject constructor(
             }
     }
 
+    override suspend fun reportDownload(downloadUrl: String) {
+        try {
+            api.triggerDownload(downloadUrl)
+        } catch (e: Exception) {
+            // Silently fail as per Unsplash recommendation for this non-critical call
+        }
+    }
+
     override suspend fun getPhoto(photoId: String): Result<Photo> {
         return safeApiCall(stringProvider) {
             val response = api.getPhoto(photoId = photoId)

@@ -46,6 +46,7 @@ fun UserProfileHeader(
     location: String?,
     portfolioUrl: String?,
     instagramUsername: String?,
+    unsplashProfileUrl: String,
     modifier: Modifier = Modifier
 ) {
     var isBioExpanded by remember { mutableStateOf(false) }
@@ -170,8 +171,37 @@ fun UserProfileHeader(
                         style = MaterialTheme.typography.labelMedium
                     )
                 }
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(4.dp))
             }
+
+            // Unsplash Profile Link
+            val uriHandler = LocalUriHandler.current
+            val appName = stringResource(R.string.app_name)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.clickable { 
+                    val urlWithUtm = if (unsplashProfileUrl.contains("?")) {
+                        "$unsplashProfileUrl&utm_source=$appName&utm_medium=referral"
+                    } else {
+                        "$unsplashProfileUrl?utm_source=$appName&utm_medium=referral"
+                    }
+                    uriHandler.openUri(urlWithUtm) 
+                }
+            ) {
+                Icon(
+                    Icons.Default.Link,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    text = "View on Unsplash",
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.labelMedium
+                )
+            }
+            Spacer(Modifier.height(8.dp))
 
             ConfettiButton(onFollowChanged = {})
         }

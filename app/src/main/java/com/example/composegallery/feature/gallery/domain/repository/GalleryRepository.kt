@@ -8,5 +8,6 @@ import kotlinx.coroutines.flow.Flow
 interface GalleryRepository {
     fun getPagedPhotos(): Flow<PagingData<Photo>>
     suspend fun getPhoto(photoId: String): Result<Photo>
+    suspend fun reportDownload(downloadUrl: String)
 }
 
