@@ -1,6 +1,7 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
 
     alias(libs.plugins.kotlin.serialization)
@@ -11,12 +12,18 @@ plugins {
     alias(libs.plugins.baselineprofile)
 }
 
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
+    }
+}
+
 val unsplashApiKey: String = project.findProperty("UNSPLASH_API_KEY") as? String
     ?: throw IllegalStateException("UNSPLASH_API_KEY is missing. Add it to local.properties")
 
 android {
     namespace = "com.example.composegallery"
-    compileSdk = 35
+    compileSdk = 37
 
     buildFeatures {
         buildConfig = true
@@ -25,7 +32,7 @@ android {
     defaultConfig {
         applicationId = "com.example.composegallery"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0"
 
@@ -43,11 +50,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-    kotlinOptions {
-        jvmTarget = "11"
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     buildFeatures {
         compose = true
@@ -100,7 +104,6 @@ dependencies {
 
 // Material Design
     implementation(libs.androidx.material3)
-    implementation(libs.material3) // e.g., LoadingIndicator, PullToRefreshBox
     implementation(libs.androidx.material.icons.extended)
 
 // Navigation
@@ -133,12 +136,9 @@ dependencies {
 // ConstraintLayout
     implementation(libs.androidx.constraintlayout.compose)
 
-// Accompanist
-    implementation(libs.accompanist.swiperefresh)
-
 // Misc UI Utilities
     implementation(libs.compose.shimmer)
-    implementation(libs.androidx.material3.window.size.class1)
+    implementation(libs.androidx.material3.window.sizeclass)
     implementation(libs.androidx.core.splashscreen)
 
 // Testing

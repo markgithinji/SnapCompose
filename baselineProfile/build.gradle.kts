@@ -1,25 +1,28 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.android.test)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.baselineprofile)
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
+    }
 }
 
 android {
     namespace = "com.example.baselineprofile"
-    compileSdk = 35
+    compileSdk = 37
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-
-    kotlinOptions {
-        jvmTarget = "11"
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     defaultConfig {
         minSdk = 28
-        targetSdk = 35
+        targetSdk = 37
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
