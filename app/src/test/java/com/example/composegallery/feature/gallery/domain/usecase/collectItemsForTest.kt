@@ -3,9 +3,11 @@ import androidx.paging.PagingData
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListUpdateCallback
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.yield
 
 private class NoopListCallback : ListUpdateCallback {
     override fun onInserted(position: Int, count: Int) {}
@@ -20,7 +22,7 @@ private class NoopListCallback : ListUpdateCallback {
 suspend fun <T : Any> Flow<PagingData<T>>.collectItemsForTest(
     diffCallback: DiffUtil.ItemCallback<T>,
     dispatcher: CoroutineDispatcher
-): List<T> {
+): List<T> = coroutineScope {
     val pagingData = first()
 
     val differ = AsyncPagingDataDiffer(
@@ -29,9 +31,14 @@ suspend fun <T : Any> Flow<PagingData<T>>.collectItemsForTest(
         workerDispatcher = dispatcher
     )
 
-    withContext(dispatcher) {
+    val job = launch(dispatcher) {
         differ.submitData(pagingData)
     }
 
-    return differ.snapshot().items
+    // Give some time for the differ to process the data
+    repeat(10) { yield() }
+
+    val items = differ.snapshot().items
+    job.cancel()
+    items
 }

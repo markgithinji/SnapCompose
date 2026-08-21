@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import javax.inject.Inject
 
 /**
@@ -39,9 +40,12 @@ class ObserveSearchResultsUseCase @Inject constructor(
         return queryFlow
             .debounce(SEARCH_DEBOUNCE_MILLIS)
             .distinctUntilChanged()
-            .filter { it.isNotBlank() }
             .flatMapLatest { query ->
-                searchRepository.searchPagedPhotos(query)
+                if (query.isBlank()) {
+                    flowOf(PagingData.empty())
+                } else {
+                    searchRepository.searchPagedPhotos(query)
+                }
             }
     }
 

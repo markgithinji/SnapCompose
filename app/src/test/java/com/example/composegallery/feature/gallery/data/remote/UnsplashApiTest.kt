@@ -6,8 +6,8 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
-import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
+import mockwebserver3.MockResponse
+import mockwebserver3.MockWebServer
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -37,7 +37,7 @@ class UnsplashApiTest {
 
     @After
     fun teardown() {
-        server.shutdown()
+        server.close()
     }
 
     @Test
@@ -69,12 +69,12 @@ class UnsplashApiTest {
             ]
         """.trimIndent()
 
-        server.enqueue(MockResponse().setBody(fakeJson).setResponseCode(200))
+        server.enqueue(MockResponse.Builder().body(fakeJson).code(200).build())
 
         val result = api.getPhotos(page = 1, perPage = 1)
         val request = server.takeRequest()
 
-        assertThat(request.path).contains("/photos?page=1&per_page=1")
+        assertThat(request.target).contains("/photos?page=1&per_page=1")
         assertThat(result).isNotEmpty()
 
         val photo = result.first()
@@ -85,7 +85,7 @@ class UnsplashApiTest {
 
     @Test
     fun getPhotos_returnsEmptyListOnEmptyResponse() = runTest {
-        server.enqueue(MockResponse().setBody("[]").setResponseCode(200))
+        server.enqueue(MockResponse.Builder().body("[]").code(200).build())
 
         val result = api.getPhotos(page = 1, perPage = 1)
 
@@ -96,7 +96,7 @@ class UnsplashApiTest {
     fun getPhotos_handlesMalformedJsonGracefully() = runTest {
         val malformedJson =
             """ [{ "id": 1, "urls": { "thumb": 123 } }] """ // thumb should be string
-        server.enqueue(MockResponse().setBody(malformedJson).setResponseCode(200))
+        server.enqueue(MockResponse.Builder().body(malformedJson).code(200).build())
 
         try {
             api.getPhotos(page = 1, perPage = 1)
@@ -108,7 +108,7 @@ class UnsplashApiTest {
 
     @Test
     fun getPhotos_failsOnHttp500() = runTest {
-        server.enqueue(MockResponse().setResponseCode(500))
+        server.enqueue(MockResponse.Builder().code(500).build())
 
         try {
             api.getPhotos(page = 1, perPage = 1)

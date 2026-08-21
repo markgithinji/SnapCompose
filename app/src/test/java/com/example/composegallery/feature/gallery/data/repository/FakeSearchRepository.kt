@@ -16,6 +16,10 @@ open class FakeSearchRepository : SearchRepository {
     private val fakeResults = mutableMapOf<String, List<Photo>>()
     private val recentSearchesFlow = MutableStateFlow<List<RecentSearch>>(emptyList())
 
+    fun addFakeResult(query: String, photos: List<Photo>) {
+        fakeResults[query] = photos
+    }
+
     override fun searchPagedPhotos(query: String): Flow<PagingData<Photo>> {
         val photos = fakeResults[query] ?: emptyList()
         return flow {

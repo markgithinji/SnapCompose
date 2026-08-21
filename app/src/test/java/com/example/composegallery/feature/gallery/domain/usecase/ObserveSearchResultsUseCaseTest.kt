@@ -34,9 +34,40 @@ class ObserveSearchResultsUseCaseTest { // TODO: Fix this test
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        fakeRepository = FakeSearchRepository()
+        fakeRepository = FakeSearchRepository().apply {
+            addFakeResult(
+                "cats", listOf(
+                    createPhoto("1", "A cute cat"),
+                    createPhoto("2", "Another cat")
+                )
+            )
+            addFakeResult(
+                "dogs", listOf(
+                    createPhoto("3", "A happy dog")
+                )
+            )
+        }
         useCase = ObserveSearchResultsUseCase(fakeRepository)
     }
+
+    private fun createPhoto(id: String, description: String) = Photo(
+        id = id,
+        width = 100,
+        height = 100,
+        thumbUrl = "",
+        smallUrl = "",
+        regularUrl = "",
+        fullUrl = "",
+        authorName = "Author",
+        authorProfileImageUrl = "",
+        authorProfileImageMediumResUrl = "",
+        authorProfileImageHighResUrl = "",
+        authorUnsplashUrl = "",
+        username = "",
+        downloadLocationUrl = "",
+        location = null,
+        description = description
+    )
 
     @After
     fun tearDown() {

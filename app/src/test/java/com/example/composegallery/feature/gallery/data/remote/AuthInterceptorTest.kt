@@ -4,8 +4,8 @@ import com.example.composegallery.BuildConfig
 import com.google.common.truth.Truth.assertThat
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
+import mockwebserver3.MockResponse
+import mockwebserver3.MockWebServer
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -22,7 +22,7 @@ class AuthInterceptorTest {
 
     @After
     fun tearDown() {
-        mockWebServer.shutdown()
+        mockWebServer.close()
     }
 
     @Test
@@ -33,7 +33,7 @@ class AuthInterceptorTest {
             .addInterceptor(interceptor)
             .build()
 
-        mockWebServer.enqueue(MockResponse().setBody("OK"))
+        mockWebServer.enqueue(MockResponse.Builder().body("OK").build())
 
         val request = Request.Builder()
             .url(mockWebServer.url("/photos"))
@@ -42,10 +42,10 @@ class AuthInterceptorTest {
         client.newCall(request).execute()
 
         val recordedRequest = mockWebServer.takeRequest()
-        val requestUrl = recordedRequest.requestUrl
+        val requestUrl = recordedRequest.url
 
-        assertThat(requestUrl?.encodedPath).isEqualTo("/photos")
-        val clientId = requestUrl?.queryParameter("client_id")
+        assertThat(requestUrl.encodedPath).isEqualTo("/photos")
+        val clientId = requestUrl.queryParameter("client_id")
         assertThat(clientId).isNotNull()
         assertThat(clientId).isEqualTo(BuildConfig.UNSPLASH_API_KEY)
     }
@@ -54,7 +54,7 @@ class AuthInterceptorTest {
     fun intercept_doesNotAddClientId_withoutInterceptor() {
         val client = OkHttpClient.Builder().build()
 
-        mockWebServer.enqueue(MockResponse().setBody("OK"))
+        mockWebServer.enqueue(MockResponse.Builder().body("OK").build())
 
         val request = Request.Builder()
             .url(mockWebServer.url("/photos"))
@@ -63,7 +63,7 @@ class AuthInterceptorTest {
         client.newCall(request).execute()
 
         val recordedRequest = mockWebServer.takeRequest()
-        val clientId = recordedRequest.requestUrl?.queryParameter("client_id")
+        val clientId = recordedRequest.url.queryParameter("client_id")
 
         assertThat(clientId).isNull()
     }
