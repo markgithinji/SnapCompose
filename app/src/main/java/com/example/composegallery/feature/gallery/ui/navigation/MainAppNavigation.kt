@@ -21,16 +21,39 @@ fun MainAppNavigation() {
                 galleryRoute(
                     sharedTransitionScope = this@SharedTransitionLayout,
                     onSearchClick = { navController.navigate(SearchRoute) },
-                    onPhotoClick = { photoId -> navController.navigate(PhotoDetailRoute(photoId)) }
+                    onPhotoClick = { photo ->
+                        navController.navigate(
+                            PhotoDetailRoute(
+                                photoId = photo.id,
+                                width = photo.width,
+                                height = photo.height,
+                                thumbUrl = photo.smallUrl,
+                                blurHash = photo.blurHash
+                            )
+                        )
+                    }
                 )
 
                 searchRoute(
                     sharedTransitionScope = this@SharedTransitionLayout,
                     onBack = { navController.popBackStack() },
-                    onPhotoClick = { photoId -> navController.navigate(PhotoDetailRoute(photoId)) }
+                    onPhotoClick = { photo ->
+                        navController.navigate(
+                            PhotoDetailRoute(
+                                photoId = photo.id,
+                                width = photo.width,
+                                height = photo.height,
+                                thumbUrl = photo.smallUrl,
+                                blurHash = photo.blurHash
+                            )
+                        )
+                    }
                 )
 
-                photoDetailRoute(navController)
+                photoDetailRoute(
+                    sharedTransitionScope = this@SharedTransitionLayout,
+                    navController = navController
+                )
                 fullscreenPhotoRoute()
                 userProfileRoute(navController)
                 collectionDetailRoute(navController)

@@ -1,5 +1,8 @@
 package com.example.composegallery.feature.gallery.ui.common
 
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -18,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -26,6 +30,7 @@ import coil.compose.AsyncImage
 import com.example.composegallery.R
 import com.example.composegallery.ui.theme.ComposeGalleryTheme
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun PhotoCard(
     imageUrl: String,
@@ -34,6 +39,10 @@ fun PhotoCard(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
     blurHash: String? = null,
+    shape: Shape = RoundedCornerShape(12.dp),
+    sharedTransitionScope: SharedTransitionScope? = null,
+    animatedVisibilityScope: AnimatedVisibilityScope? = null,
+    photoId: String? = null,
     onClick: (() -> Unit)? = null,
 ) {
     val clickableModifier = Modifier
@@ -46,6 +55,10 @@ fun PhotoCard(
             contentDescription = authorName,
             modifier = modifier,
             blurHash = blurHash,
+            shape = shape,
+            sharedTransitionScope = sharedTransitionScope,
+            animatedVisibilityScope = animatedVisibilityScope,
+            sharedKey = photoId?.let { SharedTransitionKeys.photoImage(it) },
             onRetry = onRetry
         )
 

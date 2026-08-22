@@ -59,8 +59,6 @@ android {
 }
 
 hilt {
-    // Disables the aggregating task to work around a known issue with JavaPoet:
-    // "Unable to find method 'java.lang.String com.squareup.javapoet.ClassName.canonicalName()'"
     enableAggregatingTask = false
 }
 

@@ -6,6 +6,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.ui.common.PhotoViewerScreen
 import com.example.composegallery.feature.gallery.ui.gallery.GalleryScreen
 import com.example.composegallery.feature.gallery.ui.photodetail.PhotoDetailScreen
@@ -17,7 +18,7 @@ import com.example.composegallery.feature.gallery.ui.search.SearchScreen
 fun NavGraphBuilder.galleryRoute(
     sharedTransitionScope: SharedTransitionScope,
     onSearchClick: () -> Unit,
-    onPhotoClick: (String) -> Unit
+    onPhotoClick: (Photo) -> Unit
 ) {
     composable<GalleryRoute> {
         GalleryScreen(
@@ -33,7 +34,7 @@ fun NavGraphBuilder.galleryRoute(
 fun NavGraphBuilder.searchRoute(
     sharedTransitionScope: SharedTransitionScope,
     onBack: () -> Unit,
-    onPhotoClick: (String) -> Unit
+    onPhotoClick: (Photo) -> Unit
 ) {
     composable<SearchRoute> {
         SearchScreen(
@@ -45,13 +46,21 @@ fun NavGraphBuilder.searchRoute(
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 fun NavGraphBuilder.photoDetailRoute(
+    sharedTransitionScope: SharedTransitionScope,
     navController: NavController
 ) {
     composable<PhotoDetailRoute> { backStackEntry ->
         val args = backStackEntry.toRoute<PhotoDetailRoute>()
         PhotoDetailScreen(
             photoId = args.photoId,
+            initialWidth = args.width,
+            initialHeight = args.height,
+            initialThumbUrl = args.thumbUrl,
+            initialBlurHash = args.blurHash,
+            sharedTransitionScope = sharedTransitionScope,
+            animatedVisibilityScope = this,
             onBack = { navController.popBackStack() },
             onExpandClick = { photoId ->
                 navController.navigate(FullscreenPhotoRoute(photoId))
@@ -76,8 +85,16 @@ fun NavGraphBuilder.userProfileRoute(navController: NavController) {
         UserProfileScreen(
             username = args.username,
             onBack = { navController.popBackStack() },
-            onPhotoClick = { photoId ->
-                navController.navigate(PhotoDetailRoute(photoId))
+            onPhotoClick = { photo ->
+                navController.navigate(
+                    PhotoDetailRoute(
+                        photoId = photo.id,
+                        width = photo.width,
+                        height = photo.height,
+                        thumbUrl = photo.smallUrl,
+                        blurHash = photo.blurHash
+                    )
+                )
             },
             onCollectionClick = { collectionId, title, totalPhotos ->
                 navController.navigate(
@@ -100,8 +117,16 @@ fun NavGraphBuilder.collectionDetailRoute(navController: NavController) {
             collectionTitle = args.collectionTitle,
             totalPhotos = args.totalPhotos,
             onBack = { navController.popBackStack() },
-            onPhotoClick = { photoId ->
-                navController.navigate(PhotoDetailRoute(photoId))
+            onPhotoClick = { photo ->
+                navController.navigate(
+                    PhotoDetailRoute(
+                        photoId = photo.id,
+                        width = photo.width,
+                        height = photo.height,
+                        thumbUrl = photo.smallUrl,
+                        blurHash = photo.blurHash
+                    )
+                )
             }
         )
     }

@@ -79,7 +79,7 @@ fun SearchScreen(
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedContentScope,
     onBack: () -> Unit,
-    onPhotoClick: (String) -> Unit,
+    onPhotoClick: (Photo) -> Unit,
     viewModel: SearchViewModel = hiltViewModel()
 ) {
     var query by rememberSaveable { mutableStateOf("") }
@@ -114,6 +114,7 @@ fun SearchScreen(
             photos = pagedPhotos,
             retryKeys = retryKeys,
             onPhotoClick = onPhotoClick,
+            sharedTransitionScope = sharedTransitionScope,
             animatedVisibilityScope = animatedVisibilityScope
         )
     }
@@ -203,13 +204,15 @@ private fun SearchScreenTopBar(
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun SearchScreenContent(
     showWelcome: Boolean,
     paddingValues: PaddingValues,
     photos: LazyPagingItems<Photo>,
     retryKeys: SnapshotStateMap<String, Int>,
-    onPhotoClick: (String) -> Unit,
+    onPhotoClick: (Photo) -> Unit,
+    sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedContentScope
 ) {
     val loadState = photos.loadState
@@ -302,12 +305,14 @@ private fun SearchScreenContent(
                                     authorName = photo.authorName,
                                     authorImageUrl = "${photo.authorProfileImageMediumResUrl}?retry=$retryKey",
                                     onRetry = { retryKeys[photo.id] = retryKey + 1 },
+                                    sharedTransitionScope = sharedTransitionScope,
+                                    animatedVisibilityScope = animatedVisibilityScope,
+                                    photoId = photo.id,
                                     blurHash = photo.blurHash,
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .aspectRatio(photo.width.toFloat() / photo.height)
-                                        .clip(RoundedCornerShape(12.dp)),
-                                    onClick = { onPhotoClick(photo.id) }
+                                        .aspectRatio(photo.width.toFloat() / photo.height),
+                                    onClick = { onPhotoClick(photo) }
                                 )
                             }
                         }

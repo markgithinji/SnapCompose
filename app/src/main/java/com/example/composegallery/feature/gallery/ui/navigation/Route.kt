@@ -9,7 +9,13 @@ object GalleryRoute
 object SearchRoute
 
 @Serializable
-data class PhotoDetailRoute(val photoId: String)
+data class PhotoDetailRoute(
+    val photoId: String,
+    val width: Int,
+    val height: Int,
+    val thumbUrl: String? = null,
+    val blurHash: String? = null
+)
 
 @Serializable
 data class FullscreenPhotoRoute(val photoId: String)

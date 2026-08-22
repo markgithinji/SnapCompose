@@ -37,6 +37,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.composegallery.R
+import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.ui.common.BottomLoadingIndicator
 import com.example.composegallery.feature.gallery.ui.common.EmptyContentMessage
 import com.example.composegallery.feature.gallery.ui.common.InfoMessageScreen
@@ -52,7 +53,7 @@ fun CollectionDetailScreen(
     collectionTitle: String,
     totalPhotos: Int,
     onBack: () -> Unit,
-    onPhotoClick: (String) -> Unit,
+    onPhotoClick: (Photo) -> Unit,
     viewModel: UserProfileViewModel = hiltViewModel()
 ) {
     val photos = viewModel.collectionPhotos.collectAsLazyPagingItems()
@@ -160,7 +161,7 @@ fun CollectionDetailScreen(
                                     .clip(RoundedCornerShape(12.dp)),
                                 blurHash = photo.blurHash,
                                 onRetry = { retryKeys[photo.id] = retryKey + 1 },
-                                onClick = { onPhotoClick(photo.id) }
+                                onClick = { onPhotoClick(photo) }
                             )
                         }
 

@@ -91,10 +91,12 @@ fun PhotoGrid(
                     authorName = photo.authorName,
                     authorImageUrl = "${photo.authorProfileImageMediumResUrl}?retry=$retryKey",
                     onRetry = { retryKeys[photo.id] = retryKey + 1 },
+                    sharedTransitionScope = sharedTransitionScope,
+                    animatedVisibilityScope = animatedVisibilityScope,
+                    photoId = photo.id,
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(photo.width.toFloat() / photo.height)
-                        .clip(RoundedCornerShape(12.dp))
                         .testTag("PhotoItem_${photo.id}"),
                     blurHash = photo.blurHash,
                     onClick = takeIf { isGridClickable }?.let { { onPhotoClick(photo) } }

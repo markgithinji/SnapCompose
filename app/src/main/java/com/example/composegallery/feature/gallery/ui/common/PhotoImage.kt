@@ -1,5 +1,8 @@
 package com.example.composegallery.feature.gallery.ui.common
 
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -34,12 +38,17 @@ import com.valentinilk.shimmer.ShimmerBounds
 import com.valentinilk.shimmer.rememberShimmer
 import com.valentinilk.shimmer.shimmer
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun PhotoImage(
     imageUrl: String,
     contentDescription: String,
     modifier: Modifier = Modifier,
     blurHash: String? = null,
+    shape: Shape = RoundedCornerShape(12.dp),
+    sharedTransitionScope: SharedTransitionScope? = null,
+    animatedVisibilityScope: AnimatedVisibilityScope? = null,
+    sharedKey: String? = null,
     onSuccess: (() -> Unit)? = null,
     onRetry: () -> Unit
 ) {
@@ -50,9 +59,22 @@ fun PhotoImage(
     val shimmer = rememberShimmer(shimmerBounds = ShimmerBounds.View)
     var isError by remember { mutableStateOf(false) }
 
+    val sharedModifier = if (sharedTransitionScope != null && animatedVisibilityScope != null && sharedKey != null) {
+        with(sharedTransitionScope) {
+            Modifier.sharedElement(
+                rememberSharedContentState(key = sharedKey),
+                animatedVisibilityScope = animatedVisibilityScope,
+                clipInOverlayDuringTransition = OverlayClip(shape)
+            )
+        }
+    } else {
+        Modifier
+    }
+
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(12.dp))
+            .clip(shape)
+            .then(sharedModifier)
             .background(MaterialTheme.colorScheme.surfaceVariant)
     ) {
         // 1. Placeholder (Blur or Shimmer)

@@ -71,7 +71,7 @@ fun UserProfileContent(
     userPhotos: LazyPagingItems<Photo>,
     userLikes: LazyPagingItems<Photo>,
     userCollections: LazyPagingItems<PhotoCollection>,
-    onPhotoClick: (String) -> Unit,
+    onPhotoClick: (Photo) -> Unit,
     onCollectionClick: (String, String, Int) -> Unit,
     onStatsClick: () -> Unit,
     onBack: () -> Unit,
@@ -210,7 +210,7 @@ private fun LazyStaggeredGridScope.renderPhotoItems(
     photos: LazyPagingItems<Photo>,
     retryKeys: SnapshotStateMap<String, Int>,
     onRetry: (String) -> Unit,
-    onPhotoClick: (String) -> Unit
+    onPhotoClick: (Photo) -> Unit
 ) {
     val refreshState = photos.loadState.refresh
 
@@ -234,7 +234,7 @@ private fun LazyStaggeredGridScope.renderPhotoItems(
                 .clip(RoundedCornerShape(12.dp)),
             blurHash = photo.blurHash,
             onRetry = { onRetry(photo.id) },
-            onClick = { onPhotoClick(photo.id) }
+            onClick = { onPhotoClick(photo) }
         )
     }
 

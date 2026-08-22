@@ -1,6 +1,9 @@
 package com.example.composegallery.feature.gallery.ui.photodetail
 
 import android.icu.util.TimeZone
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -36,7 +39,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalWindowInfo
@@ -50,15 +52,22 @@ import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.ui.common.InfoMessageScreen
 import com.example.composegallery.feature.gallery.ui.common.PhotoImage
 import com.example.composegallery.feature.gallery.ui.common.ProgressIndicator
+import com.example.composegallery.feature.gallery.ui.common.SharedTransitionKeys
 import com.example.composegallery.feature.gallery.ui.common.UserProfileImage
 import com.example.composegallery.feature.gallery.ui.gallery.GalleryViewModel
 import com.example.composegallery.feature.gallery.ui.util.UiState
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun PhotoDetailScreen(
     photoId: String,
+    initialWidth: Int,
+    initialHeight: Int,
+    initialThumbUrl: String? = null,
+    initialBlurHash: String? = null,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedContentScope,
     onBack: () -> Unit,
     onExpandClick: (String) -> Unit,
     onUserClick: (String) -> Unit,
@@ -66,7 +75,6 @@ fun PhotoDetailScreen(
 ) {
     val photoState by viewModel.uiState.collectAsStateWithLifecycle()
     val retryKey = remember(photoId) { mutableIntStateOf(0) }
-
 
     LaunchedEffect(photoId) {
         viewModel.loadPhoto(photoId)
@@ -91,11 +99,9 @@ fun PhotoDetailScreen(
             )
         }
     ) { padding ->
-        when (val state = photoState) {
-            UiState.Loading -> {
-                ProgressIndicator(modifier = Modifier.fillMaxSize())
-            }
+        val detailShape = RoundedCornerShape(24.dp)
 
+        when (val state = photoState) {
             is UiState.Error -> {
                 InfoMessageScreen(
                     imageRes = R.drawable.error_icon,
@@ -105,16 +111,25 @@ fun PhotoDetailScreen(
                 )
             }
 
-            is UiState.Content -> {
+            else -> {
+                val photo = (state as? UiState.Content)?.data
                 PhotoDetailContent(
-                    photo = state.data,
+                    photo = photo,
+                    photoId = photoId,
+                    initialWidth = initialWidth,
+                    initialHeight = initialHeight,
+                    initialThumbUrl = initialThumbUrl,
+                    initialBlurHash = initialBlurHash,
+                    sharedTransitionScope = sharedTransitionScope,
+                    animatedVisibilityScope = animatedVisibilityScope,
                     retryKey = retryKey.intValue,
                     onRetry = { retryKey.intValue++ },
                     modifier = Modifier.padding(padding),
                     onExpandClick = onExpandClick,
                     onUserClick = onUserClick,
+                    shape = detailShape,
                     onImageLoad = {
-                        state.data.downloadLocationUrl?.let { url ->
+                        photo?.downloadLocationUrl?.let { url ->
                             viewModel.reportDownload(url)
                         }
                     }
@@ -124,14 +139,23 @@ fun PhotoDetailScreen(
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun PhotoDetailContent(
-    photo: Photo,
+    photo: Photo?,
+    photoId: String,
+    initialWidth: Int,
+    initialHeight: Int,
+    initialThumbUrl: String?,
+    initialBlurHash: String?,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedContentScope,
     retryKey: Int,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
     onExpandClick: (String) -> Unit,
     onUserClick: (String) -> Unit,
+    shape: RoundedCornerShape,
     onImageLoad: () -> Unit
 ) {
     val containerSize = LocalWindowInfo.current.containerSize
@@ -144,33 +168,39 @@ private fun PhotoDetailContent(
                 .fillMaxWidth()
                 .height(halfScreenHeightDp)
         ) {
+            val imageUrl = photo?.fullUrl ?: initialThumbUrl ?: ""
             PhotoImage(
-                imageUrl = "${photo.fullUrl}?retry=$retryKey",
-                contentDescription = photo.authorName,
+                imageUrl = if (photo != null) "$imageUrl?retry=$retryKey" else imageUrl,
+                contentDescription = photo?.authorName ?: "",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(halfScreenHeightDp) // Force fixed height
-                    .clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp)),
-                blurHash = photo.blurHash,
+                    .height(halfScreenHeightDp),
+                blurHash = photo?.blurHash ?: initialBlurHash,
+                shape = shape,
+                sharedTransitionScope = sharedTransitionScope,
+                animatedVisibilityScope = animatedVisibilityScope,
+                sharedKey = SharedTransitionKeys.photoImage(photoId),
                 onSuccess = onImageLoad,
                 onRetry = onRetry
             )
 
-            IconButton(
-                onClick = { onExpandClick(photo.id) },
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(12.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f),
-                        shape = CircleShape
+            if (photo != null) {
+                IconButton(
+                    onClick = { onExpandClick(photo.id) },
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(12.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f),
+                            shape = CircleShape
+                        )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Fullscreen,
+                        contentDescription = stringResource(R.string.view_full_screen),
+                        tint = MaterialTheme.colorScheme.onSurface
                     )
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Fullscreen,
-                    contentDescription = stringResource(R.string.view_full_screen),
-                    tint = MaterialTheme.colorScheme.onSurface
-                )
+                }
             }
         }
 
@@ -179,16 +209,19 @@ private fun PhotoDetailContent(
                 .fillMaxWidth()
                 .height(halfScreenHeightDp)
         ) {
-            Column(Modifier.verticalScroll(rememberScrollState())) {
-                PhotoDetailInfo(
-                    photo = photo,
-                    onUserClick = onUserClick
-                )
+            if (photo != null) {
+                Column(Modifier.verticalScroll(rememberScrollState())) {
+                    PhotoDetailInfo(
+                        photo = photo,
+                        onUserClick = onUserClick
+                    )
+                }
+            } else {
+                ProgressIndicator(modifier = Modifier.fillMaxSize())
             }
         }
     }
 }
-
 
 @Composable
 private fun PhotoDetailInfo(

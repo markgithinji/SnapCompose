@@ -37,6 +37,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.composegallery.R
+import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.domain.model.UserStatistics
 import com.example.composegallery.feature.gallery.ui.common.InfoMessageScreen
 import com.example.composegallery.feature.gallery.ui.common.ProgressIndicator
@@ -47,7 +48,7 @@ import com.example.composegallery.feature.gallery.ui.util.UiState
 fun UserProfileScreen(
     username: String,
     onBack: () -> Unit,
-    onPhotoClick: (String) -> Unit,
+    onPhotoClick: (Photo) -> Unit,
     onCollectionClick: (String, String, Int) -> Unit,
     viewModel: UserProfileViewModel = hiltViewModel()
 ) {
