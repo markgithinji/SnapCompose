@@ -55,8 +55,14 @@ fun MainAppNavigation() {
                     navController = navController
                 )
                 fullscreenPhotoRoute()
-                userProfileRoute(navController)
-                collectionDetailRoute(navController)
+                userProfileRoute(
+                    sharedTransitionScope = this@SharedTransitionLayout,
+                    navController = navController
+                )
+                collectionDetailRoute(
+                    sharedTransitionScope = this@SharedTransitionLayout,
+                    navController = navController
+                )
             }
         }
     }

@@ -1,5 +1,8 @@
 package com.example.composegallery.feature.gallery.ui.profile
 
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,18 +41,24 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.domain.model.Photo
+import com.example.composegallery.feature.gallery.domain.model.PhotoCollection
 import com.example.composegallery.feature.gallery.domain.model.UserStatistics
 import com.example.composegallery.feature.gallery.ui.common.InfoMessageScreen
 import com.example.composegallery.feature.gallery.ui.common.ProgressIndicator
 import com.example.composegallery.feature.gallery.ui.util.UiState
 
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun UserProfileScreen(
     username: String,
+    initialName: String? = null,
+    initialProfileImageUrl: String? = null,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedContentScope,
     onBack: () -> Unit,
     onPhotoClick: (Photo) -> Unit,
-    onCollectionClick: (String, String, Int) -> Unit,
+    onCollectionClick: (PhotoCollection) -> Unit,
     viewModel: UserProfileViewModel = hiltViewModel()
 ) {
     val userProfileState = viewModel.userProfileState.collectAsStateWithLifecycle().value
@@ -64,22 +73,43 @@ fun UserProfileScreen(
         viewModel.setUsername(username)
     }
 
-    when (userProfileState) {
+    when (val state = userProfileState) {
         is UiState.Loading -> {
-            ProgressIndicator(modifier = Modifier.fillMaxSize())
+            UserProfileContent(
+                username = username,
+                name = initialName ?: "",
+                bio = null,
+                location = null,
+                profileImageUrl = initialProfileImageUrl ?: "",
+                portfolioUrl = null,
+                instagramUsername = null,
+                totalPhotos = 0,
+                totalLikes = 0,
+                totalCollections = 0,
+                unsplashProfileUrl = "",
+                userPhotos = photos,
+                userLikes = userLikes,
+                userCollections = collections,
+                sharedTransitionScope = sharedTransitionScope,
+                animatedVisibilityScope = animatedVisibilityScope,
+                onPhotoClick = onPhotoClick,
+                onCollectionClick = onCollectionClick,
+                onStatsClick = { showStatsDialog = true },
+                onBack = onBack
+            )
         }
 
         is UiState.Error -> {
             InfoMessageScreen(
                 imageRes = R.drawable.error_icon,
                 title = stringResource(R.string.failed_to_load_user_profile),
-                subtitle = stringResource(R.string.reason, userProfileState.message),
+                subtitle = stringResource(R.string.reason, state.message),
                 titleColor = MaterialTheme.colorScheme.error
             )
         }
 
         is UiState.Content -> {
-            val user = userProfileState.data
+            val user = state.data
             UserProfileContent(
                 username = username,
                 name = user.name,
@@ -95,13 +125,12 @@ fun UserProfileScreen(
                 userPhotos = photos,
                 userLikes = userLikes,
                 userCollections = collections,
+                sharedTransitionScope = sharedTransitionScope,
+                animatedVisibilityScope = animatedVisibilityScope,
                 onPhotoClick = onPhotoClick,
                 onCollectionClick = onCollectionClick,
                 onStatsClick = { showStatsDialog = true },
-                onBack = onBack,
-                onTabSelected = { tab ->
-                    // Navigation logic handled reactively in ViewModel
-                }
+                onBack = onBack
             )
         }
     }

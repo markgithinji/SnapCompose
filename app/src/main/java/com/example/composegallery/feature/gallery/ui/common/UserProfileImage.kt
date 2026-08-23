@@ -1,5 +1,8 @@
 package com.example.composegallery.feature.gallery.ui.common
 
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.shape.CircleShape
@@ -18,18 +21,35 @@ import com.valentinilk.shimmer.ShimmerBounds
 import com.valentinilk.shimmer.rememberShimmer
 import com.valentinilk.shimmer.shimmer
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun UserProfileImage(
     imageUrl: String,
     contentDescription: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    sharedTransitionScope: SharedTransitionScope? = null,
+    animatedVisibilityScope: AnimatedVisibilityScope? = null,
+    sharedKey: String? = null
 ) {
     val shimmer = rememberShimmer(shimmerBounds = ShimmerBounds.View)
     var isLoading by remember { mutableStateOf(true) }
 
+    val sharedModifier = if (sharedTransitionScope != null && animatedVisibilityScope != null && sharedKey != null) {
+        with(sharedTransitionScope) {
+            Modifier.sharedElement(
+                rememberSharedContentState(key = sharedKey),
+                animatedVisibilityScope = animatedVisibilityScope,
+                clipInOverlayDuringTransition = OverlayClip(CircleShape)
+            )
+        }
+    } else {
+        Modifier
+    }
+
     Box(
         modifier = modifier
             .clip(CircleShape)
+            .then(sharedModifier)
             .background(MaterialTheme.colorScheme.surfaceVariant)
     ) {
         if (isLoading) {

@@ -70,7 +70,7 @@ fun PhotoDetailScreen(
     animatedVisibilityScope: AnimatedContentScope,
     onBack: () -> Unit,
     onExpandClick: (String) -> Unit,
-    onUserClick: (String) -> Unit,
+    onUserClick: (Photo) -> Unit,
     viewModel: GalleryViewModel = hiltViewModel()
 ) {
     val photoState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -154,7 +154,7 @@ private fun PhotoDetailContent(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
     onExpandClick: (String) -> Unit,
-    onUserClick: (String) -> Unit,
+    onUserClick: (Photo) -> Unit,
     shape: RoundedCornerShape,
     onImageLoad: () -> Unit
 ) {
@@ -213,6 +213,8 @@ private fun PhotoDetailContent(
                 Column(Modifier.verticalScroll(rememberScrollState())) {
                     PhotoDetailInfo(
                         photo = photo,
+                        sharedTransitionScope = sharedTransitionScope,
+                        animatedVisibilityScope = animatedVisibilityScope,
                         onUserClick = onUserClick
                     )
                 }
@@ -223,10 +225,13 @@ private fun PhotoDetailContent(
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun PhotoDetailInfo(
     photo: Photo,
-    onUserClick: (String) -> Unit
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedContentScope,
+    onUserClick: (Photo) -> Unit
 ) {
     val formattedDate by remember(photo.createdAt) {
         derivedStateOf { photo.createdAt?.formatToReadableDate() }
@@ -241,13 +246,16 @@ private fun PhotoDetailInfo(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { onUserClick(photo.username ?: photo.authorName) },
+                .clickable { onUserClick(photo) },
             verticalAlignment = Alignment.CenterVertically
         ) {
             UserProfileImage(
                 imageUrl = photo.authorProfileImageHighResUrl,
                 contentDescription = photo.authorName,
-                modifier = Modifier.size(48.dp)
+                modifier = Modifier.size(48.dp),
+                sharedTransitionScope = sharedTransitionScope,
+                animatedVisibilityScope = animatedVisibilityScope,
+                sharedKey = SharedTransitionKeys.userProfileImage(photo.username ?: photo.authorName)
             )
 
             Spacer(modifier = Modifier.width(12.dp))

@@ -1,5 +1,8 @@
 package com.example.composegallery.feature.gallery.ui.profile
 
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -8,12 +11,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.ui.common.PhotoImage
+import com.example.composegallery.feature.gallery.ui.common.SharedTransitionKeys
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun ProfilePhotoCard(
     imageUrl: String,
     modifier: Modifier = Modifier,
     blurHash: String? = null,
+    sharedTransitionScope: SharedTransitionScope? = null,
+    animatedVisibilityScope: AnimatedVisibilityScope? = null,
+    photoId: String? = null,
     onRetry: () -> Unit,
     onClick: (() -> Unit)? = null
 ) {
@@ -29,6 +37,9 @@ fun ProfilePhotoCard(
         contentDescription = contentDescription,
         modifier = clickableModifier,
         blurHash = blurHash,
+        sharedTransitionScope = sharedTransitionScope,
+        animatedVisibilityScope = animatedVisibilityScope,
+        sharedKey = photoId?.let { SharedTransitionKeys.photoImage(it) },
         onRetry = onRetry
     )
 }

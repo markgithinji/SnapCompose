@@ -21,11 +21,17 @@ data class PhotoDetailRoute(
 data class FullscreenPhotoRoute(val photoId: String)
 
 @Serializable
-data class UserProfileRoute(val username: String)
+data class UserProfileRoute(
+    val username: String,
+    val name: String? = null,
+    val profileImageUrl: String? = null
+)
 
 @Serializable
 data class CollectionDetailRoute(
     val collectionId: String,
     val collectionTitle: String,
-    val totalPhotos: Int
+    val totalPhotos: Int,
+    val coverPhotoUrl: String? = null,
+    val coverBlurHash: String? = null
 )

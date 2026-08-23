@@ -1,5 +1,8 @@
 package com.example.composegallery.feature.gallery.ui.profile
 
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -42,16 +45,22 @@ import com.example.composegallery.feature.gallery.ui.common.BottomLoadingIndicat
 import com.example.composegallery.feature.gallery.ui.common.EmptyContentMessage
 import com.example.composegallery.feature.gallery.ui.common.InfoMessageScreen
 import com.example.composegallery.feature.gallery.ui.common.LoadMoreListError
+import com.example.composegallery.feature.gallery.ui.common.PhotoImage
 import com.example.composegallery.feature.gallery.ui.common.ProgressIndicator
 import com.example.composegallery.feature.gallery.ui.common.RetryButton
+import com.example.composegallery.feature.gallery.ui.common.SharedTransitionKeys
 import com.example.composegallery.feature.gallery.ui.common.calculateResponsiveColumnCount
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun CollectionDetailScreen(
     collectionId: String,
     collectionTitle: String,
     totalPhotos: Int,
+    initialCoverUrl: String? = null,
+    initialBlurHash: String? = null,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedContentScope,
     onBack: () -> Unit,
     onPhotoClick: (Photo) -> Unit,
     viewModel: UserProfileViewModel = hiltViewModel()
@@ -141,6 +150,24 @@ fun CollectionDetailScreen(
                         verticalItemSpacing = 12.dp,
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
+                        if (initialCoverUrl != null) {
+                            item(span = StaggeredGridItemSpan.FullLine) {
+                                PhotoImage(
+                                    imageUrl = initialCoverUrl,
+                                    contentDescription = collectionTitle,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .aspectRatio(1.6f)
+                                        .clip(RoundedCornerShape(12.dp)),
+                                    blurHash = initialBlurHash,
+                                    sharedTransitionScope = sharedTransitionScope,
+                                    animatedVisibilityScope = animatedVisibilityScope,
+                                    sharedKey = SharedTransitionKeys.collectionImage(collectionId),
+                                    onRetry = { /* No-op for header retry for now */ }
+                                )
+                            }
+                        }
+
                         items(
                             count = photos.itemCount,
                             key = { index ->
@@ -160,6 +187,9 @@ fun CollectionDetailScreen(
                                     .aspectRatio(photo.width.toFloat() / photo.height)
                                     .clip(RoundedCornerShape(12.dp)),
                                 blurHash = photo.blurHash,
+                                sharedTransitionScope = sharedTransitionScope,
+                                animatedVisibilityScope = animatedVisibilityScope,
+                                photoId = photo.id,
                                 onRetry = { retryKeys[photo.id] = retryKey + 1 },
                                 onClick = { onPhotoClick(photo) }
                             )

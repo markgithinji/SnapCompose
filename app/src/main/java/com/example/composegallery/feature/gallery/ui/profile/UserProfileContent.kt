@@ -1,5 +1,8 @@
 package com.example.composegallery.feature.gallery.ui.profile
 
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -52,9 +55,10 @@ import com.example.composegallery.feature.gallery.domain.model.PhotoCollection
 import com.example.composegallery.feature.gallery.ui.common.BottomLoadingIndicator
 import com.example.composegallery.feature.gallery.ui.common.EmptyContentMessage
 import com.example.composegallery.feature.gallery.ui.common.LoadMoreListError
+import com.example.composegallery.feature.gallery.ui.common.SharedTransitionKeys
 import com.example.composegallery.feature.gallery.ui.common.calculateResponsiveColumnCount
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun UserProfileContent(
     username: String,
@@ -71,8 +75,10 @@ fun UserProfileContent(
     userPhotos: LazyPagingItems<Photo>,
     userLikes: LazyPagingItems<Photo>,
     userCollections: LazyPagingItems<PhotoCollection>,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedContentScope,
     onPhotoClick: (Photo) -> Unit,
-    onCollectionClick: (String, String, Int) -> Unit,
+    onCollectionClick: (PhotoCollection) -> Unit,
     onStatsClick: () -> Unit,
     onBack: () -> Unit,
     onTabSelected: (UserTab) -> Unit = {}
@@ -143,7 +149,10 @@ fun UserProfileContent(
                     location = location,
                     portfolioUrl = portfolioUrl,
                     instagramUsername = instagramUsername,
-                    unsplashProfileUrl = unsplashProfileUrl
+                    unsplashProfileUrl = unsplashProfileUrl,
+                    sharedTransitionScope = sharedTransitionScope,
+                    animatedVisibilityScope = animatedVisibilityScope,
+                    username = username
                 )
             }
 
@@ -185,6 +194,8 @@ fun UserProfileContent(
                     photos = userPhotos,
                     retryKeys = retryKeys,
                     onRetry = retryHandler,
+                    sharedTransitionScope = sharedTransitionScope,
+                    animatedVisibilityScope = animatedVisibilityScope,
                     onPhotoClick = onPhotoClick
                 )
 
@@ -192,6 +203,8 @@ fun UserProfileContent(
                     photos = userLikes,
                     retryKeys = retryKeys,
                     onRetry = retryHandler,
+                    sharedTransitionScope = sharedTransitionScope,
+                    animatedVisibilityScope = animatedVisibilityScope,
                     onPhotoClick = onPhotoClick
                 )
 
@@ -199,6 +212,8 @@ fun UserProfileContent(
                     collections = userCollections,
                     retryKeys = retryKeys,
                     onRetry = retryHandler,
+                    sharedTransitionScope = sharedTransitionScope,
+                    animatedVisibilityScope = animatedVisibilityScope,
                     onCollectionClick = onCollectionClick
                 )
             }
@@ -210,6 +225,8 @@ private fun LazyStaggeredGridScope.renderPhotoItems(
     photos: LazyPagingItems<Photo>,
     retryKeys: SnapshotStateMap<String, Int>,
     onRetry: (String) -> Unit,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedContentScope,
     onPhotoClick: (Photo) -> Unit
 ) {
     val refreshState = photos.loadState.refresh
@@ -233,6 +250,9 @@ private fun LazyStaggeredGridScope.renderPhotoItems(
                 .aspectRatio(photo.width.toFloat() / photo.height)
                 .clip(RoundedCornerShape(12.dp)),
             blurHash = photo.blurHash,
+            sharedTransitionScope = sharedTransitionScope,
+            animatedVisibilityScope = animatedVisibilityScope,
+            photoId = photo.id,
             onRetry = { onRetry(photo.id) },
             onClick = { onPhotoClick(photo) }
         )
@@ -283,7 +303,9 @@ private fun LazyStaggeredGridScope.renderCollectionItems(
     collections: LazyPagingItems<PhotoCollection>,
     retryKeys: SnapshotStateMap<String, Int>,
     onRetry: (String) -> Unit,
-    onCollectionClick: (String, String, Int) -> Unit
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedContentScope,
+    onCollectionClick: (PhotoCollection) -> Unit
 ) {
     val refreshState = collections.loadState.refresh
 
@@ -312,13 +334,11 @@ private fun LazyStaggeredGridScope.renderCollectionItems(
             modifier = Modifier.fillMaxWidth(),
             blurHash = collection.coverPhoto?.blurHash,
             description = collection.description,
+            sharedTransitionScope = sharedTransitionScope,
+            animatedVisibilityScope = animatedVisibilityScope,
             onRetry = { onRetry(collection.id) },
             onCollectionClick = {
-                onCollectionClick(
-                    collection.id,
-                    collection.title,
-                    collection.totalPhotos
-                )
+                onCollectionClick(collection)
             }
         )
     }

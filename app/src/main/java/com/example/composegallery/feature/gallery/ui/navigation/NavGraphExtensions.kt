@@ -65,8 +65,14 @@ fun NavGraphBuilder.photoDetailRoute(
             onExpandClick = { photoId ->
                 navController.navigate(FullscreenPhotoRoute(photoId))
             },
-            onUserClick = { username ->
-                navController.navigate(UserProfileRoute(username = username))
+            onUserClick = { user ->
+                navController.navigate(
+                    UserProfileRoute(
+                        username = user.username ?: user.authorName,
+                        name = user.authorName,
+                        profileImageUrl = user.authorProfileImageHighResUrl
+                    )
+                )
             }
         )
     }
@@ -79,11 +85,19 @@ fun NavGraphBuilder.fullscreenPhotoRoute() {
     }
 }
 
-fun NavGraphBuilder.userProfileRoute(navController: NavController) {
+@OptIn(ExperimentalSharedTransitionApi::class)
+fun NavGraphBuilder.userProfileRoute(
+    sharedTransitionScope: SharedTransitionScope,
+    navController: NavController
+) {
     composable<UserProfileRoute> { backStackEntry ->
         val args = backStackEntry.toRoute<UserProfileRoute>()
         UserProfileScreen(
             username = args.username,
+            initialName = args.name,
+            initialProfileImageUrl = args.profileImageUrl,
+            sharedTransitionScope = sharedTransitionScope,
+            animatedVisibilityScope = this,
             onBack = { navController.popBackStack() },
             onPhotoClick = { photo ->
                 navController.navigate(
@@ -96,12 +110,14 @@ fun NavGraphBuilder.userProfileRoute(navController: NavController) {
                     )
                 )
             },
-            onCollectionClick = { collectionId, title, totalPhotos ->
+            onCollectionClick = { collection ->
                 navController.navigate(
                     CollectionDetailRoute(
-                        collectionId = collectionId,
-                        collectionTitle = title,
-                        totalPhotos = totalPhotos
+                        collectionId = collection.id,
+                        collectionTitle = collection.title,
+                        totalPhotos = collection.totalPhotos,
+                        coverPhotoUrl = collection.coverPhoto?.smallUrl,
+                        coverBlurHash = collection.coverPhoto?.blurHash
                     )
                 )
             }
@@ -109,13 +125,21 @@ fun NavGraphBuilder.userProfileRoute(navController: NavController) {
     }
 }
 
-fun NavGraphBuilder.collectionDetailRoute(navController: NavController) {
+@OptIn(ExperimentalSharedTransitionApi::class)
+fun NavGraphBuilder.collectionDetailRoute(
+    sharedTransitionScope: SharedTransitionScope,
+    navController: NavController
+) {
     composable<CollectionDetailRoute> { backStackEntry ->
         val args = backStackEntry.toRoute<CollectionDetailRoute>()
         CollectionDetailScreen(
             collectionId = args.collectionId,
             collectionTitle = args.collectionTitle,
             totalPhotos = args.totalPhotos,
+            initialCoverUrl = args.coverPhotoUrl,
+            initialBlurHash = args.coverBlurHash,
+            sharedTransitionScope = sharedTransitionScope,
+            animatedVisibilityScope = this,
             onBack = { navController.popBackStack() },
             onPhotoClick = { photo ->
                 navController.navigate(
