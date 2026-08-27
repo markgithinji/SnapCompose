@@ -12,17 +12,17 @@ import coil.request.SuccessResult
 import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.data.util.AppException
 import com.example.composegallery.feature.gallery.data.util.Result
-import com.example.composegallery.feature.gallery.domain.repository.PhotoActionsRepository
+import com.example.composegallery.feature.gallery.domain.repository.PhotoActionService
 import com.example.composegallery.feature.gallery.util.StringProvider
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class DefaultPhotoActionsRepository @Inject constructor(
+class DefaultPhotoActionService @Inject constructor(
     @ApplicationContext private val context: Context,
     private val stringProvider: StringProvider
-) : PhotoActionsRepository {
+) : PhotoActionService {
 
     override suspend fun downloadPhoto(url: String, fileName: String): Result<Unit> = withContext(Dispatchers.IO) {
         try {

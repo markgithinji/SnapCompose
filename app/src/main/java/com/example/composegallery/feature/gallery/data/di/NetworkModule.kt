@@ -7,11 +7,11 @@ import com.example.composegallery.feature.gallery.data.local.RecentSearchDao
 import com.example.composegallery.feature.gallery.data.remote.AuthInterceptor
 import com.example.composegallery.feature.gallery.data.remote.UnsplashApi
 import com.example.composegallery.feature.gallery.data.repository.DefaultGalleryRepository
-import com.example.composegallery.feature.gallery.data.repository.DefaultPhotoActionsRepository
+import com.example.composegallery.feature.gallery.data.repository.DefaultPhotoActionService
 import com.example.composegallery.feature.gallery.data.repository.DefaultSearchRepository
 import com.example.composegallery.feature.gallery.data.repository.DefaultUserRepository
 import com.example.composegallery.feature.gallery.domain.repository.GalleryRepository
-import com.example.composegallery.feature.gallery.domain.repository.PhotoActionsRepository
+import com.example.composegallery.feature.gallery.domain.repository.PhotoActionService
 import com.example.composegallery.feature.gallery.domain.repository.SearchRepository
 import com.example.composegallery.feature.gallery.domain.repository.UserRepository
 import com.example.composegallery.feature.gallery.util.DefaultStringProvider
@@ -93,11 +93,11 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun providePhotoActionsRepository(
+    fun providePhotoActionService(
         @ApplicationContext context: Context,
         stringProvider: StringProvider
-    ): PhotoActionsRepository {
-        return DefaultPhotoActionsRepository(context, stringProvider)
+    ): PhotoActionService {
+        return DefaultPhotoActionService(context, stringProvider)
     }
 
     @Provides
