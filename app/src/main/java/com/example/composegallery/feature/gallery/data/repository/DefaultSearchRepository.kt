@@ -16,19 +16,21 @@ import com.example.composegallery.feature.gallery.util.StringProvider
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
+import com.example.composegallery.feature.gallery.domain.model.SearchFilters
+
 class DefaultSearchRepository @Inject constructor(
     private val api: UnsplashApi,
     private val recentSearchDao: RecentSearchDao,
     private val stringProvider: StringProvider
 ) : SearchRepository {
 
-    override fun searchPagedPhotos(query: String): Flow<PagingData<Photo>> {
+    override fun searchPagedPhotos(filters: SearchFilters): Flow<PagingData<Photo>> {
         return Pager(
             config = PagingConfig(
                 pageSize = PagingDefaults.PAGE_SIZE,
                 initialLoadSize = PagingDefaults.INITIAL_LOAD_SIZE,
             ),
-            pagingSourceFactory = { UnsplashSearchPagingSource(api, query, stringProvider) }
+            pagingSourceFactory = { UnsplashSearchPagingSource(api, filters, stringProvider) }
         ).flow
     }
 

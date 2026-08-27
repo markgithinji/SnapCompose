@@ -80,5 +80,28 @@
     <string name="show_less">Show less</string>
     <string name="retry">Retry</string>
     <string name="attribution_format">Photo by %1$s on Unsplash</string>
+    <string name="filters">Filters</string>
+    <string name="orientation">Orientation</string>
+    <string name="color">Color</string>
+    <string name="sort_by">Sort by</string>
+    <string name="any">Any</string>
+    <string name="relevant">Relevant</string>
+    <string name="latest">Latest</string>
+    <string name="landscape">Landscape</string>
+    <string name="portrait">Portrait</string>
+    <string name="squarish">Squarish</string>
+    <string name="black_and_white">Black &amp; White</string>
+    <string name="black">Black</string>
+    <string name="white">White</string>
+    <string name="yellow">Yellow</string>
+    <string name="orange">Orange</string>
+    <string name="red">Red</string>
+    <string name="purple">Purple</string>
+    <string name="magenta">Magenta</string>
+    <string name="green">Green</string>
+    <string name="teal">Teal</string>
+    <string name="blue">Blue</string>
+    <string name="apply_filters">Apply Filters</string>
+    <string name="reset_filters">Reset</string>
 
 </resources>

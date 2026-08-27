@@ -11,6 +11,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -22,31 +23,23 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,11 +51,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.composegallery.R
+import com.example.composegallery.feature.gallery.domain.model.OrderBy
 import com.example.composegallery.feature.gallery.domain.model.Photo
+import com.example.composegallery.feature.gallery.domain.model.SearchFilters
 import com.example.composegallery.feature.gallery.ui.common.BottomLoadingIndicator
 import com.example.composegallery.feature.gallery.ui.common.InfoMessageScreen
 import com.example.composegallery.feature.gallery.ui.common.LoadMoreListError
@@ -82,10 +78,11 @@ fun SearchScreen(
     onPhotoClick: (Photo) -> Unit,
     viewModel: SearchViewModel = hiltViewModel()
 ) {
-    var query by rememberSaveable { mutableStateOf("") }
+    val filters by viewModel.filters.collectAsStateWithLifecycle()
     var firstSearchDone by rememberSaveable { mutableStateOf(false) }
     val retryKeys = remember { mutableStateMapOf<String, Int>() }
     val pagedPhotos = viewModel.searchResults.collectAsLazyPagingItems()
+    var showFilters by remember { mutableStateOf(false) }
 
     Scaffold(
         modifier = Modifier
@@ -93,15 +90,17 @@ fun SearchScreen(
             .windowInsetsPadding(WindowInsets.systemBars),
         topBar = {
             SearchScreenTopBar(
-                query = query,
-                onQueryChange = { query = it },
+                query = filters.query,
+                activeFilters = filters.orientation != null || filters.color != null || filters.orderBy != OrderBy.RELEVANT,
+                onQueryChange = { viewModel.updateQuery(it) },
                 onSearchSubmit = {
-                    val trimmed = query.trim()
+                    val trimmed = filters.query.trim()
                     if (trimmed.isNotEmpty()) {
                         viewModel.submitSearch(trimmed)
                         firstSearchDone = true
                     }
                 },
+                onFilterClick = { showFilters = true },
                 onBack = onBack,
                 sharedTransitionScope = sharedTransitionScope,
                 animatedVisibilityScope = animatedVisibilityScope
@@ -118,14 +117,29 @@ fun SearchScreen(
             animatedVisibilityScope = animatedVisibilityScope
         )
     }
+
+    if (showFilters) {
+        SearchFilterBottomSheet(
+            filters = filters,
+            onDismissRequest = { showFilters = false },
+            onApplyFilters = { newFilters ->
+                viewModel.applyFilters(newFilters)
+                if (newFilters.query.isNotBlank()) {
+                    firstSearchDone = true
+                }
+            }
+        )
+    }
 }
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun SearchScreenTopBar(
     query: String,
+    activeFilters: Boolean,
     onQueryChange: (String) -> Unit,
     onSearchSubmit: () -> Unit,
+    onFilterClick: () -> Unit,
     onBack: () -> Unit,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedContentScope
@@ -200,6 +214,28 @@ private fun SearchScreenTopBar(
                     }
                 )
             )
+        }
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        Box {
+            IconButton(onClick = onFilterClick) {
+                Icon(
+                    Icons.Default.Tune,
+                    contentDescription = stringResource(R.string.filters),
+                    tint = if (activeFilters) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                )
+            }
+            if (activeFilters) {
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary)
+                        .align(Alignment.TopEnd)
+                        .padding(2.dp)
+                )
+            }
         }
     }
 }
