@@ -104,10 +104,17 @@
     <string name="apply_filters">Apply Filters</string>
     <string name="reset_filters">Reset</string>
     <string name="download">Download</string>
+    <string name="share">Share</string>
     <string name="set_as_wallpaper">Set as Wallpaper</string>
     <string name="wallpaper_set_success">Wallpaper set successfully!</string>
     <string name="wallpaper_set_error">Failed to set wallpaper.</string>
     <string name="download_started">Download started…</string>
     <string name="download_error">Failed to start download.</string>
+    <string name="download_confirm_title">Download Photo</string>
+    <string name="download_confirm_msg">Would you like to download this high-resolution photo to your device?</string>
+    <string name="wallpaper_confirm_title">Set Wallpaper</string>
+    <string name="wallpaper_confirm_msg">Would you like to set this photo as your device home screen wallpaper?</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
 
 </resources>

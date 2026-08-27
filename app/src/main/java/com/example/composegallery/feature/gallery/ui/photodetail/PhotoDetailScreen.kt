@@ -1,5 +1,6 @@
 package com.example.composegallery.feature.gallery.ui.photodetail
 
+import android.content.Intent
 import android.icu.util.TimeZone
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
@@ -25,11 +26,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Fullscreen
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Wallpaper
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -39,6 +42,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -51,11 +55,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -91,6 +98,8 @@ fun PhotoDetailScreen(
     val retryKey = remember(photoId) { mutableIntStateOf(0) }
     val snackbarHostState = remember { SnackbarHostState() }
 
+    var pendingAction by remember { mutableStateOf<PhotoDetailAction?>(null) }
+
     LaunchedEffect(photoId) {
         viewModel.loadPhoto(photoId)
     }
@@ -100,6 +109,68 @@ fun PhotoDetailScreen(
             snackbarHostState.showSnackbar(message)
         }
     }
+
+    if (pendingAction != null && photoState is UiState.Content) {
+        val photo = (photoState as UiState.Content).data
+        AlertDialog(
+            onDismissRequest = { pendingAction = null },
+            icon = {
+                Icon(
+                    imageVector = if (pendingAction == PhotoDetailAction.DOWNLOAD) Icons.Default.Download
+                    else Icons.Default.Wallpaper,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(32.dp)
+                )
+            },
+            title = {
+                Text(
+                    text = stringResource(
+                        if (pendingAction == PhotoDetailAction.DOWNLOAD) R.string.download_confirm_title
+                        else R.string.wallpaper_confirm_title
+                    ),
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text(
+                    text = stringResource(
+                        if (pendingAction == PhotoDetailAction.DOWNLOAD) R.string.download_confirm_msg
+                        else R.string.wallpaper_confirm_msg
+                    ),
+                    textAlign = TextAlign.Start,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            },
+            shape = RoundedCornerShape(28.dp),
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        if (pendingAction == PhotoDetailAction.DOWNLOAD) {
+                            viewModel.downloadPhoto(photo)
+                        } else {
+                            viewModel.setWallpaper(photo)
+                        }
+                        pendingAction = null
+                    }
+                ) {
+                    Text(
+                        text = stringResource(R.string.confirm),
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { pendingAction = null }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
+
+    val context = LocalContext.current
 
     Scaffold(
         modifier = Modifier.testTag("PhotoDetailScreen"),
@@ -135,6 +206,7 @@ fun PhotoDetailScreen(
 
             else -> {
                 val photo = (state as? UiState.Content)?.data
+                val shareTitle = stringResource(R.string.share)
                 PhotoDetailContent(
                     photo = photo,
                     photoId = photoId,
@@ -151,8 +223,18 @@ fun PhotoDetailScreen(
                     modifier = Modifier.padding(padding),
                     onExpandClick = onExpandClick,
                     onUserClick = onUserClick,
-                    onDownloadClick = { viewModel.downloadPhoto(it) },
-                    onWallpaperClick = { viewModel.setWallpaper(it) },
+                    onDownloadClick = { pendingAction = PhotoDetailAction.DOWNLOAD },
+                    onWallpaperClick = { pendingAction = PhotoDetailAction.WALLPAPER },
+                    onShareClick = {
+                        val intent = Intent(Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(
+                                Intent.EXTRA_TEXT,
+                                photo?.authorUnsplashUrl ?: photo?.regularUrl
+                            )
+                        }
+                        context.startActivity(Intent.createChooser(intent, shareTitle))
+                    },
                     shape = detailShape,
                     onImageLoad = {
                         photo?.downloadLocationUrl?.let { url ->
@@ -164,6 +246,8 @@ fun PhotoDetailScreen(
         }
     }
 }
+
+private enum class PhotoDetailAction { DOWNLOAD, WALLPAPER }
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -183,8 +267,9 @@ private fun PhotoDetailContent(
     modifier: Modifier = Modifier,
     onExpandClick: (String) -> Unit,
     onUserClick: (Photo) -> Unit,
-    onDownloadClick: (Photo) -> Unit,
-    onWallpaperClick: (Photo) -> Unit,
+    onDownloadClick: () -> Unit,
+    onWallpaperClick: () -> Unit,
+    onShareClick: () -> Unit,
     shape: RoundedCornerShape,
     onImageLoad: () -> Unit
 ) {
@@ -265,7 +350,8 @@ private fun PhotoDetailContent(
                         isActionLoading = isActionLoading,
                         onUserClick = onUserClick,
                         onDownloadClick = onDownloadClick,
-                        onWallpaperClick = onWallpaperClick
+                        onWallpaperClick = onWallpaperClick,
+                        onShareClick = onShareClick
                     )
                 }
             } else {
@@ -284,8 +370,9 @@ private fun PhotoDetailInfo(
     animatedVisibilityScope: AnimatedContentScope,
     isActionLoading: Boolean,
     onUserClick: (Photo) -> Unit,
-    onDownloadClick: (Photo) -> Unit,
-    onWallpaperClick: (Photo) -> Unit
+    onDownloadClick: () -> Unit,
+    onWallpaperClick: () -> Unit,
+    onShareClick: () -> Unit
 ) {
     val formattedDate by remember(photo.createdAt) {
         derivedStateOf { photo.createdAt?.formatToReadableDate() }
@@ -296,6 +383,7 @@ private fun PhotoDetailInfo(
             .fillMaxWidth()
             .padding(16.dp)
     ) {
+        // ... (Author Info logic)
         // Author Info
         Row(
             modifier = Modifier
@@ -367,39 +455,43 @@ private fun PhotoDetailInfo(
         // Actions
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Button(
-                onClick = { onDownloadClick(photo) },
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                )
+            FilledTonalIconButton(
+                onClick = onShareClick,
+                modifier = Modifier.size(56.dp),
+                shape = RoundedCornerShape(16.dp)
             ) {
-                Icon(Icons.Default.Download, contentDescription = null)
-                Spacer(Modifier.width(8.dp))
-                Text(stringResource(R.string.download))
+                Icon(Icons.Default.Share, contentDescription = stringResource(R.string.share))
             }
 
-            Button(
-                onClick = { onWallpaperClick(photo) },
-                modifier = Modifier.weight(1f),
+            FilledTonalIconButton(
+                onClick = onDownloadClick,
+                modifier = Modifier.size(56.dp),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Icon(Icons.Default.Download, contentDescription = stringResource(R.string.download))
+            }
+
+            FilledIconButton(
+                onClick = onWallpaperClick,
+                modifier = Modifier.size(56.dp),
                 enabled = !isActionLoading,
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(16.dp)
             ) {
                 if (isActionLoading) {
                     CircularProgressIndicator(
-                        modifier = Modifier.size(18.dp),
+                        modifier = Modifier.size(24.dp),
                         strokeWidth = 2.dp,
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                 } else {
-                    Icon(Icons.Default.Wallpaper, contentDescription = null)
+                    Icon(
+                        imageVector = Icons.Default.Wallpaper,
+                        contentDescription = stringResource(R.string.set_as_wallpaper)
+                    )
                 }
-                Spacer(Modifier.width(8.dp))
-                Text(stringResource(R.string.set_as_wallpaper))
             }
         }
 
