@@ -8,7 +8,8 @@ import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.data.util.Result
 import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.domain.repository.GalleryRepository
-import com.example.composegallery.feature.gallery.domain.repository.PhotoActionsRepository
+import com.example.composegallery.feature.gallery.domain.usecase.DownloadPhotoUseCase
+import com.example.composegallery.feature.gallery.domain.usecase.SetWallpaperUseCase
 import com.example.composegallery.feature.gallery.ui.util.UiState
 import com.example.composegallery.feature.gallery.util.StringProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,7 +26,8 @@ import javax.inject.Inject
 @HiltViewModel
 class GalleryViewModel @Inject constructor(
     private val galleryRepository: GalleryRepository,
-    private val photoActionsRepository: PhotoActionsRepository,
+    private val downloadPhotoUseCase: DownloadPhotoUseCase,
+    private val setWallpaperUseCase: SetWallpaperUseCase,
     private val stringProvider: StringProvider
 ) : ViewModel() {
 
@@ -59,11 +61,9 @@ class GalleryViewModel @Inject constructor(
 
     fun downloadPhoto(photo: Photo) {
         viewModelScope.launch {
-            val fileName = "Snap_${photo.id}.jpg"
-            when (val result = photoActionsRepository.downloadPhoto(photo.fullUrl, fileName)) {
+            when (val result = downloadPhotoUseCase(photo)) {
                 is Result.Success -> {
                     _actionEvent.emit(stringProvider.get(R.string.download_started))
-                    reportDownload(photo.downloadLocationUrl ?: return@launch)
                 }
                 is Result.Error -> _actionEvent.emit(result.message)
             }
@@ -73,10 +73,9 @@ class GalleryViewModel @Inject constructor(
     fun setWallpaper(photo: Photo) {
         viewModelScope.launch {
             _isActionLoading.value = true
-            when (val result = photoActionsRepository.setWallpaper(photo.fullUrl)) {
+            when (val result = setWallpaperUseCase(photo)) {
                 is Result.Success -> {
                     _actionEvent.emit(stringProvider.get(R.string.wallpaper_set_success))
-                    reportDownload(photo.downloadLocationUrl ?: return@launch)
                 }
                 is Result.Error -> _actionEvent.emit(result.message)
             }
