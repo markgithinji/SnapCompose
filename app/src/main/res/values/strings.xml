@@ -1,18 +1,18 @@
 <resources>
     <string name="app_name">Snap</string>
 
-    <string name="error_no_internet_connection">No internet connection</string>
-    <string name="error_bad_request">Bad request. Something is wrong with the request.</string>
-    <string name="error_unauthorized">Unauthorized. Please check your access token.</string>
-    <string name="error_forbidden">"You don't have permission to access this resource."</string>
-    <string name="error_not_found">"Not found. The resource you're looking for doesn't exist."</string>
-    <string name="error_server_error">"Server error. Something went wrong on Unsplash's end."</string>
-    <string name="error_service_unavailable">Try again later.</string>
-    <string name="error_http_generic">HTTP %1$d: %2$s</string>
-    <string name="error_invalid_data_received">Invalid data received from the server.</string>
-    <string name="error_unexpected_data_format">Unexpected data format received.</string>
-    <string name="error_unexpected">Unexpected error occurred.</string>
-    <string name="error_database">Database error</string>
+    <string name="error_no_internet_connection">You’re offline. Check your connection and try again.</string>
+    <string name="error_bad_request">Something went wrong with the request. Please try again.</string>
+    <string name="error_unauthorized">Authentication failed. Please check your API key.</string>
+    <string name="error_forbidden">You’ve reached the limit or don’t have permission to view this.</string>
+    <string name="error_not_found">The resource you’re looking for doesn’t exist.</string>
+    <string name="error_server_error">The server is having trouble. Please try again later.</string>
+    <string name="error_service_unavailable">Service is temporarily unavailable. Please try again later.</string>
+    <string name="error_http_generic">Something went wrong (Error %1$d). Please try again.</string>
+    <string name="error_invalid_data_received">We received invalid data. Please try refreshing.</string>
+    <string name="error_unexpected_data_format">The data format was unexpected. Please try again.</string>
+    <string name="error_unexpected">An unexpected error occurred. Please try again.</string>
+    <string name="error_database">We couldn’t access the local data.</string>
     <string name="photo_zoom_description">"Zoomable photo"</string>
     <string name="error_photo_load_title">"Failed to load photo"</string>
     <string name="app_title">Snap</string>

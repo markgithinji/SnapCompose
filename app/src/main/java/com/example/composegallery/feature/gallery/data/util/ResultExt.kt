@@ -35,7 +35,7 @@ inline fun <T> safeApiCall(stringProvider: StringProvider, block: () -> T): Resu
     } catch (e: IOException) {
         val message = stringProvider.get(R.string.error_no_internet_connection)
         Timber.tag("safeApiCall").e(e, "IO Exception: %s", message)
-        Result.Error(message, e)
+        Result.Error(message, AppException(message, e))
     } catch (e: HttpException) {
         val message = when (e.code()) {
             HttpURLConnection.HTTP_BAD_REQUEST -> stringProvider.get(R.string.error_bad_request)          // 400
@@ -44,23 +44,23 @@ inline fun <T> safeApiCall(stringProvider: StringProvider, block: () -> T): Resu
             HttpURLConnection.HTTP_NOT_FOUND -> stringProvider.get(R.string.error_not_found)              // 404
             HttpURLConnection.HTTP_INTERNAL_ERROR -> stringProvider.get(R.string.error_server_error)      // 500
             HttpURLConnection.HTTP_UNAVAILABLE -> stringProvider.get(R.string.error_service_unavailable)  // 503
-            else -> stringProvider.get(R.string.error_http_generic, e.code(), e.message())
+            else -> stringProvider.get(R.string.error_http_generic, e.code())
         }
         val errorBody = e.response()?.errorBody()?.string()
         Timber.tag("safeApiCall").e(e, "HTTP Exception [%d]: %s. Body: %s", e.code(), message, errorBody)
-        Result.Error(message, e)
+        Result.Error(message, AppException(message, e))
     } catch (e: IllegalStateException) {
         val message = stringProvider.get(R.string.error_invalid_data_received)
         Timber.tag("safeApiCall").e(e)
-        Result.Error(message, e)
+        Result.Error(message, AppException(message, e))
     } catch (e: IllegalArgumentException) {
         val message = stringProvider.get(R.string.error_unexpected_data_format)
         Timber.tag("safeApiCall").e(e)
-        Result.Error(message, e)
+        Result.Error(message, AppException(message, e))
     } catch (e: Exception) {
         val message = stringProvider.get(R.string.error_unexpected)
         Timber.tag("safeApiCall").e(e)
-        Result.Error(message, e)
+        Result.Error(message, AppException(message, e))
     }
 }
 
@@ -91,6 +91,6 @@ inline fun <T> safeDbCall(stringProvider: StringProvider, block: () -> T): Resul
     } catch (e: Exception) {
         val message = stringProvider.get(R.string.error_database)
         Timber.tag("safeDbCall").e(e)
-        Result.Error(message, e)
+        Result.Error(message, AppException(message, e))
     }
 }
