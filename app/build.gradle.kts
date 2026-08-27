@@ -1,4 +1,6 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
+import java.io.FileInputStream
 
 plugins {
     alias(libs.plugins.android.application)
@@ -18,7 +20,14 @@ kotlin {
     }
 }
 
-val unsplashApiKey: String = project.findProperty("UNSPLASH_API_KEY") as? String
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(FileInputStream(localPropertiesFile))
+}
+
+val unsplashApiKey: String = (project.findProperty("UNSPLASH_API_KEY") as? String)
+    ?: localProperties.getProperty("UNSPLASH_API_KEY")
     ?: throw IllegalStateException("UNSPLASH_API_KEY is missing. Add it to local.properties")
 
 android {
