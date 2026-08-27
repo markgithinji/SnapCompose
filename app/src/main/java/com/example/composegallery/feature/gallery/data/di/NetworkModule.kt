@@ -77,9 +77,10 @@ object NetworkModule {
     @Singleton
     fun provideGalleryRepository(
         api: UnsplashApi,
+        database: AppDatabase,
         stringProvider: StringProvider
     ): GalleryRepository {
-        return DefaultGalleryRepository(api, stringProvider)
+        return DefaultGalleryRepository(api, database, stringProvider)
     }
 
     @Provides
@@ -117,7 +118,7 @@ object NetworkModule {
             context,
             AppDatabase::class.java,
             "app_database"
-        ).build()
+        ).fallbackToDestructiveMigration(dropAllTables = true).build()
     }
 
     @Provides

@@ -1,14 +1,16 @@
 package com.example.composegallery.feature.gallery.data.repository
 
+import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import androidx.paging.PagingSource
-import androidx.paging.filter
+import androidx.paging.map
 import com.example.composegallery.R
+import com.example.composegallery.feature.gallery.data.local.AppDatabase
+import com.example.composegallery.feature.gallery.data.local.toDomainModel
 import com.example.composegallery.feature.gallery.data.model.toDomainModel
 import com.example.composegallery.feature.gallery.data.pagingsource.PagingDefaults
-import com.example.composegallery.feature.gallery.data.pagingsource.UnsplashGetPhotosPagingSource
+import com.example.composegallery.feature.gallery.data.pagingsource.PhotoRemoteMediator
 import com.example.composegallery.feature.gallery.data.remote.UnsplashApi
 import com.example.composegallery.feature.gallery.data.util.Result
 import com.example.composegallery.feature.gallery.data.util.safeApiCall
@@ -22,28 +24,24 @@ import javax.inject.Inject
 
 class DefaultGalleryRepository @Inject constructor(
     private val api: UnsplashApi,
+    private val database: AppDatabase,
     private val stringProvider: StringProvider
 ) : GalleryRepository {
 
+    @OptIn(ExperimentalPagingApi::class)
     override fun getPagedPhotos(): Flow<PagingData<Photo>> {
-        return createPager { UnsplashGetPhotosPagingSource(api, stringProvider) }
-    }
-
-    private fun createPager(
-        pagingSourceFactory: () -> PagingSource<Int, Photo>
-    ): Flow<PagingData<Photo>> {
         return Pager(
             config = PagingConfig(
                 pageSize = PagingDefaults.PAGE_SIZE,
                 initialLoadSize = PagingDefaults.INITIAL_LOAD_SIZE,
                 prefetchDistance = PagingDefaults.PREFETCH_DISTANCE
             ),
-            pagingSourceFactory = pagingSourceFactory
+            remoteMediator = PhotoRemoteMediator(api, database, stringProvider),
+            pagingSourceFactory = { database.photoDao().getPagedPhotos() }
         ).flow
             .distinctUntilChanged()
             .map { pagingData ->
-                val seen = mutableSetOf<String>()
-                pagingData.filter { seen.add(it.id) } // Filter duplicates
+                pagingData.map { it.toDomainModel() }
             }
     }
 
