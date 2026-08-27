@@ -18,6 +18,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import androidx.core.net.toUri
 
 class DefaultPhotoActionService @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -26,7 +27,7 @@ class DefaultPhotoActionService @Inject constructor(
 
     override suspend fun downloadPhoto(url: String, fileName: String): Result<Unit> = withContext(Dispatchers.IO) {
         try {
-            val request = DownloadManager.Request(Uri.parse(url))
+            val request = DownloadManager.Request(url.toUri())
                 .setTitle(fileName)
                 .setDescription(stringProvider.get(R.string.download_started))
                 .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
