@@ -25,6 +25,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Wallpaper
@@ -36,6 +38,7 @@ import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -95,6 +98,7 @@ fun PhotoDetailScreen(
 ) {
     val photoState by viewModel.uiState.collectAsStateWithLifecycle()
     val isActionLoading by viewModel.isActionLoading.collectAsStateWithLifecycle()
+    val isFavorite by viewModel.isFavorite.collectAsStateWithLifecycle()
     val retryKey = remember(photoId) { mutableIntStateOf(0) }
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -219,12 +223,14 @@ fun PhotoDetailScreen(
                     animatedVisibilityScope = animatedVisibilityScope,
                     retryKey = retryKey.intValue,
                     isActionLoading = isActionLoading,
+                    isFavorite = isFavorite,
                     onRetry = { retryKey.intValue++ },
                     modifier = Modifier.padding(padding),
                     onExpandClick = onExpandClick,
                     onUserClick = onUserClick,
                     onDownloadClick = { pendingAction = PhotoDetailAction.DOWNLOAD },
                     onWallpaperClick = { pendingAction = PhotoDetailAction.WALLPAPER },
+                    onFavoriteClick = { viewModel.toggleFavorite(it) },
                     onShareClick = {
                         val intent = Intent(Intent.ACTION_SEND).apply {
                             type = "text/plain"
@@ -263,12 +269,14 @@ private fun PhotoDetailContent(
     animatedVisibilityScope: AnimatedContentScope,
     retryKey: Int,
     isActionLoading: Boolean,
+    isFavorite: Boolean,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
     onExpandClick: (String) -> Unit,
     onUserClick: (Photo) -> Unit,
     onDownloadClick: () -> Unit,
     onWallpaperClick: () -> Unit,
+    onFavoriteClick: (Photo) -> Unit,
     onShareClick: () -> Unit,
     shape: RoundedCornerShape,
     onImageLoad: () -> Unit
@@ -279,6 +287,7 @@ private fun PhotoDetailContent(
     var isImageLoading by remember { mutableStateOf(true) }
 
     Column(modifier = modifier.fillMaxSize()) {
+// ... (rest of PhotoDetailContent)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -348,9 +357,11 @@ private fun PhotoDetailContent(
                         sharedTransitionScope = sharedTransitionScope,
                         animatedVisibilityScope = animatedVisibilityScope,
                         isActionLoading = isActionLoading,
+                        isFavorite = isFavorite,
                         onUserClick = onUserClick,
                         onDownloadClick = onDownloadClick,
                         onWallpaperClick = onWallpaperClick,
+                        onFavoriteClick = { onFavoriteClick(photo) },
                         onShareClick = onShareClick
                     )
                 }
@@ -369,9 +380,11 @@ private fun PhotoDetailInfo(
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedContentScope,
     isActionLoading: Boolean,
+    isFavorite: Boolean,
     onUserClick: (Photo) -> Unit,
     onDownloadClick: () -> Unit,
     onWallpaperClick: () -> Unit,
+    onFavoriteClick: () -> Unit,
     onShareClick: () -> Unit
 ) {
     val formattedDate by remember(photo.createdAt) {
@@ -458,6 +471,23 @@ private fun PhotoDetailInfo(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            FilledTonalIconButton(
+                onClick = onFavoriteClick,
+                modifier = Modifier.size(56.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = IconButtonDefaults.filledTonalIconButtonColors(
+                    containerColor = if (isFavorite) MaterialTheme.colorScheme.primaryContainer 
+                    else MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = if (isFavorite) MaterialTheme.colorScheme.primary 
+                    else MaterialTheme.colorScheme.onSecondaryContainer
+                )
+            ) {
+                Icon(
+                    imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                    contentDescription = null
+                )
+            }
+
             FilledTonalIconButton(
                 onClick = onShareClick,
                 modifier = Modifier.size(56.dp),

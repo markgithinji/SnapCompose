@@ -116,5 +116,6 @@
     <string name="wallpaper_confirm_msg">Would you like to set this photo as your device home screen wallpaper?</string>
     <string name="cancel">Cancel</string>
     <string name="confirm">Confirm</string>
-
+    <string name="favorites">Favorites</string>
+    <string name="no_favorites_yet">You haven’t added any favorites yet.</string>
 </resources>

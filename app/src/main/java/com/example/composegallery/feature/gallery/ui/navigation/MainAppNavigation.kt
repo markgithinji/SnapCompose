@@ -21,6 +21,7 @@ fun MainAppNavigation() {
                 galleryRoute(
                     sharedTransitionScope = this@SharedTransitionLayout,
                     onSearchClick = { navController.navigate(SearchRoute) },
+                    onFavoritesClick = { navController.navigate(FavoritesRoute) },
                     onPhotoClick = { photo, origin ->
                         navController.navigate(
                             PhotoDetailRoute(
@@ -47,6 +48,23 @@ fun MainAppNavigation() {
                                 thumbUrl = photo.smallUrl,
                                 blurHash = photo.blurHash,
                                 origin = origin
+                            )
+                        )
+                    }
+                )
+
+                favoritesRoute(
+                    sharedTransitionScope = this@SharedTransitionLayout,
+                    onBack = { navController.popBackStack() },
+                    onPhotoClick = { photo ->
+                        navController.navigate(
+                            PhotoDetailRoute(
+                                photoId = photo.id,
+                                width = photo.width,
+                                height = photo.height,
+                                thumbUrl = photo.smallUrl,
+                                blurHash = photo.blurHash,
+                                origin = "favorites"
                             )
                         )
                     }

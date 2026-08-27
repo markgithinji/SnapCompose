@@ -3,6 +3,7 @@ package com.example.composegallery.feature.gallery.data.di
 import android.content.Context
 import androidx.room.Room
 import com.example.composegallery.feature.gallery.data.local.AppDatabase
+import com.example.composegallery.feature.gallery.data.local.FavoritePhotoDao
 import com.example.composegallery.feature.gallery.data.local.RecentSearchDao
 import com.example.composegallery.feature.gallery.data.remote.AuthInterceptor
 import com.example.composegallery.feature.gallery.data.remote.UnsplashApi
@@ -10,10 +11,12 @@ import com.example.composegallery.feature.gallery.data.repository.DefaultGallery
 import com.example.composegallery.feature.gallery.data.repository.DefaultPhotoActionService
 import com.example.composegallery.feature.gallery.data.repository.DefaultSearchRepository
 import com.example.composegallery.feature.gallery.data.repository.DefaultUserRepository
+import com.example.composegallery.feature.gallery.data.repository.DefaultFavoriteRepository
 import com.example.composegallery.feature.gallery.domain.repository.GalleryRepository
 import com.example.composegallery.feature.gallery.domain.repository.PhotoActionService
 import com.example.composegallery.feature.gallery.domain.repository.SearchRepository
 import com.example.composegallery.feature.gallery.domain.repository.UserRepository
+import com.example.composegallery.feature.gallery.domain.repository.FavoriteRepository
 import com.example.composegallery.feature.gallery.util.DefaultStringProvider
 import com.example.composegallery.feature.gallery.util.StringProvider
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
@@ -113,6 +116,14 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    fun provideFavoriteRepository(
+        favoritePhotoDao: FavoritePhotoDao
+    ): FavoriteRepository {
+        return DefaultFavoriteRepository(favoritePhotoDao)
+    }
+
+    @Provides
+    @Singleton
     fun provideDatabase(@ApplicationContext context: Context): AppDatabase {
         return Room.databaseBuilder(
             context,
@@ -124,5 +135,10 @@ object NetworkModule {
     @Provides
     fun provideRecentSearchDao(db: AppDatabase): RecentSearchDao {
         return db.recentSearchDao()
+    }
+
+    @Provides
+    fun provideFavoritePhotoDao(db: AppDatabase): FavoritePhotoDao {
+        return db.favoritePhotoDao()
     }
 }

@@ -45,6 +45,7 @@ fun GalleryScreen(
     animatedVisibilityScope: AnimatedContentScope,
     viewModel: GalleryViewModel = hiltViewModel(),
     onSearchNavigate: () -> Unit,
+    onFavoritesNavigate: () -> Unit,
     onPhotoClick: (Photo) -> Unit
 ) {
     val photos = viewModel.pagedPhotos.collectAsLazyPagingItems()
@@ -91,6 +92,7 @@ fun GalleryScreen(
             onPhotoClick = onPhotoClick,
             onRetry = { photos.retry() },
             onSearchClick = onSearchNavigate,
+            onFavoritesClick = onFavoritesNavigate,
             sharedTransitionScope = sharedTransitionScope,
             animatedVisibilityScope = animatedVisibilityScope
         )
@@ -106,6 +108,7 @@ private fun PhotoGridContent(
     onPhotoClick: (Photo) -> Unit,
     onRetry: () -> Unit,
     onSearchClick: () -> Unit,
+    onFavoritesClick: () -> Unit,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedContentScope
 ) {
@@ -147,6 +150,7 @@ private fun PhotoGridContent(
                         photos = photos,
                         onPhotoClick = { onPhotoClick(it) },
                         onSearchClick = onSearchClick,
+                        onFavoritesClick = onFavoritesClick,
                         sharedTransitionScope = sharedTransitionScope,
                         animatedVisibilityScope = animatedVisibilityScope
                     )

@@ -39,6 +39,7 @@ fun PhotoGrid(
     photos: LazyPagingItems<Photo>,
     onPhotoClick: (Photo) -> Unit,
     onSearchClick: () -> Unit,
+    onFavoritesClick: () -> Unit,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope
 ) {
@@ -62,6 +63,7 @@ fun PhotoGrid(
                 sharedTransitionScope = sharedTransitionScope,
                 animatedVisibilityScope = animatedVisibilityScope,
                 onSearchClick = onSearchClick,
+                onFavoritesClick = onFavoritesClick,
                 modifier = Modifier.statusBarsPadding()
             )
         }

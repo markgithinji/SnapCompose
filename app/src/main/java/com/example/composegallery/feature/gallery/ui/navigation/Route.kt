@@ -9,6 +9,9 @@ object GalleryRoute
 object SearchRoute
 
 @Serializable
+object FavoritesRoute
+
+@Serializable
 data class PhotoDetailRoute(
     val photoId: String,
     val width: Int,

@@ -9,6 +9,7 @@ import androidx.navigation.toRoute
 import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.ui.common.PhotoViewerScreen
 import com.example.composegallery.feature.gallery.ui.gallery.GalleryScreen
+import com.example.composegallery.feature.gallery.ui.gallery.FavoritesScreen
 import com.example.composegallery.feature.gallery.ui.photodetail.PhotoDetailScreen
 import com.example.composegallery.feature.gallery.ui.profile.CollectionDetailScreen
 import com.example.composegallery.feature.gallery.ui.profile.UserProfileScreen
@@ -18,6 +19,7 @@ import com.example.composegallery.feature.gallery.ui.search.SearchScreen
 fun NavGraphBuilder.galleryRoute(
     sharedTransitionScope: SharedTransitionScope,
     onSearchClick: () -> Unit,
+    onFavoritesClick: () -> Unit,
     onPhotoClick: (Photo, String) -> Unit
 ) {
     composable<GalleryRoute> {
@@ -25,7 +27,24 @@ fun NavGraphBuilder.galleryRoute(
             sharedTransitionScope = sharedTransitionScope,
             animatedVisibilityScope = this,
             onSearchNavigate = onSearchClick,
+            onFavoritesNavigate = onFavoritesClick,
             onPhotoClick = { photo -> onPhotoClick(photo, "gallery") }
+        )
+    }
+}
+
+@OptIn(ExperimentalSharedTransitionApi::class)
+fun NavGraphBuilder.favoritesRoute(
+    sharedTransitionScope: SharedTransitionScope,
+    onBack: () -> Unit,
+    onPhotoClick: (Photo) -> Unit
+) {
+    composable<FavoritesRoute> {
+        FavoritesScreen(
+            sharedTransitionScope = sharedTransitionScope,
+            animatedVisibilityScope = this,
+            onBack = onBack,
+            onPhotoClick = onPhotoClick
         )
     }
 }
