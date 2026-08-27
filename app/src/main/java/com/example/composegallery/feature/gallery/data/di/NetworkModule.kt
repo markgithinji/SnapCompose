@@ -7,9 +7,11 @@ import com.example.composegallery.feature.gallery.data.local.RecentSearchDao
 import com.example.composegallery.feature.gallery.data.remote.AuthInterceptor
 import com.example.composegallery.feature.gallery.data.remote.UnsplashApi
 import com.example.composegallery.feature.gallery.data.repository.DefaultGalleryRepository
+import com.example.composegallery.feature.gallery.data.repository.DefaultPhotoActionsRepository
 import com.example.composegallery.feature.gallery.data.repository.DefaultSearchRepository
 import com.example.composegallery.feature.gallery.data.repository.DefaultUserRepository
 import com.example.composegallery.feature.gallery.domain.repository.GalleryRepository
+import com.example.composegallery.feature.gallery.domain.repository.PhotoActionsRepository
 import com.example.composegallery.feature.gallery.domain.repository.SearchRepository
 import com.example.composegallery.feature.gallery.domain.repository.UserRepository
 import com.example.composegallery.feature.gallery.util.DefaultStringProvider
@@ -87,6 +89,15 @@ object NetworkModule {
         stringProvider: StringProvider
     ): UserRepository {
         return DefaultUserRepository(api, stringProvider)
+    }
+
+    @Provides
+    @Singleton
+    fun providePhotoActionsRepository(
+        @ApplicationContext context: Context,
+        stringProvider: StringProvider
+    ): PhotoActionsRepository {
+        return DefaultPhotoActionsRepository(context, stringProvider)
     }
 
     @Provides
