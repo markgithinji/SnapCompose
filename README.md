@@ -12,13 +12,14 @@ A modern Android app built with **Jetpack Compose**, showcasing best practices a
 
 ## 🚀 Features
 
-- 🔍 **Search Unsplash photos** with infinite scroll
+- 🔍 **Search Unsplash photos** with infinite scroll and **advanced filters** (Orientation, Color, Sorting)
 - 📷 **Photo details** with metadata, exif, and location info
-- 👤 **User profile** with statistics, photos, liked images & collections
+- 👥 **User profile** with statistics, photos, liked images & collections
 - 📂 **Collection viewer**
 - 🌑 **Jetpack Compose UI** with Material 3 styling
 - 💉 **Hilt Dependency Injection**
 - 🌐 **Retrofit-based API integration**
+- 🛠️ **MVI/MVVM Clean Architecture** with Use Cases
 - 🧪 **Unit & UI tests (in progress)**
 - 🎯 **Built for performance and readability**
 
@@ -44,11 +45,13 @@ A modern Android app built with **Jetpack Compose**, showcasing best practices a
 
 This app demonstrates attention to smooth user experiences with:
 
-- Confetti animation to celebrate actions
-- Shared element transitions for visual continuity
-- Compose animation APIs like `AnimatedVisibility`, `Crossfade`, `updateTransition`, `Animatable `
-- Responsive staggered grid layout for the gallery, adapting to screen size (similar to Pinterest-style layouts)
-- Gesture support for panning and zooming images for an immersive photo viewing experience
+- **Shared Element Transitions**: Seamless visual continuity when navigating between the gallery, search, and user profiles.
+- **Progressive Image Loading**: Instant "flicker-free" transitions using cached thumbnails that upscale to high-resolution in the background with localized progress indicators.
+- **Namespaced Animations**: Smart transition logic that isolates animations to specific navigation stacks, preventing visual "swapping" during complex navigation flows.
+- **Confetti Celebration**: Interactive confetti animations to reward specific user actions (e.g., following a user).
+- **Responsive Staggered Grid**: Adaptive Pinterest-style layouts that adjust column counts based on device size and orientation.
+- **Gesture Support**: Immersive photo viewing with full support for panning and zooming gestures.
+- **Empathetic Error Handling**: Custom error mapping that converts technical network/API errors into human-readable, actionable messages.
 
 ---
 
@@ -64,7 +67,7 @@ This project **requires an Unsplash API key** to function properly. Without it, 
 ### How to Provide the API Key:
 Create a `local.properties` file at the **root of the project** (next to your `gradlew` file), and add the following line:
 
-UNSPLASH_ACCESS_KEY=your_actual_unsplash_access_key_here
+UNSPLASH_API_KEY=your_actual_unsplash_access_key_here
 
 ---
 
