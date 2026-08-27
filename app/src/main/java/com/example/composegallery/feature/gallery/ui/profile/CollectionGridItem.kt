@@ -1,8 +1,5 @@
 package com.example.composegallery.feature.gallery.ui.profile
 
-import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -24,7 +21,6 @@ import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.ui.common.PhotoImage
 import com.example.composegallery.feature.gallery.ui.common.SharedTransitionKeys
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun CollectionGridItem(
     id: String,
@@ -34,8 +30,6 @@ fun CollectionGridItem(
     modifier: Modifier = Modifier,
     blurHash: String? = null,
     description: String? = null,
-    sharedTransitionScope: SharedTransitionScope? = null,
-    animatedVisibilityScope: AnimatedVisibilityScope? = null,
     onRetry: () -> Unit,
     onCollectionClick: (String) -> Unit
 ) {
@@ -53,9 +47,6 @@ fun CollectionGridItem(
                 .aspectRatio(1.4f)
                 .clip(RoundedCornerShape(12.dp)),
             blurHash = blurHash,
-            sharedTransitionScope = sharedTransitionScope,
-            animatedVisibilityScope = animatedVisibilityScope,
-            sharedKey = SharedTransitionKeys.collectionImage(id),
             onRetry = onRetry
         )
 

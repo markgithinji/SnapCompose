@@ -18,14 +18,14 @@ import com.example.composegallery.feature.gallery.ui.search.SearchScreen
 fun NavGraphBuilder.galleryRoute(
     sharedTransitionScope: SharedTransitionScope,
     onSearchClick: () -> Unit,
-    onPhotoClick: (Photo) -> Unit
+    onPhotoClick: (Photo, String) -> Unit
 ) {
     composable<GalleryRoute> {
         GalleryScreen(
             sharedTransitionScope = sharedTransitionScope,
             animatedVisibilityScope = this,
             onSearchNavigate = onSearchClick,
-            onPhotoClick = onPhotoClick
+            onPhotoClick = { photo -> onPhotoClick(photo, "gallery") }
         )
     }
 }
@@ -34,14 +34,14 @@ fun NavGraphBuilder.galleryRoute(
 fun NavGraphBuilder.searchRoute(
     sharedTransitionScope: SharedTransitionScope,
     onBack: () -> Unit,
-    onPhotoClick: (Photo) -> Unit
+    onPhotoClick: (Photo, String) -> Unit
 ) {
     composable<SearchRoute> {
         SearchScreen(
             sharedTransitionScope = sharedTransitionScope,
             animatedVisibilityScope = this,
             onBack = onBack,
-            onPhotoClick = onPhotoClick
+            onPhotoClick = { photo -> onPhotoClick(photo, "gallery") }
         )
     }
 }
@@ -59,6 +59,7 @@ fun NavGraphBuilder.photoDetailRoute(
             initialHeight = args.height,
             initialThumbUrl = args.thumbUrl,
             initialBlurHash = args.blurHash,
+            origin = args.origin,
             sharedTransitionScope = sharedTransitionScope,
             animatedVisibilityScope = this,
             onBack = { navController.popBackStack() },
@@ -106,7 +107,8 @@ fun NavGraphBuilder.userProfileRoute(
                         width = photo.width,
                         height = photo.height,
                         thumbUrl = photo.smallUrl,
-                        blurHash = photo.blurHash
+                        blurHash = photo.blurHash,
+                        origin = "profile_${args.username}"
                     )
                 )
             },
@@ -115,9 +117,7 @@ fun NavGraphBuilder.userProfileRoute(
                     CollectionDetailRoute(
                         collectionId = collection.id,
                         collectionTitle = collection.title,
-                        totalPhotos = collection.totalPhotos,
-                        coverPhotoUrl = collection.coverPhoto?.smallUrl,
-                        coverBlurHash = collection.coverPhoto?.blurHash
+                        totalPhotos = collection.totalPhotos
                     )
                 )
             }
@@ -136,8 +136,6 @@ fun NavGraphBuilder.collectionDetailRoute(
             collectionId = args.collectionId,
             collectionTitle = args.collectionTitle,
             totalPhotos = args.totalPhotos,
-            initialCoverUrl = args.coverPhotoUrl,
-            initialBlurHash = args.coverBlurHash,
             sharedTransitionScope = sharedTransitionScope,
             animatedVisibilityScope = this,
             onBack = { navController.popBackStack() },
@@ -148,7 +146,8 @@ fun NavGraphBuilder.collectionDetailRoute(
                         width = photo.width,
                         height = photo.height,
                         thumbUrl = photo.smallUrl,
-                        blurHash = photo.blurHash
+                        blurHash = photo.blurHash,
+                        origin = "collection_${args.collectionId}"
                     )
                 )
             }

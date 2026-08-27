@@ -49,6 +49,8 @@ fun PhotoImage(
     sharedTransitionScope: SharedTransitionScope? = null,
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
     sharedKey: String? = null,
+    placeholderUrl: String? = null,
+    onLoading: ((Boolean) -> Unit)? = null,
     onSuccess: (() -> Unit)? = null,
     onRetry: () -> Unit
 ) {
@@ -98,12 +100,15 @@ fun PhotoImage(
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(imageUrl)
+                .placeholderMemoryCacheKey(placeholderUrl) // Use the thumbnail from cache
                 .crossfade(true)
                 .build(),
             contentDescription = contentDescription,
             contentScale = ContentScale.Crop,
             modifier = Modifier.matchParentSize(),
             onState = { state ->
+                val loading = state is AsyncImagePainter.State.Loading
+                onLoading?.invoke(loading)
                 isError = state is AsyncImagePainter.State.Error
                 if (state is AsyncImagePainter.State.Success) {
                     onSuccess?.invoke()

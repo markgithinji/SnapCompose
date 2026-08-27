@@ -14,7 +14,8 @@ data class PhotoDetailRoute(
     val width: Int,
     val height: Int,
     val thumbUrl: String? = null,
-    val blurHash: String? = null
+    val blurHash: String? = null,
+    val origin: String = "gallery"
 )
 
 @Serializable
@@ -31,7 +32,5 @@ data class UserProfileRoute(
 data class CollectionDetailRoute(
     val collectionId: String,
     val collectionTitle: String,
-    val totalPhotos: Int,
-    val coverPhotoUrl: String? = null,
-    val coverBlurHash: String? = null
+    val totalPhotos: Int
 )

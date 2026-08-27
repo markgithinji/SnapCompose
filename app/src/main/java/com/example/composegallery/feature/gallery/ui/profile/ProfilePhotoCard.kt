@@ -22,6 +22,7 @@ fun ProfilePhotoCard(
     sharedTransitionScope: SharedTransitionScope? = null,
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
     photoId: String? = null,
+    origin: String = "gallery",
     onRetry: () -> Unit,
     onClick: (() -> Unit)? = null
 ) {
@@ -39,7 +40,7 @@ fun ProfilePhotoCard(
         blurHash = blurHash,
         sharedTransitionScope = sharedTransitionScope,
         animatedVisibilityScope = animatedVisibilityScope,
-        sharedKey = photoId?.let { SharedTransitionKeys.photoImage(it) },
+        sharedKey = photoId?.let { SharedTransitionKeys.photoImage(it, origin) },
         onRetry = onRetry
     )
 }

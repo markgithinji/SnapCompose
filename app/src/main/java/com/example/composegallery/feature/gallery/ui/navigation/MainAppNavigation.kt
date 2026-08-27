@@ -21,14 +21,15 @@ fun MainAppNavigation() {
                 galleryRoute(
                     sharedTransitionScope = this@SharedTransitionLayout,
                     onSearchClick = { navController.navigate(SearchRoute) },
-                    onPhotoClick = { photo ->
+                    onPhotoClick = { photo, origin ->
                         navController.navigate(
                             PhotoDetailRoute(
                                 photoId = photo.id,
                                 width = photo.width,
                                 height = photo.height,
                                 thumbUrl = photo.smallUrl,
-                                blurHash = photo.blurHash
+                                blurHash = photo.blurHash,
+                                origin = origin
                             )
                         )
                     }
@@ -37,14 +38,15 @@ fun MainAppNavigation() {
                 searchRoute(
                     sharedTransitionScope = this@SharedTransitionLayout,
                     onBack = { navController.popBackStack() },
-                    onPhotoClick = { photo ->
+                    onPhotoClick = { photo, origin ->
                         navController.navigate(
                             PhotoDetailRoute(
                                 photoId = photo.id,
                                 width = photo.width,
                                 height = photo.height,
                                 thumbUrl = photo.smallUrl,
-                                blurHash = photo.blurHash
+                                blurHash = photo.blurHash,
+                                origin = origin
                             )
                         )
                     }

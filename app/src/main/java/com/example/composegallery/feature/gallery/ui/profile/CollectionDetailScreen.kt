@@ -57,8 +57,6 @@ fun CollectionDetailScreen(
     collectionId: String,
     collectionTitle: String,
     totalPhotos: Int,
-    initialCoverUrl: String? = null,
-    initialBlurHash: String? = null,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedContentScope,
     onBack: () -> Unit,
@@ -150,24 +148,6 @@ fun CollectionDetailScreen(
                         verticalItemSpacing = 12.dp,
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        if (initialCoverUrl != null) {
-                            item(span = StaggeredGridItemSpan.FullLine) {
-                                PhotoImage(
-                                    imageUrl = initialCoverUrl,
-                                    contentDescription = collectionTitle,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .aspectRatio(1.6f)
-                                        .clip(RoundedCornerShape(12.dp)),
-                                    blurHash = initialBlurHash,
-                                    sharedTransitionScope = sharedTransitionScope,
-                                    animatedVisibilityScope = animatedVisibilityScope,
-                                    sharedKey = SharedTransitionKeys.collectionImage(collectionId),
-                                    onRetry = { /* No-op for header retry for now */ }
-                                )
-                            }
-                        }
-
                         items(
                             count = photos.itemCount,
                             key = { index ->
@@ -190,6 +170,7 @@ fun CollectionDetailScreen(
                                 sharedTransitionScope = sharedTransitionScope,
                                 animatedVisibilityScope = animatedVisibilityScope,
                                 photoId = photo.id,
+                                origin = "collection_$collectionId",
                                 onRetry = { retryKeys[photo.id] = retryKey + 1 },
                                 onClick = { onPhotoClick(photo) }
                             )

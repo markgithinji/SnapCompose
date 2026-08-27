@@ -27,6 +27,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -36,9 +37,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalWindowInfo
@@ -66,6 +70,7 @@ fun PhotoDetailScreen(
     initialHeight: Int,
     initialThumbUrl: String? = null,
     initialBlurHash: String? = null,
+    origin: String = "gallery",
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedContentScope,
     onBack: () -> Unit,
@@ -120,6 +125,7 @@ fun PhotoDetailScreen(
                     initialHeight = initialHeight,
                     initialThumbUrl = initialThumbUrl,
                     initialBlurHash = initialBlurHash,
+                    origin = origin,
                     sharedTransitionScope = sharedTransitionScope,
                     animatedVisibilityScope = animatedVisibilityScope,
                     retryKey = retryKey.intValue,
@@ -148,6 +154,7 @@ private fun PhotoDetailContent(
     initialHeight: Int,
     initialThumbUrl: String?,
     initialBlurHash: String?,
+    origin: String,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedContentScope,
     retryKey: Int,
@@ -161,6 +168,7 @@ private fun PhotoDetailContent(
     val containerSize = LocalWindowInfo.current.containerSize
     val density = LocalDensity.current
     val halfScreenHeightDp = with(density) { (containerSize.height * 0.5f).toDp() }
+    var isImageLoading by remember { mutableStateOf(true) }
 
     Column(modifier = modifier.fillMaxSize()) {
         Box(
@@ -179,10 +187,25 @@ private fun PhotoDetailContent(
                 shape = shape,
                 sharedTransitionScope = sharedTransitionScope,
                 animatedVisibilityScope = animatedVisibilityScope,
-                sharedKey = SharedTransitionKeys.photoImage(photoId),
+                sharedKey = SharedTransitionKeys.photoImage(photoId, origin),
+                placeholderUrl = initialThumbUrl,
+                onLoading = { isImageLoading = it },
                 onSuccess = onImageLoad,
                 onRetry = onRetry
             )
+
+            if (isImageLoading || photo == null) {
+                LinearProgressIndicator(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.BottomCenter)
+                        .padding(horizontal = 24.dp, vertical = 12.dp)
+                        .height(4.dp)
+                        .clip(RoundedCornerShape(2.dp)),
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                )
+            }
 
             if (photo != null) {
                 IconButton(
@@ -213,6 +236,7 @@ private fun PhotoDetailContent(
                 Column(Modifier.verticalScroll(rememberScrollState())) {
                     PhotoDetailInfo(
                         photo = photo,
+                        origin = origin,
                         sharedTransitionScope = sharedTransitionScope,
                         animatedVisibilityScope = animatedVisibilityScope,
                         onUserClick = onUserClick
@@ -229,6 +253,7 @@ private fun PhotoDetailContent(
 @Composable
 private fun PhotoDetailInfo(
     photo: Photo,
+    origin: String,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedContentScope,
     onUserClick: (Photo) -> Unit
@@ -249,13 +274,19 @@ private fun PhotoDetailInfo(
                 .clickable { onUserClick(photo) },
             verticalAlignment = Alignment.CenterVertically
         ) {
+            val userSharedKey = if (!origin.startsWith("profile")) {
+                SharedTransitionKeys.userProfileImage(photo.username ?: photo.authorName)
+            } else {
+                null
+            }
+
             UserProfileImage(
                 imageUrl = photo.authorProfileImageHighResUrl,
                 contentDescription = photo.authorName,
                 modifier = Modifier.size(48.dp),
                 sharedTransitionScope = sharedTransitionScope,
                 animatedVisibilityScope = animatedVisibilityScope,
-                sharedKey = SharedTransitionKeys.userProfileImage(photo.username ?: photo.authorName)
+                sharedKey = userSharedKey
             )
 
             Spacer(modifier = Modifier.width(12.dp))

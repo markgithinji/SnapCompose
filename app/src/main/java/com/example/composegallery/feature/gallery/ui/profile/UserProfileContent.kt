@@ -196,6 +196,7 @@ fun UserProfileContent(
                     onRetry = retryHandler,
                     sharedTransitionScope = sharedTransitionScope,
                     animatedVisibilityScope = animatedVisibilityScope,
+                    username = username,
                     onPhotoClick = onPhotoClick
                 )
 
@@ -205,6 +206,7 @@ fun UserProfileContent(
                     onRetry = retryHandler,
                     sharedTransitionScope = sharedTransitionScope,
                     animatedVisibilityScope = animatedVisibilityScope,
+                    username = username,
                     onPhotoClick = onPhotoClick
                 )
 
@@ -227,6 +229,7 @@ private fun LazyStaggeredGridScope.renderPhotoItems(
     onRetry: (String) -> Unit,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedContentScope,
+    username: String,
     onPhotoClick: (Photo) -> Unit
 ) {
     val refreshState = photos.loadState.refresh
@@ -253,6 +256,7 @@ private fun LazyStaggeredGridScope.renderPhotoItems(
             sharedTransitionScope = sharedTransitionScope,
             animatedVisibilityScope = animatedVisibilityScope,
             photoId = photo.id,
+            origin = "profile_$username",
             onRetry = { onRetry(photo.id) },
             onClick = { onPhotoClick(photo) }
         )
@@ -334,8 +338,6 @@ private fun LazyStaggeredGridScope.renderCollectionItems(
             modifier = Modifier.fillMaxWidth(),
             blurHash = collection.coverPhoto?.blurHash,
             description = collection.description,
-            sharedTransitionScope = sharedTransitionScope,
-            animatedVisibilityScope = animatedVisibilityScope,
             onRetry = { onRetry(collection.id) },
             onCollectionClick = {
                 onCollectionClick(collection)
