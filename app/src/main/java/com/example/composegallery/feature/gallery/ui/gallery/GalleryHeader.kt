@@ -22,7 +22,9 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,9 +32,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.composegallery.R
+import com.example.composegallery.feature.gallery.domain.model.Topic
 import com.example.composegallery.feature.gallery.ui.common.SharedTransitionKeys
 import com.example.composegallery.ui.theme.searchBar
 
@@ -41,6 +45,9 @@ import com.example.composegallery.ui.theme.searchBar
 fun GalleryHeader(
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope,
+    topics: List<Topic>,
+    selectedTopicId: String?,
+    onTopicSelected: (String?) -> Unit,
     onSearchClick: () -> Unit,
     onFavoritesClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -48,10 +55,12 @@ fun GalleryHeader(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 24.dp)
+            .padding(top = 24.dp)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -74,7 +83,8 @@ fun GalleryHeader(
         Text(
             text = stringResource(R.string.app_tagline),
             style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.75f)
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.75f),
+            modifier = Modifier.padding(horizontal = 16.dp)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -82,8 +92,67 @@ fun GalleryHeader(
         DummySearchBar(
             sharedTransitionScope = sharedTransitionScope,
             animatedVisibilityScope = animatedVisibilityScope,
-            onClick = onSearchClick
+            onClick = onSearchClick,
+            modifier = Modifier.padding(horizontal = 16.dp)
         )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        TopicTabs(
+            topics = topics,
+            selectedTopicId = selectedTopicId,
+            onTopicSelected = onTopicSelected
+        )
+    }
+}
+
+@Composable
+private fun TopicTabs(
+    topics: List<Topic>,
+    selectedTopicId: String?,
+    onTopicSelected: (String?) -> Unit
+) {
+    if (topics.isEmpty()) return
+
+    val allTabs = listOf(null) + topics.map { it.id }
+    val selectedIndex = allTabs.indexOf(selectedTopicId).coerceAtLeast(0)
+
+    ScrollableTabRow(
+        selectedTabIndex = selectedIndex,
+        edgePadding = 16.dp,
+        containerColor = Color.Transparent,
+        contentColor = MaterialTheme.colorScheme.primary,
+        divider = {},
+        indicator = {},
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        allTabs.forEachIndexed { index, topicId ->
+            val title = if (topicId == null) {
+                stringResource(R.string.editorial)
+            } else {
+                topics.find { it.id == topicId }?.title ?: ""
+            }
+
+            Tab(
+                selected = selectedIndex == index,
+                onClick = { onTopicSelected(topicId) },
+                text = {
+                    Text(
+                        text = title,
+                        style = if (selectedIndex == index) {
+                            MaterialTheme.typography.titleMedium
+                        } else {
+                            MaterialTheme.typography.bodyLarge
+                        },
+                        color = if (selectedIndex == index) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        }
+                    )
+                }
+            )
+        }
     }
 }
 
@@ -92,7 +161,8 @@ fun GalleryHeader(
 fun DummySearchBar(
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val interactionSource = remember { MutableInteractionSource() }
 
@@ -117,7 +187,7 @@ fun DummySearchBar(
         }
 
         Surface(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
                 .sharedElement(
                     sharedContentState = rememberSharedContentState(key = SharedTransitionKeys.SEARCH_BAR),

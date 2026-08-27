@@ -7,6 +7,7 @@ import androidx.paging.cachedIn
 import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.data.util.Result
 import com.example.composegallery.feature.gallery.domain.model.Photo
+import com.example.composegallery.feature.gallery.domain.model.Topic
 import com.example.composegallery.feature.gallery.domain.repository.FavoriteRepository
 import com.example.composegallery.feature.gallery.domain.repository.GalleryRepository
 import com.example.composegallery.feature.gallery.domain.usecase.DownloadPhotoUseCase
@@ -23,6 +24,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
@@ -49,8 +51,22 @@ class GalleryViewModel @Inject constructor(
     private val _isActionLoading = MutableStateFlow(false)
     val isActionLoading: StateFlow<Boolean> = _isActionLoading
 
-    val pagedPhotos: Flow<PagingData<Photo>> =
-        galleryRepository.getPagedPhotos().cachedIn(viewModelScope)
+    private val _topics = MutableStateFlow<List<Topic>>(emptyList())
+    val topics: StateFlow<List<Topic>> = _topics.asStateFlow()
+
+    private val _selectedTopicId = MutableStateFlow<String?>(null) // null = Editorial
+    val selectedTopicId: StateFlow<String?> = _selectedTopicId.asStateFlow()
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val pagedPhotos: Flow<PagingData<Photo>> = _selectedTopicId
+        .flatMapLatest { topicId ->
+            if (topicId == null) {
+                galleryRepository.getPagedPhotos()
+            } else {
+                galleryRepository.getTopicPagedPhotos(topicId)
+            }
+        }
+        .cachedIn(viewModelScope)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val isFavorite: StateFlow<Boolean> = _uiState
@@ -65,6 +81,23 @@ class GalleryViewModel @Inject constructor(
 
     val favoritePhotos: StateFlow<List<Photo>> = favoriteRepository.getFavorites()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    init {
+        fetchTopics()
+    }
+
+    private fun fetchTopics() {
+        viewModelScope.launch {
+            when (val result = galleryRepository.getTopics()) {
+                is Result.Success -> _topics.value = result.data
+                is Result.Error -> { /* Handle error or use defaults */ }
+            }
+        }
+    }
+
+    fun selectTopic(topicId: String?) {
+        _selectedTopicId.value = topicId
+    }
 
     fun loadPhoto(photoId: String) {
         viewModelScope.launch {

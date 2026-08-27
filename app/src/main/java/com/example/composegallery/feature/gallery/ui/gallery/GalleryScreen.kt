@@ -28,11 +28,13 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.domain.model.Photo
+import com.example.composegallery.feature.gallery.domain.model.Topic
 import com.example.composegallery.feature.gallery.ui.common.InfoMessageScreen
 import com.example.composegallery.feature.gallery.ui.common.ProgressIndicator
 import com.example.composegallery.feature.gallery.ui.common.RetryButton
@@ -49,6 +51,8 @@ fun GalleryScreen(
     onPhotoClick: (Photo) -> Unit
 ) {
     val photos = viewModel.pagedPhotos.collectAsLazyPagingItems()
+    val topics by viewModel.topics.collectAsStateWithLifecycle()
+    val selectedTopicId by viewModel.selectedTopicId.collectAsStateWithLifecycle()
     val pullRefreshState = rememberPullToRefreshState()
     val hasLoadedOnce = remember { mutableStateOf(false) }
     val refreshState = photos.loadState.refresh
@@ -87,6 +91,9 @@ fun GalleryScreen(
     ) {
         PhotoGridContent(
             photos = photos,
+            topics = topics,
+            selectedTopicId = selectedTopicId,
+            onTopicSelected = { viewModel.selectTopic(it) },
             loadState = refreshState,
             hasLoadedOnce = hasLoadedOnce.value,
             onPhotoClick = onPhotoClick,
@@ -103,6 +110,9 @@ fun GalleryScreen(
 @Composable
 private fun PhotoGridContent(
     photos: LazyPagingItems<Photo>,
+    topics: List<Topic>,
+    selectedTopicId: String?,
+    onTopicSelected: (String?) -> Unit,
     loadState: LoadState,
     hasLoadedOnce: Boolean,
     onPhotoClick: (Photo) -> Unit,
@@ -148,6 +158,9 @@ private fun PhotoGridContent(
                 else -> {
                     PhotoGrid(
                         photos = photos,
+                        topics = topics,
+                        selectedTopicId = selectedTopicId,
+                        onTopicSelected = onTopicSelected,
                         onPhotoClick = { onPhotoClick(it) },
                         onSearchClick = onSearchClick,
                         onFavoritesClick = onFavoritesClick,

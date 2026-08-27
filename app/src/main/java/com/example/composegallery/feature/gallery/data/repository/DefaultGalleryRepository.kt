@@ -11,10 +11,12 @@ import com.example.composegallery.feature.gallery.data.local.toDomainModel
 import com.example.composegallery.feature.gallery.data.model.toDomainModel
 import com.example.composegallery.feature.gallery.data.pagingsource.PagingDefaults
 import com.example.composegallery.feature.gallery.data.pagingsource.PhotoRemoteMediator
+import com.example.composegallery.feature.gallery.data.pagingsource.UnsplashTopicPhotosPagingSource
 import com.example.composegallery.feature.gallery.data.remote.UnsplashApi
 import com.example.composegallery.feature.gallery.data.util.Result
 import com.example.composegallery.feature.gallery.data.util.safeApiCall
 import com.example.composegallery.feature.gallery.domain.model.Photo
+import com.example.composegallery.feature.gallery.domain.model.Topic
 import com.example.composegallery.feature.gallery.domain.repository.GalleryRepository
 import com.example.composegallery.feature.gallery.util.StringProvider
 import kotlinx.coroutines.flow.Flow
@@ -43,6 +45,23 @@ class DefaultGalleryRepository @Inject constructor(
             .map { pagingData ->
                 pagingData.map { it.toDomainModel() }
             }
+    }
+
+    override fun getTopicPagedPhotos(topicIdOrSlug: String): Flow<PagingData<Photo>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = PagingDefaults.PAGE_SIZE,
+                initialLoadSize = PagingDefaults.INITIAL_LOAD_SIZE,
+                prefetchDistance = PagingDefaults.PREFETCH_DISTANCE
+            ),
+            pagingSourceFactory = { UnsplashTopicPhotosPagingSource(api, topicIdOrSlug, stringProvider) }
+        ).flow
+    }
+
+    override suspend fun getTopics(): Result<List<Topic>> {
+        return safeApiCall(stringProvider) {
+            api.getTopics().map { it.toDomainModel() }
+        }
     }
 
     override suspend fun reportDownload(downloadUrl: String) {

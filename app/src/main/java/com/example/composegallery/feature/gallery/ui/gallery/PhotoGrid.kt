@@ -28,6 +28,7 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.domain.model.Photo
+import com.example.composegallery.feature.gallery.domain.model.Topic
 import com.example.composegallery.feature.gallery.ui.common.BottomLoadingIndicator
 import com.example.composegallery.feature.gallery.ui.common.LoadMoreListError
 import com.example.composegallery.feature.gallery.ui.common.PhotoCard
@@ -37,6 +38,9 @@ import com.example.composegallery.feature.gallery.ui.common.calculateResponsiveC
 @Composable
 fun PhotoGrid(
     photos: LazyPagingItems<Photo>,
+    topics: List<Topic>,
+    selectedTopicId: String?,
+    onTopicSelected: (String?) -> Unit,
     onPhotoClick: (Photo) -> Unit,
     onSearchClick: () -> Unit,
     onFavoritesClick: () -> Unit,
@@ -62,6 +66,9 @@ fun PhotoGrid(
             GalleryHeader(
                 sharedTransitionScope = sharedTransitionScope,
                 animatedVisibilityScope = animatedVisibilityScope,
+                topics = topics,
+                selectedTopicId = selectedTopicId,
+                onTopicSelected = onTopicSelected,
                 onSearchClick = onSearchClick,
                 onFavoritesClick = onFavoritesClick,
                 modifier = Modifier.statusBarsPadding()

@@ -3,6 +3,7 @@ package com.example.composegallery.feature.gallery.data.remote
 import com.example.composegallery.feature.gallery.data.model.SearchResponseDto
 import com.example.composegallery.feature.gallery.data.model.UnsplashCollectionDto
 import com.example.composegallery.feature.gallery.data.model.UnsplashPhotoDto
+import com.example.composegallery.feature.gallery.data.model.UnsplashTopicDto
 import com.example.composegallery.feature.gallery.data.model.UnsplashUserDto
 import com.example.composegallery.feature.gallery.data.model.UserStatisticsDto
 import retrofit2.http.GET
@@ -13,6 +14,20 @@ import retrofit2.http.Url
 interface UnsplashApi {
     @GET("photos")
     suspend fun getPhotos(
+        @Query("page") page: Int = 1,
+        @Query("per_page") perPage: Int
+    ): List<UnsplashPhotoDto>
+
+    @GET("topics")
+    suspend fun getTopics(
+        @Query("page") page: Int = 1,
+        @Query("per_page") perPage: Int = 20,
+        @Query("order_by") orderBy: String = "position"
+    ): List<UnsplashTopicDto>
+
+    @GET("topics/{id_or_slug}/photos")
+    suspend fun getTopicPhotos(
+        @Path("id_or_slug") topicIdOrSlug: String,
         @Query("page") page: Int = 1,
         @Query("per_page") perPage: Int
     ): List<UnsplashPhotoDto>
