@@ -92,10 +92,10 @@ fun PhotoGrid(
                 Box(
                     modifier = Modifier
                         .animateItem()
-                        .clip(RoundedCornerShape(12.dp))
                         .fillMaxWidth()
                         .aspectRatio(aspectRatio)
                         .padding(8.dp)
+                        .clip(RoundedCornerShape(12.dp))
                         .shimmer()
                         .background(MaterialTheme.colorScheme.surfaceVariant)
                 )
