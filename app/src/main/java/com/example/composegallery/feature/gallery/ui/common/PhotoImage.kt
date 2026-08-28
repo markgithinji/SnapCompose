@@ -34,12 +34,14 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
 import coil.compose.SubcomposeAsyncImage
+import coil.compose.SubcomposeAsyncImageContent
 import coil.request.ImageRequest
 import com.example.composegallery.feature.gallery.ui.util.BlurHashDecoder
 import com.valentinilk.shimmer.ShimmerBounds
 import com.valentinilk.shimmer.rememberShimmer
 import com.valentinilk.shimmer.shimmer
-import android.util.Log
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -55,7 +57,7 @@ fun PhotoImage(
     placeholderUrl: String? = null,
     onLoading: ((Boolean) -> Unit)? = null,
     onSuccess: (() -> Unit)? = null,
-    onRetry: () -> Unit
+    onRetry: () -> Unit,
 ) {
     val blurBitmap: ImageBitmap? = remember(blurHash) {
         blurHash?.let { BlurHashDecoder.decode(it, 20, 12)?.asImageBitmap() }
@@ -70,7 +72,7 @@ fun PhotoImage(
 
     // Log.d("PhotoImage", "Compose: id=$sharedKey, url=$imageUrl")
 
-    val sharedModifier = if (sharedTransitionScope != null && animatedVisibilityScope != null && sharedKey != null) {
+    val sharedModifier = if ((sharedTransitionScope != null) && (animatedVisibilityScope != null) && (sharedKey != null)) {
         with(sharedTransitionScope) {
             Modifier.sharedElement(
                 rememberSharedContentState(key = sharedKey),
@@ -88,24 +90,7 @@ fun PhotoImage(
             .then(sharedModifier)
             .background(MaterialTheme.colorScheme.surfaceVariant)
     ) {
-        // 1. Level 1: Immediate Placeholder (Blur or Shimmer)
-        if (blurBitmap != null) {
-            Image(
-                bitmap = blurBitmap,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.matchParentSize()
-            )
-        } else {
-            Box(
-                Modifier
-                    .matchParentSize()
-                    .shimmer(shimmer)
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-            )
-        }
-
-        // 2. Level 2 & 3: Progressive Image Loading using a single SubcomposeAsyncImage
+        // Progressive Image Loading with Fade Animation
         // This allows us to keep the placeholder visible while the high-res one loads.
         SubcomposeAsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
@@ -115,29 +100,68 @@ fun PhotoImage(
             contentDescription = contentDescription,
             contentScale = ContentScale.Crop,
             modifier = Modifier.matchParentSize(),
-            onLoading = {
-                Log.d("PhotoImage", "onLoading: target=$imageUrl, placeholder=$placeholderUrl")
-                onLoading?.invoke(true)
+            onState = { state ->
+                when (state) {
+                    is AsyncImagePainter.State.Loading -> onLoading?.invoke(true)
+                    is AsyncImagePainter.State.Success -> {
+                        onLoading?.invoke(false)
+                        onSuccess?.invoke()
+                    }
+                    is AsyncImagePainter.State.Error -> {
+                        onLoading?.invoke(false)
+                        isError = true
+                    }
+                    else -> {}
+                }
             },
-            onSuccess = { state ->
-                Log.d("PhotoImage", "onSuccess for $imageUrl from ${state.result.dataSource}")
-                onLoading?.invoke(false)
-                onSuccess?.invoke()
-            },
-            onError = { state ->
-                Log.e("PhotoImage", "onError for $imageUrl", state.result.throwable)
-                onLoading?.invoke(false)
-                isError = true
-            },
-            loading = {
-                // While Level 3 is loading, we show Level 2 (the grid thumbnail)
-                if (placeholderUrl != null) {
-                    AsyncImage(
-                        model = placeholderUrl,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
+            content = {
+                val state = painter.state
+                Crossfade(
+                    targetState = state,
+                    label = "photo_image_fade",
+                    animationSpec = tween(durationMillis = 800),
+                    modifier = Modifier.fillMaxSize()
+                ) { currentState ->
+                    when (currentState) {
+                        is AsyncImagePainter.State.Success -> {
+                            // Show the final Regular/High-res image (Level 3)
+                            SubcomposeAsyncImageContent(
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        }
+                        else -> {
+                            // While loading (or on error), show the placeholders
+                            Box(Modifier.fillMaxSize()) {
+                                // Level 1: Blur or Shimmer
+                                if (blurBitmap != null) {
+                                    Image(
+                                        bitmap = blurBitmap,
+                                        contentDescription = null,
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier.matchParentSize()
+                                    )
+                                } else {
+                                    Box(
+                                        Modifier
+                                            .matchParentSize()
+                                            .shimmer(shimmer)
+                                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                                    )
+                                }
+
+                                // Level 2: Thumbnail (if available)
+                                placeholderUrl?.let {
+                                    AsyncImage(
+                                        model = it,
+                                        contentDescription = null,
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier.matchParentSize()
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
             }
         )
