@@ -56,7 +56,7 @@ fun GalleryScreen(
     var isSwitchingTopic by remember(selectedTopicId) { mutableStateOf(selectedTopicId != null) }
     var hasSeenLoadingForTab by remember(selectedTopicId) { mutableStateOf(false) }
 
-    LaunchedEffect(refreshState) {
+    LaunchedEffect(refreshState, photos.itemCount) {
         if (refreshState !is LoadState.Loading) {
             isManualRefreshing = false
         }
@@ -65,9 +65,10 @@ fun GalleryScreen(
             hasSeenLoadingForTab = true
         }
         
-        // Hide shimmers only after we've seen a loading cycle and it finished,
-        // or if we already have data and the tab didn't trigger a new load
-        if (isSwitchingTopic && hasSeenLoadingForTab && refreshState is LoadState.NotLoading) {
+        // Hide shimmers if:
+        // 1. We saw a loading cycle and it finished (Success or Error).
+        // 2. We already have data and the pager is idle (handles back navigation from detail).
+        if (isSwitchingTopic && (hasSeenLoadingForTab || photos.itemCount > 0) && refreshState !is LoadState.Loading) {
             isSwitchingTopic = false
         }
     }

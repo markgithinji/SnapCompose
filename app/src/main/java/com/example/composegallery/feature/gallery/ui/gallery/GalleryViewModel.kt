@@ -16,6 +16,7 @@ import com.example.composegallery.feature.gallery.domain.usecase.ToggleFavoriteU
 import com.example.composegallery.feature.gallery.ui.util.UiState
 import com.example.composegallery.feature.gallery.util.StringProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
+import timber.log.Timber
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -88,10 +89,18 @@ class GalleryViewModel @Inject constructor(
 
     fun fetchTopics() {
         viewModelScope.launch {
+            Timber.tag("GalleryViewModel").d("fetchTopics: Starting load")
             _topicsState.value = UiState.Loading
-            when (val result = galleryRepository.getTopics()) {
-                is Result.Success -> _topicsState.value = UiState.Content(result.data)
-                is Result.Error -> _topicsState.value = UiState.Error(result.message)
+            try {
+                val result = galleryRepository.getTopics()
+                Timber.tag("GalleryViewModel").d("fetchTopics: Result received: %s", result)
+                when (result) {
+                    is Result.Success -> _topicsState.value = UiState.Content(result.data)
+                    is Result.Error -> _topicsState.value = UiState.Error(result.message)
+                }
+            } catch (e: Exception) {
+                Timber.tag("GalleryViewModel").e(e, "fetchTopics: Unexpected exception")
+                _topicsState.value = UiState.Error(stringProvider.get(R.string.error_unexpected))
             }
         }
     }

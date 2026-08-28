@@ -28,9 +28,13 @@ import java.net.HttpURLConnection
  * @throws CancellationException if the coroutine executing the block is cancelled.
  */
 inline fun <T> safeApiCall(stringProvider: StringProvider, block: () -> T): Result<T> {
+    Timber.tag("safeApiCall").d("Executing block")
     return try {
-        Result.Success(block())
+        val result = block()
+        Timber.tag("safeApiCall").d("Success")
+        Result.Success(result)
     } catch (e: CancellationException) {
+        Timber.tag("safeApiCall").d("Cancelled")
         throw e
     } catch (e: IOException) {
         val message = stringProvider.get(R.string.error_no_internet_connection)

@@ -6,6 +6,7 @@ import com.example.composegallery.feature.gallery.data.remote.UnsplashApi
 import com.example.composegallery.feature.gallery.data.util.Result
 import com.example.composegallery.feature.gallery.data.util.safeApiCall
 import com.example.composegallery.feature.gallery.util.StringProvider
+import timber.log.Timber
 
 abstract class BaseUnsplashPagingSource<T : Any>(
     private val stringProvider: StringProvider,
@@ -19,15 +20,21 @@ abstract class BaseUnsplashPagingSource<T : Any>(
         return when (val result = safeApiCall(stringProvider) {
             api(page, pageSize)
         }) {
-            is Result.Success -> LoadResult.Page(
-                data = result.data,
-                prevKey = if (page == 1) null else page - 1,
-                nextKey = if (result.data.isEmpty()) null else page + 1
-            )
+            is Result.Success -> {
+                Timber.tag("PagingSource").d("Loaded %d items for page %d", result.data.size, page)
+                LoadResult.Page(
+                    data = result.data,
+                    prevKey = if (page == 1) null else page - 1,
+                    nextKey = if (result.data.isEmpty()) null else page + 1
+                )
+            }
 
-            is Result.Error -> LoadResult.Error(
-                result.throwable ?: Exception(result.message)
-            )
+            is Result.Error -> {
+                Timber.tag("PagingSource").e("Error loading page %d: %s", page, result.message)
+                LoadResult.Error(
+                    result.throwable ?: Exception(result.message)
+                )
+            }
         }
     }
 
