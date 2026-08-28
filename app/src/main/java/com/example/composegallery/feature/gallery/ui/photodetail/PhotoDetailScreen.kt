@@ -293,9 +293,11 @@ private fun PhotoDetailContent(
                 .fillMaxWidth()
                 .height(halfScreenHeightDp)
         ) {
-            val imageUrl = photo?.fullUrl ?: initialThumbUrl ?: ""
+            val baseImageUrl = photo?.fullUrl ?: initialThumbUrl ?: ""
+            val imageUrl = if (photo != null && retryKey > 0) "$baseImageUrl?retry=$retryKey" else baseImageUrl
+
             PhotoImage(
-                imageUrl = if (photo != null) "$imageUrl?retry=$retryKey" else imageUrl,
+                imageUrl = imageUrl,
                 contentDescription = photo?.authorName ?: "",
                 modifier = Modifier
                     .fillMaxWidth()

@@ -101,6 +101,12 @@ class GalleryViewModel @Inject constructor(
     }
 
     fun loadPhoto(photoId: String) {
+        // If we already have this photo loaded, don't trigger a loading state
+        val currentState = _uiState.value
+        if (currentState is UiState.Content && currentState.data.id == photoId) {
+            return
+        }
+
         viewModelScope.launch {
             _uiState.value = UiState.Loading
             when (val result = galleryRepository.getPhoto(photoId)) {
