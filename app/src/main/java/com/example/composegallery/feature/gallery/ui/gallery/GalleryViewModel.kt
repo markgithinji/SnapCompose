@@ -110,17 +110,24 @@ class GalleryViewModel @Inject constructor(
     }
 
     fun loadPhoto(photoId: String) {
-        // If we already have this photo loaded, don't trigger a loading state
+        // 1. If we already have this exact photo in state, skip to avoid flicker
         val currentState = _uiState.value
         if (currentState is UiState.Content && currentState.data.id == photoId) {
             return
         }
 
         viewModelScope.launch {
-            _uiState.value = UiState.Loading
-            when (val result = galleryRepository.getPhoto(photoId)) {
-                is Result.Success -> _uiState.value = UiState.Content(result.data)
-                is Result.Error -> _uiState.value = UiState.Error(result.message)
+            // 2. Fetch from repository (which has an in-memory cache)
+            val result = galleryRepository.getPhoto(photoId)
+            
+            if (result is Result.Success) {
+                _uiState.value = UiState.Content(result.data)
+            } else if (result is Result.Error) {
+                // Only show loading if we don't have a cached version and this is a fresh load
+                if (_uiState.value !is UiState.Content) {
+                    _uiState.value = UiState.Loading
+                }
+                _uiState.value = UiState.Error(result.message)
             }
         }
     }

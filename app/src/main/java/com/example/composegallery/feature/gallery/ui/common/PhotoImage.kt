@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,6 +33,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
+import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.example.composegallery.feature.gallery.ui.util.BlurHashDecoder
 import com.valentinilk.shimmer.ShimmerBounds
@@ -62,7 +64,11 @@ fun PhotoImage(
     val shimmer = rememberShimmer(shimmerBounds = ShimmerBounds.View)
     var isError by remember { mutableStateOf(false) }
 
-    Log.d("PhotoImage", "Compose: id=$sharedKey, url=$imageUrl")
+    LaunchedEffect(imageUrl) {
+        // Log.d("PhotoImage", "imageUrl changed to: $imageUrl (SharedKey: $sharedKey)")
+    }
+
+    // Log.d("PhotoImage", "Compose: id=$sharedKey, url=$imageUrl")
 
     val sharedModifier = if (sharedTransitionScope != null && animatedVisibilityScope != null && sharedKey != null) {
         with(sharedTransitionScope) {
@@ -82,7 +88,7 @@ fun PhotoImage(
             .then(sharedModifier)
             .background(MaterialTheme.colorScheme.surfaceVariant)
     ) {
-        // 1. Placeholder (Blur or Shimmer)
+        // 1. Level 1: Immediate Placeholder (Blur or Shimmer)
         if (blurBitmap != null) {
             Image(
                 bitmap = blurBitmap,
@@ -99,33 +105,39 @@ fun PhotoImage(
             )
         }
 
-        // 2. Main Image with Crossfade
-        AsyncImage(
+        // 2. Level 2 & 3: Progressive Image Loading using a single SubcomposeAsyncImage
+        // This allows us to keep the placeholder visible while the high-res one loads.
+        SubcomposeAsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(imageUrl)
-                .placeholderMemoryCacheKey(placeholderUrl) // Use the thumbnail from cache
                 .crossfade(true)
                 .build(),
             contentDescription = contentDescription,
             contentScale = ContentScale.Crop,
             modifier = Modifier.matchParentSize(),
-            onState = { state ->
-                when (state) {
-                    is AsyncImagePainter.State.Loading -> {
-                        Log.d("PhotoImage", "State: Loading for $imageUrl")
-                        onLoading?.invoke(true)
-                    }
-                    is AsyncImagePainter.State.Success -> {
-                        Log.d("PhotoImage", "State: Success for $imageUrl")
-                        onLoading?.invoke(false)
-                        onSuccess?.invoke()
-                    }
-                    is AsyncImagePainter.State.Error -> {
-                        Log.e("PhotoImage", "State: Error for $imageUrl", state.result.throwable)
-                        onLoading?.invoke(false)
-                        isError = true
-                    }
-                    else -> {}
+            onLoading = {
+                Log.d("PhotoImage", "onLoading: target=$imageUrl, placeholder=$placeholderUrl")
+                onLoading?.invoke(true)
+            },
+            onSuccess = { state ->
+                Log.d("PhotoImage", "onSuccess for $imageUrl from ${state.result.dataSource}")
+                onLoading?.invoke(false)
+                onSuccess?.invoke()
+            },
+            onError = { state ->
+                Log.e("PhotoImage", "onError for $imageUrl", state.result.throwable)
+                onLoading?.invoke(false)
+                isError = true
+            },
+            loading = {
+                // While Level 3 is loading, we show Level 2 (the grid thumbnail)
+                if (placeholderUrl != null) {
+                    AsyncImage(
+                        model = placeholderUrl,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
                 }
             }
         )

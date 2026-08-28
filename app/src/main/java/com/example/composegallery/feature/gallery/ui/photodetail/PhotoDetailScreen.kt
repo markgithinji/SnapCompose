@@ -2,6 +2,7 @@ package com.example.composegallery.feature.gallery.ui.photodetail
 
 import android.content.Intent
 import android.icu.util.TimeZone
+import android.util.Log
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
@@ -293,8 +294,10 @@ private fun PhotoDetailContent(
                 .fillMaxWidth()
                 .height(halfScreenHeightDp)
         ) {
-            val baseImageUrl = photo?.fullUrl ?: initialThumbUrl ?: ""
+            val baseImageUrl = photo?.regularUrl ?: initialThumbUrl ?: ""
             val imageUrl = if (photo != null && retryKey > 0) "$baseImageUrl?retry=$retryKey" else baseImageUrl
+            
+            // Log.d("PhotoDetail", "State: photoIsNull=${photo == null}, isImageLoading=$isImageLoading, url=$imageUrl")
 
             PhotoImage(
                 imageUrl = imageUrl,
@@ -313,7 +316,14 @@ private fun PhotoDetailContent(
                 onRetry = onRetry
             )
 
-            if (isImageLoading || photo == null) {
+            // Show the progress bar until the final high-quality image is fully loaded.
+            // It stays visible if:
+            // 1. Metadata is still loading (photo == null)
+            // 2. The current image is still just the low-res thumbnail from the grid.
+            // 3. Any network request is currently in progress.
+            val isShowingThumbnail = initialThumbUrl != null && imageUrl == initialThumbUrl
+            
+            if (photo == null || isImageLoading || isShowingThumbnail) {
                 LinearProgressIndicator(
                     modifier = Modifier
                         .fillMaxWidth()

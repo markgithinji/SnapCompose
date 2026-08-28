@@ -12,6 +12,9 @@ interface PhotoDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPhotos(photos: List<PhotoEntity>)
 
+    @Query("SELECT * FROM photos WHERE id = :photoId")
+    suspend fun getPhotoById(photoId: String): PhotoEntity?
+
     @Query("SELECT * FROM photos ORDER BY pagingOrder ASC")
     fun getPagedPhotos(): PagingSource<Int, PhotoEntity>
 

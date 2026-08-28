@@ -19,6 +19,9 @@ import com.example.composegallery.feature.gallery.domain.repository.UserReposito
 import com.example.composegallery.feature.gallery.domain.repository.FavoriteRepository
 import com.example.composegallery.feature.gallery.util.DefaultStringProvider
 import com.example.composegallery.feature.gallery.util.StringProvider
+import coil.ImageLoader
+import coil.disk.DiskCache
+import coil.memory.MemoryCache
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
 import dagger.Provides
@@ -26,6 +29,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.json.Json
+import okhttp3.Cache
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -45,14 +49,18 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient {
+    fun provideOkHttpClient(@ApplicationContext context: Context): OkHttpClient {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
 
+        // 100 MB cache for images and metadata
+        val cache = Cache(context.cacheDir, 100L * 1024L * 1024L)
+
         return OkHttpClient.Builder()
             .addInterceptor(AuthInterceptor())
             .addInterceptor(loggingInterceptor)
+            .cache(cache)
             .build()
     }
 
@@ -67,6 +75,29 @@ object NetworkModule {
             .addConverterFactory(json.asConverterFactory(contentType))
             .build()
             .create(UnsplashApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideImageLoader(
+        @ApplicationContext context: Context,
+        okHttpClient: OkHttpClient
+    ): ImageLoader {
+        return ImageLoader.Builder(context)
+            .okHttpClient(okHttpClient)
+            .memoryCache {
+                MemoryCache.Builder(context)
+                    .maxSizePercent(0.25)
+                    .build()
+            }
+            .diskCache {
+                DiskCache.Builder()
+                    .directory(context.cacheDir.resolve("image_cache"))
+                    .maxSizeBytes(100L * 1024L * 1024L) // 100 MB
+                    .build()
+            }
+            .respectCacheHeaders(false) // Unsplash headers can be restrictive; we want to cache images longer
+            .build()
     }
 
     // Provide the StringProvider for string resources access
