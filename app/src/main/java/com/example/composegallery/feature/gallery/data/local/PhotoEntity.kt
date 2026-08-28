@@ -23,6 +23,7 @@ data class PhotoEntity(
     val authorUnsplashUrl: String?,
     val username: String?,
     val downloadLocationUrl: String?,
+    val pagingOrder: Int = 0,
     @Embedded(prefix = "location_") val location: PhotoLocation?,
     val blurHash: String? = null,
     val description: String? = null,
@@ -54,7 +55,7 @@ fun PhotoEntity.toDomainModel(): Photo {
     )
 }
 
-fun Photo.toEntity(): PhotoEntity {
+fun Photo.toEntity(pagingOrder: Int = 0): PhotoEntity {
     return PhotoEntity(
         id = id,
         width = width,
@@ -74,6 +75,7 @@ fun Photo.toEntity(): PhotoEntity {
         blurHash = blurHash,
         description = description,
         createdAt = createdAt,
-        exif = exif
+        exif = exif,
+        pagingOrder = pagingOrder
     )
 }

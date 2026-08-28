@@ -1,17 +1,10 @@
 package com.example.composegallery.feature.gallery.ui.gallery
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -22,6 +15,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -38,7 +32,7 @@ import com.example.composegallery.feature.gallery.domain.model.Topic
 import com.example.composegallery.feature.gallery.ui.common.InfoMessageScreen
 import com.example.composegallery.feature.gallery.ui.common.ProgressIndicator
 import com.example.composegallery.feature.gallery.ui.common.RetryButton
-
+import com.example.composegallery.feature.gallery.ui.util.UiState
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
@@ -51,29 +45,44 @@ fun GalleryScreen(
     onPhotoClick: (Photo) -> Unit
 ) {
     val photos = viewModel.pagedPhotos.collectAsLazyPagingItems()
-    val topics by viewModel.topics.collectAsStateWithLifecycle()
+    val topicsState by viewModel.topicsState.collectAsStateWithLifecycle()
     val selectedTopicId by viewModel.selectedTopicId.collectAsStateWithLifecycle()
     val pullRefreshState = rememberPullToRefreshState()
-    val hasLoadedOnce = remember { mutableStateOf(false) }
+    var isManualRefreshing by remember { mutableStateOf(false) }
     val refreshState = photos.loadState.refresh
-    // Only true for pull-to-refresh after first successful load
-    val isRefreshing = hasLoadedOnce.value && refreshState is LoadState.Loading
+
+    // Force a "switching" state when the tab changes so we see shimmers immediately.
+    // For the Editorial tab (null), we allow showing cached data immediately to avoid flicker.
+    var isSwitchingTopic by remember(selectedTopicId) { mutableStateOf(selectedTopicId != null) }
+    var hasSeenLoadingForTab by remember(selectedTopicId) { mutableStateOf(false) }
 
     LaunchedEffect(refreshState) {
-        if (refreshState is LoadState.NotLoading) {
-            hasLoadedOnce.value = true
+        if (refreshState !is LoadState.Loading) {
+            isManualRefreshing = false
+        }
+
+        if (refreshState is LoadState.Loading) {
+            hasSeenLoadingForTab = true
+        }
+        
+        // Hide shimmers only after we've seen a loading cycle and it finished,
+        // or if we already have data and the tab didn't trigger a new load
+        if (isSwitchingTopic && hasSeenLoadingForTab && refreshState is LoadState.NotLoading) {
+            isSwitchingTopic = false
         }
     }
 
     PullToRefreshBox(
-        isRefreshing = isRefreshing,
-        onRefresh = { photos.refresh() },
+        isRefreshing = isManualRefreshing,
+        onRefresh = {
+            isManualRefreshing = true
+            photos.refresh()
+        },
         state = pullRefreshState,
-        modifier = Modifier
-            .fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         indicator = {
             val progress = pullRefreshState.distanceFraction.coerceIn(0f, 1f)
-            if (progress > 0f || isRefreshing) {
+            if (progress > 0f || isManualRefreshing) {
                 Box(
                     modifier = Modifier
                         .align(Alignment.TopCenter)
@@ -91,11 +100,12 @@ fun GalleryScreen(
     ) {
         PhotoGridContent(
             photos = photos,
-            topics = topics,
+            topicsState = topicsState,
             selectedTopicId = selectedTopicId,
+            isSwitchingTopic = isSwitchingTopic,
             onTopicSelected = { viewModel.selectTopic(it) },
+            onRetryTopics = { viewModel.fetchTopics() },
             loadState = refreshState,
-            hasLoadedOnce = hasLoadedOnce.value,
             onPhotoClick = onPhotoClick,
             onRetry = { photos.retry() },
             onSearchClick = onSearchNavigate,
@@ -110,11 +120,12 @@ fun GalleryScreen(
 @Composable
 private fun PhotoGridContent(
     photos: LazyPagingItems<Photo>,
-    topics: List<Topic>,
+    topicsState: UiState<List<Topic>>,
     selectedTopicId: String?,
+    isSwitchingTopic: Boolean,
     onTopicSelected: (String?) -> Unit,
+    onRetryTopics: () -> Unit,
     loadState: LoadState,
-    hasLoadedOnce: Boolean,
     onPhotoClick: (Photo) -> Unit,
     onRetry: () -> Unit,
     onSearchClick: () -> Unit,
@@ -122,53 +133,34 @@ private fun PhotoGridContent(
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedContentScope
 ) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        if (loadState is LoadState.Error && photos.itemCount == 0) {
+            val reason = loadState.error.localizedMessage?.let {
+                stringResource(R.string.error_reason_prefix, it)
+            } ?: stringResource(R.string.unknown_error)
 
-    Column {
-        AnimatedContent(
-            targetState = loadState,
-            transitionSpec = {
-                fadeIn(tween(500)) togetherWith fadeOut(tween(300))
-            },
-            label = "PhotoGridTransition"
-        ) { state ->
-            when (state) {
-                is LoadState.Loading -> {
-                    // Show only if first load to prevent showing both main ProgressIndicator
-                    // and PullToRefreshBox indicator simultaneously
-                    if (!hasLoadedOnce) {
-                        ProgressIndicator(modifier = Modifier.fillMaxSize())
-                    }
-                }
-
-                is LoadState.Error -> {
-                    val reason = state.error.localizedMessage?.let {
-                        stringResource(R.string.error_reason_prefix, it)
-                    } ?: stringResource(R.string.unknown_error)
-
-                    InfoMessageScreen(
-                        title = stringResource(R.string.error_load_photos),
-                        subtitle = reason,
-                        imageRes = R.drawable.error_icon,
-                        titleColor = MaterialTheme.colorScheme.error
-                    ) {
-                        RetryButton(onClick = onRetry)
-                    }
-                }
-
-                else -> {
-                    PhotoGrid(
-                        photos = photos,
-                        topics = topics,
-                        selectedTopicId = selectedTopicId,
-                        onTopicSelected = onTopicSelected,
-                        onPhotoClick = { onPhotoClick(it) },
-                        onSearchClick = onSearchClick,
-                        onFavoritesClick = onFavoritesClick,
-                        sharedTransitionScope = sharedTransitionScope,
-                        animatedVisibilityScope = animatedVisibilityScope
-                    )
-                }
+            InfoMessageScreen(
+                title = stringResource(R.string.error_load_photos),
+                subtitle = reason,
+                imageRes = R.drawable.error_icon,
+                titleColor = MaterialTheme.colorScheme.error
+            ) {
+                RetryButton(onClick = onRetry)
             }
+        } else {
+            PhotoGrid(
+                photos = photos,
+                topicsState = topicsState,
+                selectedTopicId = selectedTopicId,
+                isSwitchingTopic = isSwitchingTopic,
+                onTopicSelected = onTopicSelected,
+                onRetryTopics = onRetryTopics,
+                onPhotoClick = onPhotoClick,
+                onSearchClick = onSearchClick,
+                onFavoritesClick = onFavoritesClick,
+                sharedTransitionScope = sharedTransitionScope,
+                animatedVisibilityScope = animatedVisibilityScope
+            )
         }
     }
 }

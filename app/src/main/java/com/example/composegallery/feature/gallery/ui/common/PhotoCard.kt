@@ -5,6 +5,7 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -27,6 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import android.util.Log
 import com.example.composegallery.R
 import com.example.composegallery.ui.theme.ComposeGalleryTheme
 
@@ -39,21 +41,26 @@ fun PhotoCard(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
     blurHash: String? = null,
+    aspectRatio: Float = 1f,
     shape: Shape = RoundedCornerShape(12.dp),
     sharedTransitionScope: SharedTransitionScope? = null,
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
     photoId: String? = null,
     onClick: (() -> Unit)? = null,
 ) {
-    val clickableModifier = Modifier
+    Log.d("PhotoCard", "id=$photoId, ratio=$aspectRatio")
+    val cardModifier = modifier
+        .clip(RoundedCornerShape(16.dp))
         .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier)
         .padding(8.dp)
 
-    Column(modifier = clickableModifier) {
+    Column(modifier = cardModifier) {
         PhotoImage(
             imageUrl = imageUrl,
             contentDescription = authorName,
-            modifier = modifier,
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(aspectRatio),
             blurHash = blurHash,
             shape = shape,
             sharedTransitionScope = sharedTransitionScope,

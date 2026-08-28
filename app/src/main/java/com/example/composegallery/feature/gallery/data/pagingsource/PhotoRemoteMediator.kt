@@ -14,7 +14,7 @@ import com.example.composegallery.feature.gallery.data.remote.UnsplashApi
 import com.example.composegallery.feature.gallery.data.util.Result
 import com.example.composegallery.feature.gallery.data.util.safeApiCall
 import com.example.composegallery.feature.gallery.util.StringProvider
-import java.io.IOException
+import timber.log.Timber
 
 @OptIn(ExperimentalPagingApi::class)
 class PhotoRemoteMediator(
@@ -27,6 +27,7 @@ class PhotoRemoteMediator(
         loadType: LoadType,
         state: PagingState<Int, PhotoEntity>
     ): MediatorResult {
+        Timber.d("PhotoRemoteMediator: loadType=$loadType")
         val page = when (loadType) {
             LoadType.REFRESH -> {
                 val remoteKey = getRemoteKeyClosestToCurrentPosition(state)
@@ -47,18 +48,21 @@ class PhotoRemoteMediator(
         }
 
         val result = safeApiCall(stringProvider) {
+            Timber.d("PhotoRemoteMediator: Fetching photos for page $page")
             api.getPhotos(page = page, perPage = state.config.pageSize)
         }
 
         return when (result) {
             is Result.Success -> {
                 val photos = result.data.mapNotNull { it.toDomainModel() }
+                Timber.d("PhotoRemoteMediator: Fetched ${photos.size} photos")
                 val endOfPaginationReached = photos.isEmpty()
 
                 database.withTransaction {
                     if (loadType == LoadType.REFRESH) {
                         database.photoRemoteKeyDao().clearRemoteKeys()
-                        database.photoDao().clearAll()
+                        // Removed clearAll() to avoid UI flicker/rearranging on refresh.
+                        // Items will be overwritten by REPLACE strategy.
                     }
 
                     val prevPage = if (page == 1) null else page - 1
@@ -68,13 +72,16 @@ class PhotoRemoteMediator(
                     }
 
                     database.photoRemoteKeyDao().insertAll(keys)
-                    database.photoDao().insertPhotos(photos.map { it.toEntity() })
+                    database.photoDao().insertPhotos(photos.mapIndexed { index, photo ->
+                        photo.toEntity(pagingOrder = (page - 1) * state.config.pageSize + index)
+                    })
                 }
 
                 MediatorResult.Success(endOfPaginationReached = endOfPaginationReached)
             }
 
             is Result.Error -> {
+                Timber.e("PhotoRemoteMediator: Error fetching photos: ${result.message}")
                 MediatorResult.Error(result.throwable ?: Exception(result.message))
             }
         }

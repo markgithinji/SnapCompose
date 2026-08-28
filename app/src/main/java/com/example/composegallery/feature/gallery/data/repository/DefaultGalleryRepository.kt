@@ -80,4 +80,3 @@ class DefaultGalleryRepository @Inject constructor(
         }
     }
 }
-

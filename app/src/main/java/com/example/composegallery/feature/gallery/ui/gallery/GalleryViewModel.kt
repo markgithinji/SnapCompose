@@ -51,8 +51,8 @@ class GalleryViewModel @Inject constructor(
     private val _isActionLoading = MutableStateFlow(false)
     val isActionLoading: StateFlow<Boolean> = _isActionLoading
 
-    private val _topics = MutableStateFlow<List<Topic>>(emptyList())
-    val topics: StateFlow<List<Topic>> = _topics.asStateFlow()
+    private val _topicsState = MutableStateFlow<UiState<List<Topic>>>(UiState.Loading)
+    val topicsState: StateFlow<UiState<List<Topic>>> = _topicsState.asStateFlow()
 
     private val _selectedTopicId = MutableStateFlow<String?>(null) // null = Editorial
     val selectedTopicId: StateFlow<String?> = _selectedTopicId.asStateFlow()
@@ -86,11 +86,12 @@ class GalleryViewModel @Inject constructor(
         fetchTopics()
     }
 
-    private fun fetchTopics() {
+    fun fetchTopics() {
         viewModelScope.launch {
+            _topicsState.value = UiState.Loading
             when (val result = galleryRepository.getTopics()) {
-                is Result.Success -> _topics.value = result.data
-                is Result.Error -> { /* Handle error or use defaults */ }
+                is Result.Success -> _topicsState.value = UiState.Content(result.data)
+                is Result.Error -> _topicsState.value = UiState.Error(result.message)
             }
         }
     }

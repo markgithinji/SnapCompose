@@ -1,21 +1,26 @@
 package com.example.composegallery.feature.gallery.ui.gallery
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
@@ -30,24 +35,28 @@ import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.domain.model.Topic
 import com.example.composegallery.feature.gallery.ui.common.BottomLoadingIndicator
+import com.example.composegallery.feature.gallery.ui.util.UiState
 import com.example.composegallery.feature.gallery.ui.common.LoadMoreListError
 import com.example.composegallery.feature.gallery.ui.common.PhotoCard
 import com.example.composegallery.feature.gallery.ui.common.calculateResponsiveColumnCount
+import com.valentinilk.shimmer.shimmer
+import timber.log.Timber
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun PhotoGrid(
     photos: LazyPagingItems<Photo>,
-    topics: List<Topic>,
+    topicsState: UiState<List<Topic>>,
     selectedTopicId: String?,
+    isSwitchingTopic: Boolean,
     onTopicSelected: (String?) -> Unit,
+    onRetryTopics: () -> Unit,
     onPhotoClick: (Photo) -> Unit,
     onSearchClick: () -> Unit,
     onFavoritesClick: () -> Unit,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope
 ) {
-
     val retryKeys = remember { mutableStateMapOf<String, Int>() }
     val isGridClickable =
         photos.loadState.refresh !is LoadState.Loading &&
@@ -66,36 +75,52 @@ fun PhotoGrid(
             GalleryHeader(
                 sharedTransitionScope = sharedTransitionScope,
                 animatedVisibilityScope = animatedVisibilityScope,
-                topics = topics,
+                topicsState = topicsState,
                 selectedTopicId = selectedTopicId,
                 onTopicSelected = onTopicSelected,
                 onSearchClick = onSearchClick,
                 onFavoritesClick = onFavoritesClick,
+                onRetryTopics = onRetryTopics,
                 modifier = Modifier.statusBarsPadding()
             )
         }
 
-        items(
-            count = photos.itemCount,
-            key = { index ->
-                val item = photos.peek(index)
-                item?.id ?: index
-            },
-            span = { index ->
-                if ((index + 1) % 5 == 0) {
-                    StaggeredGridItemSpan.FullLine
-                } else {
-                    StaggeredGridItemSpan.SingleLane
-                }
+        val refreshState = photos.loadState.refresh
+        if (isSwitchingTopic || (refreshState is LoadState.Loading && photos.itemCount == 0)) {
+            items(10) { index ->
+                val aspectRatio = if (index % 2 == 0) 0.7f else 1.3f
+                Box(
+                    modifier = Modifier
+                        .animateItem()
+                        .clip(RoundedCornerShape(12.dp))
+                        .fillMaxWidth()
+                        .aspectRatio(aspectRatio)
+                        .padding(8.dp)
+                        .shimmer()
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                )
             }
-        ) { index ->
-            val photo = photos[index]
-            if (photo != null) {
+        } else {
+            items(
+                count = photos.itemCount,
+                key = { index ->
+                    val item = photos.peek(index)
+                    item?.id ?: index
+                },
+                span = { index ->
+                    if ((index + 1) % 5 == 0) {
+                        StaggeredGridItemSpan.FullLine
+                    } else {
+                        StaggeredGridItemSpan.SingleLane
+                    }
+                }
+            ) { index ->
+                val photo = photos[index]
+                if (photo != null) {
+                    val retryKey = retryKeys[photo.id] ?: 0
+                    val url = if (retryKey > 0) "${photo.smallUrl}?retry=$retryKey" else photo.smallUrl
 
-                val retryKey = retryKeys[photo.id] ?: 0
-                val url = if (retryKey > 0) "${photo.smallUrl}?retry=$retryKey" else photo.smallUrl
-
-                PhotoCard(
+                    PhotoCard(
                     imageUrl = url,
                     authorName = photo.authorName,
                     authorImageUrl = "${photo.authorProfileImageMediumResUrl}?retry=$retryKey",
@@ -103,13 +128,19 @@ fun PhotoGrid(
                     sharedTransitionScope = sharedTransitionScope,
                     animatedVisibilityScope = animatedVisibilityScope,
                     photoId = photo.id,
+                    aspectRatio = photo.width.toFloat() / photo.height,
                     modifier = Modifier
+                        .animateItem(
+                            fadeInSpec = spring(stiffness = Spring.StiffnessLow),
+                            fadeOutSpec = spring(stiffness = Spring.StiffnessLow),
+                            placementSpec = spring(stiffness = Spring.StiffnessMedium)
+                        )
                         .fillMaxWidth()
-                        .aspectRatio(photo.width.toFloat() / photo.height)
                         .testTag("PhotoItem_${photo.id}"),
                     blurHash = photo.blurHash,
                     onClick = takeIf { isGridClickable }?.let { { onPhotoClick(photo) } }
                 )
+                }
             }
         }
 

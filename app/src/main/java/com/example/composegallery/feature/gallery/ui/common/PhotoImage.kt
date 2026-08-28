@@ -37,6 +37,7 @@ import com.example.composegallery.feature.gallery.ui.util.BlurHashDecoder
 import com.valentinilk.shimmer.ShimmerBounds
 import com.valentinilk.shimmer.rememberShimmer
 import com.valentinilk.shimmer.shimmer
+import android.util.Log
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -60,6 +61,8 @@ fun PhotoImage(
     
     val shimmer = rememberShimmer(shimmerBounds = ShimmerBounds.View)
     var isError by remember { mutableStateOf(false) }
+
+    Log.d("PhotoImage", "Compose: id=$sharedKey, url=$imageUrl")
 
     val sharedModifier = if (sharedTransitionScope != null && animatedVisibilityScope != null && sharedKey != null) {
         with(sharedTransitionScope) {
@@ -107,11 +110,22 @@ fun PhotoImage(
             contentScale = ContentScale.Crop,
             modifier = Modifier.matchParentSize(),
             onState = { state ->
-                val loading = state is AsyncImagePainter.State.Loading
-                onLoading?.invoke(loading)
-                isError = state is AsyncImagePainter.State.Error
-                if (state is AsyncImagePainter.State.Success) {
-                    onSuccess?.invoke()
+                when (state) {
+                    is AsyncImagePainter.State.Loading -> {
+                        Log.d("PhotoImage", "State: Loading for $imageUrl")
+                        onLoading?.invoke(true)
+                    }
+                    is AsyncImagePainter.State.Success -> {
+                        Log.d("PhotoImage", "State: Success for $imageUrl")
+                        onLoading?.invoke(false)
+                        onSuccess?.invoke()
+                    }
+                    is AsyncImagePainter.State.Error -> {
+                        Log.e("PhotoImage", "State: Error for $imageUrl", state.result.throwable)
+                        onLoading?.invoke(false)
+                        isError = true
+                    }
+                    else -> {}
                 }
             }
         )
