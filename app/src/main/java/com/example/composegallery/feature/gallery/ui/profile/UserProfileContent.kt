@@ -49,6 +49,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.itemKey
+import androidx.paging.compose.itemContentType
 import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.domain.model.PhotoCollection
@@ -57,6 +59,7 @@ import com.example.composegallery.feature.gallery.ui.common.EmptyContentMessage
 import com.example.composegallery.feature.gallery.ui.common.LoadMoreListError
 import com.example.composegallery.feature.gallery.ui.common.SharedTransitionKeys
 import com.example.composegallery.feature.gallery.ui.common.calculateResponsiveColumnCount
+import com.valentinilk.shimmer.shimmer
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
@@ -236,30 +239,39 @@ private fun LazyStaggeredGridScope.renderPhotoItems(
 
     items(
         count = photos.itemCount,
-        key = { index ->
-            val item = photos.peek(index)
-            item?.id ?: index
-        }
+        key = photos.itemKey { it.id },
+        contentType = photos.itemContentType { "photo" }
     ) { index ->
-        val photo = photos[index] ?: return@items
+        val photo = photos[index]
+        if (photo != null) {
+            val retryKey = retryKeys[photo.id] ?: 0
+            val url = if (retryKey > 0) "${photo.smallUrl}?retry=$retryKey" else photo.smallUrl
 
-        val retryKey = retryKeys[photo.id] ?: 0
-        val url = if (retryKey > 0) "${photo.smallUrl}?retry=$retryKey" else photo.smallUrl
-
-        ProfilePhotoCard(
-            imageUrl = url,
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(photo.width.toFloat() / photo.height)
-                .clip(RoundedCornerShape(12.dp)),
-            blurHash = photo.blurHash,
-            sharedTransitionScope = sharedTransitionScope,
-            animatedVisibilityScope = animatedVisibilityScope,
-            photoId = photo.id,
-            origin = "profile_$username",
-            onRetry = { onRetry(photo.id) },
-            onClick = { onPhotoClick(photo) }
-        )
+            ProfilePhotoCard(
+                imageUrl = url,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(photo.width.toFloat() / photo.height)
+                    .clip(RoundedCornerShape(12.dp)),
+                blurHash = photo.blurHash,
+                sharedTransitionScope = sharedTransitionScope,
+                animatedVisibilityScope = animatedVisibilityScope,
+                photoId = photo.id,
+                origin = "profile_$username",
+                onRetry = { onRetry(photo.id) },
+                onClick = { onPhotoClick(photo) }
+            )
+        } else {
+            // Placeholder
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f)
+                    .clip(RoundedCornerShape(12.dp))
+                    .shimmer()
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+            )
+        }
     }
 
     if (refreshState is LoadState.Loading) {
@@ -315,34 +327,43 @@ private fun LazyStaggeredGridScope.renderCollectionItems(
 
     items(
         count = collections.itemCount,
-        key = { index ->
-            val item = collections.peek(index)
-            item?.id ?: index
-        }
+        key = collections.itemKey { it.id },
+        contentType = collections.itemContentType { "collection" }
     ) { index ->
-        val collection = collections[index] ?: return@items
+        val collection = collections[index]
+        if (collection != null) {
+            val retryKey = retryKeys[collection.id] ?: 0
 
-        val retryKey = retryKeys[collection.id] ?: 0
-
-        val imageUrl = if (retryKey > 0) {
-            "${collection.coverPhoto?.smallUrl.orEmpty()}?retry=$retryKey"
-        } else {
-            collection.coverPhoto?.smallUrl.orEmpty()
-        }
-
-        CollectionGridItem(
-            id = collection.id,
-            coverPhoto = imageUrl,
-            title = collection.title,
-            totalPhotos = collection.totalPhotos,
-            modifier = Modifier.fillMaxWidth(),
-            blurHash = collection.coverPhoto?.blurHash,
-            description = collection.description,
-            onRetry = { onRetry(collection.id) },
-            onCollectionClick = {
-                onCollectionClick(collection)
+            val imageUrl = if (retryKey > 0) {
+                "${collection.coverPhoto?.smallUrl.orEmpty()}?retry=$retryKey"
+            } else {
+                collection.coverPhoto?.smallUrl.orEmpty()
             }
-        )
+
+            CollectionGridItem(
+                id = collection.id,
+                coverPhoto = imageUrl,
+                title = collection.title,
+                totalPhotos = collection.totalPhotos,
+                modifier = Modifier.fillMaxWidth(),
+                blurHash = collection.coverPhoto?.blurHash,
+                description = collection.description,
+                onRetry = { onRetry(collection.id) },
+                onCollectionClick = {
+                    onCollectionClick(collection)
+                }
+            )
+        } else {
+            // Placeholder
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1.5f)
+                    .clip(RoundedCornerShape(12.dp))
+                    .shimmer()
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+            )
+        }
     }
 
     if (refreshState is LoadState.Loading) {

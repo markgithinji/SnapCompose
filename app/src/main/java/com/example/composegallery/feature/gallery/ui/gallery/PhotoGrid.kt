@@ -1,5 +1,6 @@
 package com.example.composegallery.feature.gallery.ui.gallery
 
+import android.util.Log
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.AnimatedVisibilityScope
@@ -18,7 +19,6 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
-import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -31,6 +31,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.itemKey
+import androidx.paging.compose.itemContentType
 import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.domain.model.Topic
@@ -41,6 +43,11 @@ import com.example.composegallery.feature.gallery.ui.common.PhotoCard
 import com.example.composegallery.feature.gallery.ui.common.calculateResponsiveColumnCount
 import com.valentinilk.shimmer.shimmer
 import timber.log.Timber
+
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.snapshotFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -57,6 +64,10 @@ fun PhotoGrid(
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope
 ) {
+    SideEffect {
+        Log.d("PhotoGrid", "Composition/Recomposition: itemCount=${photos.itemCount}, loadState=${photos.loadState}")
+    }
+
     val retryKeys = remember { mutableStateMapOf<String, Int>() }
     val isGridClickable =
         photos.loadState.refresh !is LoadState.Loading &&
@@ -101,18 +112,16 @@ fun PhotoGrid(
                 )
             }
         } else {
+            // Use paging-specific items extension for better key stability and performance
             items(
                 count = photos.itemCount,
-                key = { index ->
-                    val item = photos.peek(index)
-                    item?.id ?: index
-                },
+                key = photos.itemKey { it.id },
+                contentType = photos.itemContentType { "photo" },
                 span = { index ->
-                    if ((index + 1) % 5 == 0) {
-                        StaggeredGridItemSpan.FullLine
-                    } else {
-                        StaggeredGridItemSpan.SingleLane
-                    }
+                    val photo = photos.peek(index)
+                    // Tie span to the item ID to ensure it's stable even if items shift positions
+                    val isFullLine = photo?.let { it.id.hashCode() % 11 == 0 } ?: false
+                    if (isFullLine) StaggeredGridItemSpan.FullLine else StaggeredGridItemSpan.SingleLane
                 }
             ) { index ->
                 val photo = photos[index]
@@ -121,28 +130,40 @@ fun PhotoGrid(
                     val url = if (retryKey > 0) "${photo.smallUrl}?retry=$retryKey" else photo.smallUrl
 
                     PhotoCard(
-                    imageUrl = url,
-                    authorName = photo.authorName,
-                    authorImageUrl = "${photo.authorProfileImageMediumResUrl}?retry=$retryKey",
-                    onRetry = { retryKeys[photo.id] = retryKey + 1 },
-                    sharedTransitionScope = sharedTransitionScope,
-                    animatedVisibilityScope = animatedVisibilityScope,
-                    photoId = photo.id,
-                    aspectRatio = photo.width.toFloat() / photo.height,
-                    modifier = Modifier
-                        .animateItem(
-                            fadeInSpec = spring(stiffness = Spring.StiffnessLow),
-                            fadeOutSpec = spring(stiffness = Spring.StiffnessLow),
-                            placementSpec = spring(stiffness = Spring.StiffnessMedium)
-                        )
-                        .fillMaxWidth()
-                        .testTag("PhotoItem_${photo.id}"),
-                    blurHash = photo.blurHash,
-                    onClick = takeIf { isGridClickable }?.let { { onPhotoClick(photo) } }
-                )
+                        imageUrl = url,
+                        authorName = photo.authorName,
+                        authorImageUrl = "${photo.authorProfileImageMediumResUrl}?retry=$retryKey",
+                        onRetry = { retryKeys[photo.id] = retryKey + 1 },
+                        sharedTransitionScope = sharedTransitionScope,
+                        animatedVisibilityScope = animatedVisibilityScope,
+                        photoId = photo.id,
+                        aspectRatio = photo.width.toFloat() / photo.height,
+                        modifier = Modifier
+                            .animateItem(
+                                fadeInSpec = spring(stiffness = Spring.StiffnessLow),
+                                fadeOutSpec = spring(stiffness = Spring.StiffnessLow),
+                                placementSpec = spring(stiffness = Spring.StiffnessMedium)
+                            )
+                            .fillMaxWidth()
+                            .testTag("PhotoItem_${photo.id}"),
+                        blurHash = photo.blurHash,
+                        onClick = takeIf { isGridClickable }?.let { { onPhotoClick(photo) } }
+                    )
+                } else {
+                    // Placeholder for when enablePlaceholders = true
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(1f)
+                            .padding(8.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .shimmer()
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                    )
                 }
             }
         }
+
 
         when (val appendState = photos.loadState.append) {
             is LoadState.Loading -> item(span = StaggeredGridItemSpan.FullLine) {

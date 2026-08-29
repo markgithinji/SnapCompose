@@ -19,6 +19,7 @@ data class Photo(
     val blurHash: String? = null,
     val description: String? = null,
     val createdAt: String? = null,
-    val exif: Exif? = null
+    val exif: Exif? = null,
+    val debugOrder: Int = -1
 )
 

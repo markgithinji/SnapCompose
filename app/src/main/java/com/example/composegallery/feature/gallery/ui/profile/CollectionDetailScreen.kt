@@ -3,7 +3,9 @@ package com.example.composegallery.feature.gallery.ui.profile
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -38,7 +40,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
+import androidx.paging.compose.itemContentType
 import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.ui.common.BottomLoadingIndicator
@@ -50,6 +55,7 @@ import com.example.composegallery.feature.gallery.ui.common.ProgressIndicator
 import com.example.composegallery.feature.gallery.ui.common.RetryButton
 import com.example.composegallery.feature.gallery.ui.common.SharedTransitionKeys
 import com.example.composegallery.feature.gallery.ui.common.calculateResponsiveColumnCount
+import com.valentinilk.shimmer.shimmer
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
@@ -150,30 +156,39 @@ fun CollectionDetailScreen(
                     ) {
                         items(
                             count = photos.itemCount,
-                            key = { index ->
-                                val item = photos.peek(index)
-                                item?.id ?: index
-                            }
+                            key = photos.itemKey { it.id },
+                            contentType = photos.itemContentType { "photo" }
                         ) { index ->
-                            val photo = photos[index] ?: return@items
-                            val retryKey = retryKeys[photo.id] ?: 0
-                            val url =
-                                if (retryKey > 0) "${photo.smallUrl}?retry=$retryKey" else photo.smallUrl
+                            val photo = photos[index]
+                            if (photo != null) {
+                                val retryKey = retryKeys[photo.id] ?: 0
+                                val url = if (retryKey > 0) "${photo.smallUrl}?retry=$retryKey" else photo.smallUrl
 
-                            ProfilePhotoCard(
-                                imageUrl = url,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .aspectRatio(photo.width.toFloat() / photo.height)
-                                    .clip(RoundedCornerShape(12.dp)),
-                                blurHash = photo.blurHash,
-                                sharedTransitionScope = sharedTransitionScope,
-                                animatedVisibilityScope = animatedVisibilityScope,
-                                photoId = photo.id,
-                                origin = "collection_$collectionId",
-                                onRetry = { retryKeys[photo.id] = retryKey + 1 },
-                                onClick = { onPhotoClick(photo) }
-                            )
+                                ProfilePhotoCard(
+                                    imageUrl = url,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .aspectRatio(photo.width.toFloat() / photo.height)
+                                        .clip(RoundedCornerShape(12.dp)),
+                                    blurHash = photo.blurHash,
+                                    sharedTransitionScope = sharedTransitionScope,
+                                    animatedVisibilityScope = animatedVisibilityScope,
+                                    photoId = photo.id,
+                                    origin = "collection_$collectionId",
+                                    onRetry = { retryKeys[photo.id] = retryKey + 1 },
+                                    onClick = { onPhotoClick(photo) }
+                                )
+                            } else {
+                                // Placeholder
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .aspectRatio(1f)
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .shimmer()
+                                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                                )
+                            }
                         }
 
                         // Pagination footer

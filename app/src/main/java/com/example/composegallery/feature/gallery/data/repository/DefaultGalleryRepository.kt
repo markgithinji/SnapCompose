@@ -11,6 +11,7 @@ import com.example.composegallery.feature.gallery.data.local.toDomainModel
 import com.example.composegallery.feature.gallery.data.model.toDomainModel
 import com.example.composegallery.feature.gallery.data.pagingsource.PagingDefaults
 import com.example.composegallery.feature.gallery.data.pagingsource.PhotoRemoteMediator
+import com.example.composegallery.feature.gallery.data.pagingsource.UnsplashGetPhotosPagingSource
 import com.example.composegallery.feature.gallery.data.pagingsource.UnsplashTopicPhotosPagingSource
 import com.example.composegallery.feature.gallery.data.remote.UnsplashApi
 import com.example.composegallery.feature.gallery.data.util.Result
@@ -37,7 +38,8 @@ class DefaultGalleryRepository @Inject constructor(
             config = PagingConfig(
                 pageSize = PagingDefaults.PAGE_SIZE,
                 initialLoadSize = PagingDefaults.INITIAL_LOAD_SIZE,
-                prefetchDistance = PagingDefaults.PREFETCH_DISTANCE
+                prefetchDistance = PagingDefaults.PREFETCH_DISTANCE,
+                enablePlaceholders = true // Keep itemCount stable during invalidation
             ),
             remoteMediator = PhotoRemoteMediator(api, database, stringProvider),
             pagingSourceFactory = { database.photoDao().getPagedPhotos() }
@@ -53,7 +55,8 @@ class DefaultGalleryRepository @Inject constructor(
             config = PagingConfig(
                 pageSize = PagingDefaults.PAGE_SIZE,
                 initialLoadSize = PagingDefaults.INITIAL_LOAD_SIZE,
-                prefetchDistance = PagingDefaults.PREFETCH_DISTANCE
+                prefetchDistance = PagingDefaults.PREFETCH_DISTANCE,
+                enablePlaceholders = false
             ),
             pagingSourceFactory = { UnsplashTopicPhotosPagingSource(api, topicIdOrSlug, stringProvider) }
         ).flow

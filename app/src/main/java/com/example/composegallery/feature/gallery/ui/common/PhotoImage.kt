@@ -1,5 +1,6 @@
 package com.example.composegallery.feature.gallery.ui.common
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
@@ -102,8 +103,12 @@ fun PhotoImage(
             modifier = Modifier.matchParentSize(),
             onState = { state ->
                 when (state) {
-                    is AsyncImagePainter.State.Loading -> onLoading?.invoke(true)
+                    is AsyncImagePainter.State.Loading -> {
+                        Log.d("PhotoImage", "Loading: $imageUrl")
+                        onLoading?.invoke(true)
+                    }
                     is AsyncImagePainter.State.Success -> {
+                        Log.d("PhotoImage", "Success: $imageUrl")
                         onLoading?.invoke(false)
                         onSuccess?.invoke()
                     }

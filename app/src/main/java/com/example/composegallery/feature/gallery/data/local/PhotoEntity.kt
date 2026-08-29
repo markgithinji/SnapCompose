@@ -51,7 +51,8 @@ fun PhotoEntity.toDomainModel(): Photo {
         blurHash = blurHash,
         description = description,
         createdAt = createdAt,
-        exif = exif
+        exif = exif,
+        debugOrder = pagingOrder
     )
 }
 
@@ -76,6 +77,6 @@ fun Photo.toEntity(pagingOrder: Int = 0): PhotoEntity {
         description = description,
         createdAt = createdAt,
         exif = exif,
-        pagingOrder = pagingOrder
+        pagingOrder = if (debugOrder != -1) debugOrder else pagingOrder
     )
 }

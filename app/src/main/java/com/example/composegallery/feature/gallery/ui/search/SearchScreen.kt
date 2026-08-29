@@ -55,6 +55,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
+import androidx.paging.compose.itemContentType
 import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.domain.model.OrderBy
 import com.example.composegallery.feature.gallery.domain.model.Photo
@@ -68,6 +70,7 @@ import com.example.composegallery.feature.gallery.ui.common.RetryButton
 import com.example.composegallery.feature.gallery.ui.common.SharedTransitionKeys
 import com.example.composegallery.feature.gallery.ui.common.calculateResponsiveColumnCount
 import com.example.composegallery.ui.theme.searchBar
+import com.valentinilk.shimmer.shimmer
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -325,10 +328,8 @@ private fun SearchScreenContent(
                     ) {
                         items(
                             count = photos.itemCount,
-                            key = { index ->
-                                val item = photos.peek(index)
-                                item?.id ?: index
-                            }
+                            key = photos.itemKey { it.id },
+                            contentType = photos.itemContentType { "photo" }
                         ) { index ->
                             val photo = photos[index]
                             if (photo != null) {
@@ -348,6 +349,17 @@ private fun SearchScreenContent(
                                     blurHash = photo.blurHash,
                                     modifier = Modifier.fillMaxWidth(),
                                     onClick = { onPhotoClick(photo) }
+                                )
+                            } else {
+                                // Placeholder
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .aspectRatio(1f)
+                                        .padding(8.dp)
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .shimmer()
+                                        .background(MaterialTheme.colorScheme.surfaceVariant)
                                 )
                             }
                         }
