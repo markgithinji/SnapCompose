@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.data.util.Result
 import com.example.composegallery.feature.gallery.domain.model.Photo
@@ -42,6 +43,8 @@ class GalleryViewModel @Inject constructor(
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
     private val stringProvider: StringProvider
 ) : ViewModel() {
+
+    val gridState = LazyStaggeredGridState()
 
     private val _uiState = MutableStateFlow<UiState<Photo>>(UiState.Loading)
     val uiState: StateFlow<UiState<Photo>> = _uiState

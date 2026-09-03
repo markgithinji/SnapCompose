@@ -6,6 +6,7 @@ import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -48,6 +49,7 @@ fun GalleryScreen(
     val topicsState by viewModel.topicsState.collectAsStateWithLifecycle()
     val selectedTopicId by viewModel.selectedTopicId.collectAsStateWithLifecycle()
     val pullRefreshState = rememberPullToRefreshState()
+    val gridState = viewModel.gridState
     var isManualRefreshing by remember { mutableStateOf(false) }
     val refreshState = photos.loadState.refresh
 
@@ -101,6 +103,7 @@ fun GalleryScreen(
     ) {
         PhotoGridContent(
             photos = photos,
+            gridState = gridState,
             topicsState = topicsState,
             selectedTopicId = selectedTopicId,
             isSwitchingTopic = isSwitchingTopic,
@@ -121,6 +124,7 @@ fun GalleryScreen(
 @Composable
 private fun PhotoGridContent(
     photos: LazyPagingItems<Photo>,
+    gridState: LazyStaggeredGridState,
     topicsState: UiState<List<Topic>>,
     selectedTopicId: String?,
     isSwitchingTopic: Boolean,
@@ -151,6 +155,7 @@ private fun PhotoGridContent(
         } else {
             PhotoGrid(
                 photos = photos,
+                gridState = gridState,
                 topicsState = topicsState,
                 selectedTopicId = selectedTopicId,
                 isSwitchingTopic = isSwitchingTopic,

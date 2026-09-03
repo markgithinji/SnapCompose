@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
@@ -53,6 +54,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 @Composable
 fun PhotoGrid(
     photos: LazyPagingItems<Photo>,
+    gridState: LazyStaggeredGridState,
     topicsState: UiState<List<Topic>>,
     selectedTopicId: String?,
     isSwitchingTopic: Boolean,
@@ -64,10 +66,6 @@ fun PhotoGrid(
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope
 ) {
-    SideEffect {
-        Log.d("PhotoGrid", "Composition/Recomposition: itemCount=${photos.itemCount}, loadState=${photos.loadState}")
-    }
-
     val retryKeys = remember { mutableStateMapOf<String, Int>() }
     val isGridClickable =
         photos.loadState.refresh !is LoadState.Loading &&
@@ -75,6 +73,7 @@ fun PhotoGrid(
 
     LazyVerticalStaggeredGrid(
         columns = StaggeredGridCells.Fixed(calculateResponsiveColumnCount()),
+        state = gridState,
         modifier = Modifier
             .fillMaxSize()
             .testTag("PhotoGrid"),
