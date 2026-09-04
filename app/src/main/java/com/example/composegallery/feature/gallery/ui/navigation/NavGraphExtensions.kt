@@ -19,7 +19,6 @@ import com.example.composegallery.feature.gallery.ui.search.SearchScreen
 fun NavGraphBuilder.galleryRoute(
     sharedTransitionScope: SharedTransitionScope,
     onSearchClick: () -> Unit,
-    onFavoritesClick: () -> Unit,
     onPhotoClick: (Photo, String) -> Unit
 ) {
     composable<GalleryRoute> {
@@ -27,7 +26,6 @@ fun NavGraphBuilder.galleryRoute(
             sharedTransitionScope = sharedTransitionScope,
             animatedVisibilityScope = this,
             onSearchNavigate = onSearchClick,
-            onFavoritesNavigate = onFavoritesClick,
             onPhotoClick = { photo -> onPhotoClick(photo, "gallery") }
         )
     }
@@ -36,14 +34,12 @@ fun NavGraphBuilder.galleryRoute(
 @OptIn(ExperimentalSharedTransitionApi::class)
 fun NavGraphBuilder.favoritesRoute(
     sharedTransitionScope: SharedTransitionScope,
-    onBack: () -> Unit,
     onPhotoClick: (Photo) -> Unit
 ) {
     composable<FavoritesRoute> {
         FavoritesScreen(
             sharedTransitionScope = sharedTransitionScope,
             animatedVisibilityScope = this,
-            onBack = onBack,
             onPhotoClick = onPhotoClick
         )
     }

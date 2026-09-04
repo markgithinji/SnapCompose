@@ -57,7 +57,6 @@ fun GalleryHeader(
     selectedTopicId: String?,
     onTopicSelected: (String?) -> Unit,
     onSearchClick: () -> Unit,
-    onFavoritesClick: () -> Unit,
     onRetryTopics: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -77,14 +76,6 @@ fun GalleryHeader(
                 text = stringResource(R.string.app_title),
                 style = MaterialTheme.typography.displayLarge
             )
-
-            IconButton(onClick = onFavoritesClick) {
-                Icon(
-                    imageVector = Icons.Default.Favorite,
-                    contentDescription = stringResource(R.string.favorites),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            }
         }
 
         Spacer(modifier = Modifier.height(4.dp))

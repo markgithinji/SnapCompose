@@ -4,11 +4,9 @@ import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,59 +26,56 @@ import com.example.composegallery.feature.gallery.ui.common.calculateResponsiveC
 fun FavoritesScreen(
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedContentScope,
-    onBack: () -> Unit,
     onPhotoClick: (Photo) -> Unit,
     viewModel: GalleryViewModel = hiltViewModel()
 ) {
     val favorites by viewModel.favoritePhotos.collectAsStateWithLifecycle()
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(R.string.favorites),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                }
-            )
-        }
+        modifier = Modifier.fillMaxSize()
     ) { padding ->
-        if (favorites.isEmpty()) {
-            EmptyContentMessage(
-                message = stringResource(R.string.no_favorites_yet),
-                modifier = Modifier.padding(padding)
-            )
-        } else {
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(calculateResponsiveColumnCount()),
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+            Text(
+                text = stringResource(R.string.favorites),
+                style = MaterialTheme.typography.displayLarge,
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(favorites, key = { it.id }) { photo ->
-                    PhotoCard(
-                        imageUrl = photo.smallUrl,
-                        authorName = photo.authorName,
-                        authorImageUrl = photo.authorProfileImageMediumResUrl,
-                        onRetry = { /* No-op for favorites */ },
-                        sharedTransitionScope = sharedTransitionScope,
-                        animatedVisibilityScope = animatedVisibilityScope,
-                        photoId = photo.id,
-                        aspectRatio = photo.width.toFloat() / photo.height,
-                        blurHash = photo.blurHash,
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = { onPhotoClick(photo) }
+                    .padding(horizontal = 16.dp)
+                    .padding(top = 24.dp, bottom = 16.dp)
+            )
+
+            if (favorites.isEmpty()) {
+                Box(modifier = Modifier.weight(1f)) {
+                    EmptyContentMessage(
+                        message = stringResource(R.string.no_favorites_yet)
                     )
+                }
+            } else {
+                LazyVerticalStaggeredGrid(
+                    columns = StaggeredGridCells.Fixed(calculateResponsiveColumnCount()),
+                    modifier = Modifier.weight(1f),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalItemSpacing = 12.dp,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(favorites, key = { it.id }) { photo ->
+                        PhotoCard(
+                            imageUrl = photo.smallUrl,
+                            authorName = photo.authorName,
+                            authorImageUrl = photo.authorProfileImageMediumResUrl,
+                            onRetry = { /* No-op for favorites */ },
+                            sharedTransitionScope = sharedTransitionScope,
+                            animatedVisibilityScope = animatedVisibilityScope,
+                            photoId = photo.id,
+                            aspectRatio = photo.width.toFloat() / photo.height,
+                            blurHash = photo.blurHash,
+                            modifier = Modifier.fillMaxWidth(),
+                            onClick = { onPhotoClick(photo) }
+                        )
+                    }
                 }
             }
         }

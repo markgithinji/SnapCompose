@@ -27,9 +27,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -319,11 +320,11 @@ private fun SearchScreenContent(
 
                 // Content successfully loaded
                 else -> {
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(calculateResponsiveColumnCount()),
+                    LazyVerticalStaggeredGrid(
+                        columns = StaggeredGridCells.Fixed(calculateResponsiveColumnCount()),
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalItemSpacing = 12.dp,
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         items(
@@ -365,16 +366,15 @@ private fun SearchScreenContent(
                         }
 
                         // Handle append loading/error states (pagination)
-                        item(span = { GridItemSpan(maxCurrentLineSpan) }) {
-                            when (loadState.append) {
+                        item(span = StaggeredGridItemSpan.FullLine) {
+                            when (val loadStateAppend = loadState.append) {
                                 is LoadState.Loading -> {
                                     BottomLoadingIndicator()
                                 }
 
                                 is LoadState.Error -> {
-                                    val error = (loadState.append as LoadState.Error).error
                                     LoadMoreListError(
-                                        message = error.localizedMessage
+                                        message = loadStateAppend.error.localizedMessage
                                             ?: stringResource(R.string.failed_to_load_more),
                                         onRetry = { photos.retry() }
                                     )

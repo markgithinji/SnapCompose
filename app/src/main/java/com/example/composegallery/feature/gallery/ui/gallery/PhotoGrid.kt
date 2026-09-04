@@ -67,7 +67,6 @@ fun PhotoGrid(
     onPhotoClick: (Photo) -> Unit,
     onRetry: () -> Unit,
     onSearchClick: () -> Unit,
-    onFavoritesClick: () -> Unit,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope
 ) {
@@ -94,7 +93,6 @@ fun PhotoGrid(
                 selectedTopicId = selectedTopicId,
                 onTopicSelected = onTopicSelected,
                 onSearchClick = onSearchClick,
-                onFavoritesClick = onFavoritesClick,
                 onRetryTopics = onRetryTopics,
                 modifier = Modifier.statusBarsPadding()
             )

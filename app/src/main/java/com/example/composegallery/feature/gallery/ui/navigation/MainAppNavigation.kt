@@ -2,9 +2,40 @@ package com.example.composegallery.feature.gallery.ui.navigation
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.composegallery.R
 import com.example.composegallery.ui.theme.ComposeGalleryTheme
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -13,77 +44,161 @@ fun MainAppNavigation() {
     ComposeGalleryTheme {
         SharedTransitionLayout {
             val navController = rememberNavController()
+            val navBackStackEntry by navController.currentBackStackEntryAsState()
+            val currentDestination = navBackStackEntry?.destination
 
-            NavHost(
-                navController = navController,
-                startDestination = GalleryRoute
-            ) {
-                galleryRoute(
-                    sharedTransitionScope = this@SharedTransitionLayout,
-                    onSearchClick = { navController.navigate(SearchRoute) },
-                    onFavoritesClick = { navController.navigate(FavoritesRoute) },
-                    onPhotoClick = { photo, origin ->
-                        navController.navigate(
-                            PhotoDetailRoute(
-                                photoId = photo.id,
-                                width = photo.width,
-                                height = photo.height,
-                                thumbUrl = photo.smallUrl,
-                                blurHash = photo.blurHash,
-                                origin = origin
+            val topLevelDestinations = listOf(
+                TopLevelDestination(
+                    route = GalleryRoute,
+                    selectedIcon = Icons.Default.Home,
+                    unselectedIcon = Icons.Outlined.Home,
+                    labelRes = R.string.gallery
+                ),
+                TopLevelDestination(
+                    route = FavoritesRoute,
+                    selectedIcon = Icons.Default.Favorite,
+                    unselectedIcon = Icons.Outlined.FavoriteBorder,
+                    labelRes = R.string.favorites
+                )
+            )
+
+            val showBottomBar = topLevelDestinations.any { destination ->
+                currentDestination?.hierarchy?.any { it.hasRoute(destination.route::class) } == true
+            }
+
+            Scaffold(
+                bottomBar = {
+                    if (showBottomBar) {
+                        Column(
+                            modifier = Modifier.background(MaterialTheme.colorScheme.background)
+                        ) {
+                            HorizontalDivider(
+                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
+                                thickness = 0.5.dp
                             )
-                        )
+                            NavigationBar(
+                                containerColor = Color.Transparent,
+                                tonalElevation = 0.dp
+                            ) {
+                                topLevelDestinations.forEach { destination ->
+                                    val selected = currentDestination?.hierarchy?.any {
+                                        it.hasRoute(destination.route::class)
+                                    } == true
+                                    NavigationBarItem(
+                                        selected = selected,
+                                        onClick = {
+                                            navController.navigate(destination.route) {
+                                                popUpTo(navController.graph.findStartDestination().id) {
+                                                    saveState = true
+                                                }
+                                                launchSingleTop = true
+                                                restoreState = true
+                                            }
+                                        },
+                                        icon = {
+                                            Icon(
+                                                imageVector = if (selected) destination.selectedIcon else destination.unselectedIcon,
+                                                contentDescription = stringResource(destination.labelRes)
+                                            )
+                                        },
+                                        label = {
+                                            Text(
+                                                text = stringResource(destination.labelRes),
+                                                style = MaterialTheme.typography.labelMedium,
+                                                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal
+                                            )
+                                        },
+                                        colors = NavigationBarItemDefaults.colors(
+                                            selectedIconColor = MaterialTheme.colorScheme.primary,
+                                            selectedTextColor = MaterialTheme.colorScheme.primary,
+                                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                            indicatorColor = Color.Transparent
+                                        )
+                                    )
+                                }
+                            }
+                        }
                     }
-                )
-
-                searchRoute(
-                    sharedTransitionScope = this@SharedTransitionLayout,
-                    onBack = { navController.popBackStack() },
-                    onPhotoClick = { photo, origin ->
-                        navController.navigate(
-                            PhotoDetailRoute(
-                                photoId = photo.id,
-                                width = photo.width,
-                                height = photo.height,
-                                thumbUrl = photo.smallUrl,
-                                blurHash = photo.blurHash,
-                                origin = origin
+                }
+            ) { innerPadding ->
+                NavHost(
+                    navController = navController,
+                    startDestination = GalleryRoute,
+                    modifier = Modifier.padding(innerPadding)
+                ) {
+                    galleryRoute(
+                        sharedTransitionScope = this@SharedTransitionLayout,
+                        onSearchClick = { navController.navigate(SearchRoute) },
+                        onPhotoClick = { photo, origin ->
+                            navController.navigate(
+                                PhotoDetailRoute(
+                                    photoId = photo.id,
+                                    width = photo.width,
+                                    height = photo.height,
+                                    thumbUrl = photo.smallUrl,
+                                    blurHash = photo.blurHash,
+                                    origin = origin
+                                )
                             )
-                        )
-                    }
-                )
+                        }
+                    )
 
-                favoritesRoute(
-                    sharedTransitionScope = this@SharedTransitionLayout,
-                    onBack = { navController.popBackStack() },
-                    onPhotoClick = { photo ->
-                        navController.navigate(
-                            PhotoDetailRoute(
-                                photoId = photo.id,
-                                width = photo.width,
-                                height = photo.height,
-                                thumbUrl = photo.smallUrl,
-                                blurHash = photo.blurHash,
-                                origin = "favorites"
+                    searchRoute(
+                        sharedTransitionScope = this@SharedTransitionLayout,
+                        onBack = { navController.popBackStack() },
+                        onPhotoClick = { photo, origin ->
+                            navController.navigate(
+                                PhotoDetailRoute(
+                                    photoId = photo.id,
+                                    width = photo.width,
+                                    height = photo.height,
+                                    thumbUrl = photo.smallUrl,
+                                    blurHash = photo.blurHash,
+                                    origin = origin
+                                )
                             )
-                        )
-                    }
-                )
+                        }
+                    )
 
-                photoDetailRoute(
-                    sharedTransitionScope = this@SharedTransitionLayout,
-                    navController = navController
-                )
-                fullscreenPhotoRoute()
-                userProfileRoute(
-                    sharedTransitionScope = this@SharedTransitionLayout,
-                    navController = navController
-                )
-                collectionDetailRoute(
-                    sharedTransitionScope = this@SharedTransitionLayout,
-                    navController = navController
-                )
+                    favoritesRoute(
+                        sharedTransitionScope = this@SharedTransitionLayout,
+                        onPhotoClick = { photo ->
+                            navController.navigate(
+                                PhotoDetailRoute(
+                                    photoId = photo.id,
+                                    width = photo.width,
+                                    height = photo.height,
+                                    thumbUrl = photo.smallUrl,
+                                    blurHash = photo.blurHash,
+                                    origin = "favorites"
+                                )
+                            )
+                        }
+                    )
+
+                    photoDetailRoute(
+                        sharedTransitionScope = this@SharedTransitionLayout,
+                        navController = navController
+                    )
+                    fullscreenPhotoRoute()
+                    userProfileRoute(
+                        sharedTransitionScope = this@SharedTransitionLayout,
+                        navController = navController
+                    )
+                    collectionDetailRoute(
+                        sharedTransitionScope = this@SharedTransitionLayout,
+                        navController = navController
+                    )
+                }
             }
         }
     }
 }
+
+private data class TopLevelDestination<T : Any>(
+    val route: T,
+    val selectedIcon: ImageVector,
+    val unselectedIcon: ImageVector,
+    val labelRes: Int
+)

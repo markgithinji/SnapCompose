@@ -117,6 +117,7 @@
     <string name="cancel">Cancel</string>
     <string name="confirm">Confirm</string>
     <string name="favorites">Favorites</string>
+    <string name="gallery">Gallery</string>
     <string name="no_favorites_yet">You haven’t added any favorites yet.</string>
     <string name="editorial">Editorial</string>
     <string name="failed_to_load_topics">Failed to load categories</string>
