@@ -1,6 +1,7 @@
 package com.example.composegallery.ui.theme
 
 import androidx.compose.material3.Typography
+import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -23,65 +24,77 @@ val SourceSans = FontFamily(
 val Typography = Typography(
     displayLarge = TextStyle(
         fontFamily = SourceSans,
-        fontWeight = FontWeight.ExtraBold,
-        fontSize = 32.sp
+        fontWeight = FontWeight.Bold,
+        fontSize = 32.sp,
+        platformStyle = PlatformTextStyle(includeFontPadding = false)
     ),
     displayMedium = TextStyle(
         fontFamily = SourceSans,
         fontWeight = FontWeight.Bold,
-        fontSize = 28.sp
+        fontSize = 28.sp,
+        platformStyle = PlatformTextStyle(includeFontPadding = false)
     ),
     displaySmall = TextStyle(
         fontFamily = SourceSans,
-        fontWeight = FontWeight.Black,
-        fontSize = 24.sp
+        fontWeight = FontWeight.Bold,
+        fontSize = 24.sp,
+        platformStyle = PlatformTextStyle(includeFontPadding = false)
     ),
 
     headlineLarge = TextStyle(
         fontFamily = SourceSans,
-        fontWeight = FontWeight.Bold,
-        fontSize = 20.sp
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 20.sp,
+        platformStyle = PlatformTextStyle(includeFontPadding = false)
     ),
     headlineMedium = TextStyle(
         fontFamily = SourceSans,
-        fontWeight = FontWeight.Medium,
-        fontSize = 18.sp
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 18.sp,
+        platformStyle = PlatformTextStyle(includeFontPadding = false)
     ),
     headlineSmall = TextStyle(
         fontFamily = SourceSans,
-        fontWeight = FontWeight.Normal,
-        fontSize = 16.sp
+        fontWeight = FontWeight.Medium,
+        fontSize = 16.sp,
+        platformStyle = PlatformTextStyle(includeFontPadding = false)
     ),
 
     bodyLarge = TextStyle(
         fontFamily = SourceSans,
-        fontWeight = FontWeight.Light,
-        fontSize = 18.sp
+        fontWeight = FontWeight.Normal,
+        fontSize = 18.sp,
+        platformStyle = PlatformTextStyle(includeFontPadding = false)
     ),
     bodyMedium = TextStyle(
         fontFamily = SourceSans,
-        fontWeight = FontWeight.ExtraLight,
-        fontSize = 16.sp
+        fontWeight = FontWeight.Normal,
+        fontSize = 16.sp,
+        platformStyle = PlatformTextStyle(includeFontPadding = false)
     ),
     bodySmall = TextStyle(
         fontFamily = SourceSans,
-        fontWeight = FontWeight.ExtraLight,
-        fontSize = 14.sp
+        fontWeight = FontWeight.Light,
+        fontSize = 14.sp,
+        platformStyle = PlatformTextStyle(includeFontPadding = false)
     ),
 
     labelLarge = TextStyle(
         fontFamily = SourceSans,
         fontWeight = FontWeight.Medium,
-        fontSize = 16.sp
+        fontSize = 16.sp,
+        platformStyle = PlatformTextStyle(includeFontPadding = false)
     ),
     labelMedium = TextStyle(
         fontFamily = SourceSans,
-        fontWeight = FontWeight.Normal,
-        fontSize = 14.sp
+        fontWeight = FontWeight.Medium,
+        fontSize = 14.sp,
+        platformStyle = PlatformTextStyle(includeFontPadding = false)
     ),
     labelSmall = TextStyle(
         fontFamily = SourceSans,
-        fontWeight = FontWeight.ExtraLight,
-        fontSize = 10.sp
+        fontWeight = FontWeight.Normal,
+        fontSize = 10.sp,
+        platformStyle = PlatformTextStyle(includeFontPadding = false)
     )
 )

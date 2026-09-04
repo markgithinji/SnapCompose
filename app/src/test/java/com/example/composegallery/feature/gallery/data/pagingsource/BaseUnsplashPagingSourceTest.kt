@@ -3,6 +3,7 @@ package com.example.composegallery.feature.gallery.data.pagingsource
 import androidx.paging.PagingConfig
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
+import com.example.composegallery.feature.gallery.data.util.AppException
 import com.example.composegallery.feature.gallery.util.StringProvider
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
@@ -70,7 +71,9 @@ class BaseUnsplashPagingSourceTest {
 
         assertThat(result).isInstanceOf(PagingSource.LoadResult.Error::class.java)
         val error = result as PagingSource.LoadResult.Error
-        assertThat(error.throwable).hasMessageThat().contains("Unexpected error")
+        assertThat(error.throwable).isInstanceOf(AppException::class.java)
+        assertThat(error.throwable.message).isEqualTo("Something went wrong")
+        assertThat(error.throwable.cause).hasMessageThat().contains("Unexpected error")
     }
 
     @Test

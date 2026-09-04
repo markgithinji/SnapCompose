@@ -6,6 +6,8 @@ import com.example.composegallery.feature.gallery.data.model.UnsplashPhotoDto
 import com.example.composegallery.feature.gallery.data.model.UrlsDto
 import com.example.composegallery.feature.gallery.data.model.UserDto
 import com.example.composegallery.feature.gallery.data.local.AppDatabase
+import com.example.composegallery.feature.gallery.data.local.PhotoDao
+import com.example.composegallery.feature.gallery.data.local.PhotoEntity
 import com.example.composegallery.feature.gallery.data.remote.UnsplashApi
 import com.example.composegallery.feature.gallery.data.util.Result
 import com.example.composegallery.feature.gallery.util.StringProvider
@@ -13,9 +15,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
-import org.mockito.kotlin.any
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
+import org.mockito.kotlin.*
 
 class DefaultGalleryRepositoryTest {
 
@@ -28,6 +28,8 @@ class DefaultGalleryRepositoryTest {
     fun setup() {
         api = mock()
         database = mock()
+        val photoDao = mock<PhotoDao>()
+        whenever(database.photoDao()).thenReturn(photoDao)
         stringProvider = mock()
         repository = DefaultGalleryRepository(api, database, stringProvider)
     }
@@ -132,6 +134,30 @@ class DefaultGalleryRepositoryTest {
         assertThat(message.lowercase()).contains("missing")
     }
 
+
+    @Test
+    fun getPhoto_cachedInDb_returnsCachedPhoto() = runTest {
+        val photoId = "cached-123"
+        val entity = mock<PhotoEntity>().apply {
+            whenever(id).thenReturn(photoId)
+            whenever(authorName).thenReturn("Cached Author")
+            whenever(smallUrl).thenReturn("url")
+            whenever(fullUrl).thenReturn("url")
+            whenever(regularUrl).thenReturn("url")
+            whenever(thumbUrl).thenReturn("url")
+            whenever(authorProfileImageUrl).thenReturn("url")
+            whenever(authorProfileImageMediumResUrl).thenReturn("url")
+            whenever(authorProfileImageHighResUrl).thenReturn("url")
+        }
+        whenever(database.photoDao().getPhotoById(photoId)).thenReturn(entity)
+
+        val result = repository.getPhoto(photoId)
+
+        assertThat(result).isInstanceOf(Result.Success::class.java)
+        assertThat((result as Result.Success).data.id).isEqualTo(photoId)
+        assertThat(result.data.authorName).isEqualTo("Cached Author")
+        verify(api, never()).getPhoto(any())
+    }
 
     private fun fakePhotoDto(id: String = "123"): UnsplashPhotoDto {
         return UnsplashPhotoDto(

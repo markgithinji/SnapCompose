@@ -26,7 +26,7 @@ class AuthInterceptorTest {
     }
 
     @Test
-    fun intercept_addsClientIdQueryParameter() {
+    fun intercept_addsAuthorizationHeader() {
         val interceptor = AuthInterceptor()
 
         val client = OkHttpClient.Builder()
@@ -42,16 +42,13 @@ class AuthInterceptorTest {
         client.newCall(request).execute()
 
         val recordedRequest = mockWebServer.takeRequest()
-        val requestUrl = recordedRequest.url
+        val authHeader = recordedRequest.headers["Authorization"]
 
-        assertThat(requestUrl.encodedPath).isEqualTo("/photos")
-        val clientId = requestUrl.queryParameter("client_id")
-        assertThat(clientId).isNotNull()
-        assertThat(clientId).isEqualTo(BuildConfig.UNSPLASH_API_KEY)
+        assertThat(authHeader).isEqualTo("Client-ID ${BuildConfig.UNSPLASH_API_KEY.trim()}")
     }
 
     @Test
-    fun intercept_doesNotAddClientId_withoutInterceptor() {
+    fun intercept_doesNotAddAuthorization_withoutInterceptor() {
         val client = OkHttpClient.Builder().build()
 
         mockWebServer.enqueue(MockResponse.Builder().body("OK").build())
@@ -63,8 +60,8 @@ class AuthInterceptorTest {
         client.newCall(request).execute()
 
         val recordedRequest = mockWebServer.takeRequest()
-        val clientId = recordedRequest.url.queryParameter("client_id")
+        val authHeader = recordedRequest.headers["Authorization"]
 
-        assertThat(clientId).isNull()
+        assertThat(authHeader).isNull()
     }
 }

@@ -1,3 +1,5 @@
+package com.example.composegallery.feature.gallery.data.local
+
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4

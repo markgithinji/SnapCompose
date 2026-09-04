@@ -20,7 +20,7 @@ import org.junit.Before
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class ObserveSearchResultsUseCaseTest { // TODO: Fix this test
+class ObserveSearchResultsUseCaseTest {
 
     private val testDispatcher = StandardTestDispatcher()
 

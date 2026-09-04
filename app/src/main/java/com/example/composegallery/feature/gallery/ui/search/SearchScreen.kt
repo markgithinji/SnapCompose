@@ -456,7 +456,7 @@ private fun SearchScreenContent(
 }
 
 @Composable
-private fun RecentSearchesList(
+internal fun RecentSearchesList(
     recentSearches: List<RecentSearch>,
     onSearchClick: (String) -> Unit,
     onDeleteClick: (String) -> Unit,
