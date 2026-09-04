@@ -197,7 +197,7 @@ fun UserProfileHeader(
                 )
                 Spacer(Modifier.width(4.dp))
                 Text(
-                    text = "View on Unsplash",
+                    text = stringResource(R.string.view_on_unsplash),
                     color = MaterialTheme.colorScheme.primary,
                     style = MaterialTheme.typography.labelMedium,
                     maxLines = 1,

@@ -142,10 +142,12 @@ private fun ModernLineChart(
     }
 
     val textMeasurer = rememberTextMeasurer()
-    val labelStyle = TextStyle(
+    val labelStyle = MaterialTheme.typography.labelSmall.copy(
         fontSize = 10.sp,
         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
     )
+
+    val outlineVariantColor = MaterialTheme.colorScheme.outlineVariant
 
     val maxValue = values.maxOrNull() ?: 0f
     val minValue = 0f // Start from zero for better context
@@ -172,7 +174,7 @@ private fun ModernLineChart(
             val valueAtTick = minValue + (maxValue - minValue) * i / gridLines
 
             drawLine(
-                color = Color.LightGray.copy(alpha = 0.3f),
+                color = outlineVariantColor.copy(alpha = 0.3f),
                 start = Offset(paddingLeft, y),
                 end = Offset(width - paddingRight, y),
                 strokeWidth = 1.dp.toPx()
