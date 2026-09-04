@@ -46,6 +46,7 @@ class GalleryViewModel @Inject constructor(
 ) : ViewModel() {
 
     val gridState = LazyStaggeredGridState()
+    val favoritesGridState = LazyStaggeredGridState()
 
     private val _uiState = MutableStateFlow<UiState<Photo>>(UiState.Loading)
     val uiState: StateFlow<UiState<Photo>> = _uiState
@@ -66,13 +67,13 @@ class GalleryViewModel @Inject constructor(
     val pagedPhotos: Flow<PagingData<Photo>> = _selectedTopicId
         .flatMapLatest { topicId ->
             Timber.tag("GalleryViewModel").d("Switching to topic: %s", topicId ?: "Editorial")
-            val flow = if (topicId == null) {
+            if (topicId == null) {
                 galleryRepository.getPagedPhotos()
             } else {
                 galleryRepository.getTopicPagedPhotos(topicId)
             }
-            flow.cachedIn(viewModelScope)
         }
+        .cachedIn(viewModelScope)
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val isFavorite: StateFlow<Boolean> = _uiState

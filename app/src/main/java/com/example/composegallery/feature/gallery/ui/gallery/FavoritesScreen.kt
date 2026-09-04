@@ -35,6 +35,7 @@ fun FavoritesScreen(
     viewModel: GalleryViewModel = hiltViewModel()
 ) {
     val favoritesState by viewModel.favoritesState.collectAsStateWithLifecycle()
+    val gridState = viewModel.favoritesGridState
 
     Column(
         modifier = Modifier
@@ -53,6 +54,7 @@ fun FavoritesScreen(
             is UiState.Loading -> {
                 LazyVerticalStaggeredGrid(
                     columns = StaggeredGridCells.Fixed(calculateResponsiveColumnCount()),
+                    state = gridState,
                     modifier = Modifier.weight(1f),
                     contentPadding = PaddingValues(start = 16.dp, top = 0.dp, end = 16.dp, bottom = 144.dp),
                     verticalItemSpacing = 12.dp,
@@ -83,6 +85,7 @@ fun FavoritesScreen(
                 } else {
                     LazyVerticalStaggeredGrid(
                         columns = StaggeredGridCells.Fixed(calculateResponsiveColumnCount()),
+                        state = gridState,
                         modifier = Modifier.weight(1f),
                         contentPadding = PaddingValues(start = 16.dp, top = 0.dp, end = 16.dp, bottom = 144.dp),
                         verticalItemSpacing = 12.dp,
