@@ -11,8 +11,6 @@ import com.example.composegallery.feature.gallery.data.local.toDomainModel
 import com.example.composegallery.feature.gallery.data.model.toDomainModel
 import com.example.composegallery.feature.gallery.data.pagingsource.PagingDefaults
 import com.example.composegallery.feature.gallery.data.pagingsource.PhotoRemoteMediator
-import com.example.composegallery.feature.gallery.data.pagingsource.UnsplashGetPhotosPagingSource
-import com.example.composegallery.feature.gallery.data.pagingsource.UnsplashTopicPhotosPagingSource
 import com.example.composegallery.feature.gallery.data.remote.UnsplashApi
 import com.example.composegallery.feature.gallery.data.util.Result
 import com.example.composegallery.feature.gallery.data.util.safeApiCall
@@ -34,34 +32,31 @@ class DefaultGalleryRepository @Inject constructor(
 
     @OptIn(ExperimentalPagingApi::class)
     override fun getPagedPhotos(): Flow<PagingData<Photo>> {
-        Timber.tag("GalleryRepository").d("getPagedPhotos (Editorial) called")
+        return getCachedPagedPhotos(PhotoRemoteMediator.EDITORIAL)
+    }
+
+    @OptIn(ExperimentalPagingApi::class)
+    override fun getTopicPagedPhotos(topicIdOrSlug: String): Flow<PagingData<Photo>> {
+        return getCachedPagedPhotos(topicIdOrSlug)
+    }
+
+    @OptIn(ExperimentalPagingApi::class)
+    private fun getCachedPagedPhotos(topicId: String): Flow<PagingData<Photo>> {
+        Timber.tag("GalleryRepository").d("getCachedPagedPhotos called for: %s", topicId)
         return Pager(
             config = PagingConfig(
                 pageSize = PagingDefaults.PAGE_SIZE,
                 initialLoadSize = PagingDefaults.INITIAL_LOAD_SIZE,
                 prefetchDistance = PagingDefaults.PREFETCH_DISTANCE,
-                enablePlaceholders = true // Keep itemCount stable during invalidation
+                enablePlaceholders = true
             ),
-            remoteMediator = PhotoRemoteMediator(api, database, stringProvider),
-            pagingSourceFactory = { database.photoDao().getPagedPhotos() }
+            remoteMediator = PhotoRemoteMediator(api, database, stringProvider, topicId),
+            pagingSourceFactory = { database.photoDao().getPagedPhotos(topicId) }
         ).flow
             .distinctUntilChanged()
             .map { pagingData ->
                 pagingData.map { it.toDomainModel() }
             }
-    }
-
-    override fun getTopicPagedPhotos(topicIdOrSlug: String): Flow<PagingData<Photo>> {
-        Timber.tag("GalleryRepository").d("getTopicPagedPhotos called for: %s", topicIdOrSlug)
-        return Pager(
-            config = PagingConfig(
-                pageSize = PagingDefaults.PAGE_SIZE,
-                initialLoadSize = PagingDefaults.INITIAL_LOAD_SIZE,
-                prefetchDistance = PagingDefaults.PREFETCH_DISTANCE,
-                enablePlaceholders = false
-            ),
-            pagingSourceFactory = { UnsplashTopicPhotosPagingSource(api, topicIdOrSlug, stringProvider) }
-        ).flow
     }
 
     override suspend fun getTopics(): Result<List<Topic>> {

@@ -1,11 +1,14 @@
 package com.example.composegallery.feature.gallery.data.local
 
 import androidx.room.Entity
-import androidx.room.PrimaryKey
 
-@Entity(tableName = "photo_remote_keys")
+@Entity(
+    tableName = "photo_remote_keys",
+    primaryKeys = ["photoId", "topicId"]
+)
 data class PhotoRemoteKeyEntity(
-    @PrimaryKey val photoId: String,
+    val photoId: String,
+    val topicId: String,
     val prevPage: Int?,
     val nextPage: Int?
 )

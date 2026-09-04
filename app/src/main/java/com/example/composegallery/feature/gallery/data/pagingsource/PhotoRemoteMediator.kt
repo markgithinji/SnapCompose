@@ -20,12 +20,17 @@ import timber.log.Timber
 class PhotoRemoteMediator(
     private val api: UnsplashApi,
     private val database: AppDatabase,
-    private val stringProvider: StringProvider
+    private val stringProvider: StringProvider,
+    private val topicId: String // "editorial" or topic slug
 ) : RemoteMediator<Int, PhotoEntity>() {
 
+    companion object {
+        const val EDITORIAL = "editorial"
+    }
+
     override suspend fun initialize(): InitializeAction {
-        val count = database.photoDao().getCount()
-        Timber.tag("PhotoRemoteMediator").d("initialize: count=$count")
+        val count = database.photoDao().getCount(topicId)
+        Timber.tag("PhotoRemoteMediator").d("initialize: topicId=$topicId, count=$count")
         // If we already have data, skip the initial refresh to keep the grid stable.
         // The user can still pull-to-refresh manually.
         return if (count > 0) {
@@ -39,23 +44,16 @@ class PhotoRemoteMediator(
         loadType: LoadType,
         state: PagingState<Int, PhotoEntity>
     ): MediatorResult {
-        Timber.tag("PhotoRemoteMediator").d("load: START loadType=$loadType, anchorPosition=${state.anchorPosition}")
+        Timber.tag("PhotoRemoteMediator").d("load: START topicId=$topicId, loadType=$loadType, anchorPosition=${state.anchorPosition}")
         
         val page = when (loadType) {
-            LoadType.REFRESH -> {
-                // To keep the list contiguous and stable, we ALWAYS start at page 1 on REFRESH.
-                // Resuming from mid-list (e.g. page 5) while clearing everything else
-                // causes massive jumps and breaks the PREPEND logic.
-                1
-            }
+            LoadType.REFRESH -> 1
             LoadType.PREPEND -> {
-                Timber.tag("PhotoRemoteMediator").d("load: PREPEND - Returning Success(endOfPaginationReached=true)")
                 return MediatorResult.Success(endOfPaginationReached = true)
             }
             LoadType.APPEND -> {
                 val remoteKey = getRemoteKeyForLastItem(state)
                 val nextPage = remoteKey?.nextPage
-                Timber.tag("PhotoRemoteMediator").d("load: APPEND nextPage=$nextPage (from last remoteKey=${remoteKey?.photoId})")
                 if (nextPage == null) {
                     return MediatorResult.Success(endOfPaginationReached = remoteKey != null)
                 }
@@ -64,36 +62,37 @@ class PhotoRemoteMediator(
         }
 
         val result = safeApiCall(stringProvider) {
-            Timber.tag("PhotoRemoteMediator").d("load: Fetching page $page from API...")
-            api.getPhotos(page = page, perPage = state.config.pageSize)
+            Timber.tag("PhotoRemoteMediator").d("load: Fetching topic=$topicId page $page from API...")
+            if (topicId == EDITORIAL) {
+                api.getPhotos(page = page, perPage = state.config.pageSize)
+            } else {
+                api.getTopicPhotos(topicIdOrSlug = topicId, page = page, perPage = state.config.pageSize)
+            }
         }
 
         return when (result) {
             is Result.Success -> {
                 val photos = result.data.mapNotNull { it.toDomainModel() }
-                Timber.tag("PhotoRemoteMediator").d("load: SUCCESS fetched ${photos.size} photos for page $page")
+                Timber.tag("PhotoRemoteMediator").d("load: SUCCESS topic=$topicId fetched ${photos.size} photos for page $page")
                 val endOfPaginationReached = photos.isEmpty()
 
                 database.withTransaction {
                     if (loadType == LoadType.REFRESH) {
-                        Timber.tag("PhotoRemoteMediator").d("load: REFRESH - Clearing all data in DB")
-                        database.photoRemoteKeyDao().clearRemoteKeys()
-                        database.photoDao().clearAll()
+                        database.photoRemoteKeyDao().clearRemoteKeys(topicId)
+                        database.photoDao().clearAll(topicId)
                     }
 
                     val prevPage = if (page == 1) null else page - 1
                     val nextPage = if (endOfPaginationReached) null else page + 1
                     
-                    Timber.tag("PhotoRemoteMediator").d("load: DB Transaction for page $page - prevPage=$prevPage, nextPage=$nextPage")
-
                     val keys = photos.map {
-                        PhotoRemoteKeyEntity(photoId = it.id, prevPage = prevPage, nextPage = nextPage)
+                        PhotoRemoteKeyEntity(photoId = it.id, topicId = topicId, prevPage = prevPage, nextPage = nextPage)
                     }
                     database.photoRemoteKeyDao().insertAll(keys)
 
                     val entities = photos.mapIndexed { index, photo ->
                         val order = (page - 1) * state.config.pageSize + index
-                        photo.toEntity(pagingOrder = order)
+                        photo.toEntity(topicId = topicId, pagingOrder = order)
                     }
 
                     val insertResults = database.photoDao().insertPhotos(entities)
@@ -102,13 +101,8 @@ class PhotoRemoteMediator(
                         val entity = entities[index]
                         if (resultId == -1L) {
                             if (loadType == LoadType.REFRESH) {
-                                Timber.tag("PhotoRemoteMediator").v("load: Updating existing photo ${entity.id} order to ${entity.pagingOrder}")
-                                database.photoDao().updatePagingOrder(entity.id, entity.pagingOrder)
-                            } else {
-                                Timber.tag("PhotoRemoteMediator").v("load: Photo ${entity.id} already exists, skipping order update during APPEND to maintain stability")
+                                database.photoDao().updatePagingOrder(entity.id, topicId, entity.pagingOrder)
                             }
-                        } else {
-                            Timber.tag("PhotoRemoteMediator").v("load: Inserted new photo ${entity.id} at order ${entity.pagingOrder}")
                         }
                     }
                 }
@@ -117,7 +111,7 @@ class PhotoRemoteMediator(
             }
 
             is Result.Error -> {
-                Timber.tag("PhotoRemoteMediator").e("load: ERROR for page $page: ${result.message}")
+                Timber.tag("PhotoRemoteMediator").e("load: ERROR topic=$topicId for page $page: ${result.message}")
                 MediatorResult.Error(result.throwable ?: Exception(result.message))
             }
         }
@@ -126,14 +120,7 @@ class PhotoRemoteMediator(
     private suspend fun getRemoteKeyForLastItem(state: PagingState<Int, PhotoEntity>): PhotoRemoteKeyEntity? {
         return state.pages.lastOrNull { it.data.isNotEmpty() }?.data?.lastOrNull()
             ?.let { photo ->
-                database.photoRemoteKeyDao().getRemoteKeyByPhotoId(photo.id)
-            }
-    }
-
-    private suspend fun getRemoteKeyForFirstItem(state: PagingState<Int, PhotoEntity>): PhotoRemoteKeyEntity? {
-        return state.pages.firstOrNull { it.data.isNotEmpty() }?.data?.firstOrNull()
-            ?.let { photo ->
-                database.photoRemoteKeyDao().getRemoteKeyByPhotoId(photo.id)
+                database.photoRemoteKeyDao().getRemoteKeyByPhotoId(photo.id, topicId)
             }
     }
 }

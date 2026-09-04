@@ -2,14 +2,17 @@ package com.example.composegallery.feature.gallery.data.local
 
 import androidx.room.Embedded
 import androidx.room.Entity
-import androidx.room.PrimaryKey
 import com.example.composegallery.feature.gallery.domain.model.Exif
 import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.domain.model.PhotoLocation
 
-@Entity(tableName = "photos")
+@Entity(
+    tableName = "photos",
+    primaryKeys = ["id", "topicId"]
+)
 data class PhotoEntity(
-    @PrimaryKey val id: String,
+    val id: String,
+    val topicId: String, // "editorial" or a topic slug/id
     val width: Int,
     val height: Int,
     val thumbUrl: String,
@@ -56,9 +59,10 @@ fun PhotoEntity.toDomainModel(): Photo {
     )
 }
 
-fun Photo.toEntity(pagingOrder: Int = 0): PhotoEntity {
+fun Photo.toEntity(topicId: String, pagingOrder: Int = 0): PhotoEntity {
     return PhotoEntity(
         id = id,
+        topicId = topicId,
         width = width,
         height = height,
         thumbUrl = thumbUrl,

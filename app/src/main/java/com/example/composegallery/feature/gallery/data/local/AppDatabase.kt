@@ -11,7 +11,7 @@ import com.example.composegallery.feature.gallery.domain.model.RecentSearch
         PhotoRemoteKeyEntity::class,
         FavoritePhotoEntity::class
     ],
-    version = 4
+    version = 5
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun recentSearchDao(): RecentSearchDao
