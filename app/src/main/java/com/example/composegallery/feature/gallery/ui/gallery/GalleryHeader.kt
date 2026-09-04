@@ -108,7 +108,7 @@ fun GalleryHeader(
 }
 
 @Composable
-private fun TopicTabs(
+internal fun TopicTabs(
     state: UiState<List<Topic>>,
     selectedTopicId: String?,
     onTopicSelected: (String?) -> Unit,
