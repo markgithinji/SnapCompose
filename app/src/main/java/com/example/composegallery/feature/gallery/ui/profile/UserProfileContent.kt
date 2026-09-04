@@ -84,8 +84,7 @@ fun UserProfileContent(
     onPhotoClick: (Photo) -> Unit,
     onCollectionClick: (PhotoCollection) -> Unit,
     onStatsClick: () -> Unit,
-    onBack: () -> Unit,
-    onTabSelected: (UserTab) -> Unit = {}
+    onBack: () -> Unit
 ) {
     var selectedTab by rememberSaveable(inputs = arrayOf(username)) { 
         mutableStateOf(UserTab.PHOTOS) 
@@ -94,10 +93,6 @@ fun UserProfileContent(
     val retryKeys = remember { mutableStateMapOf<String, Int>() }
     val retryHandler: (String) -> Unit = { id ->
         retryKeys[id] = retryKeys.getOrDefault(id, 0) + 1
-    }
-
-   LaunchedEffect(selectedTab) {
-        onTabSelected(selectedTab)
     }
 
     Scaffold(

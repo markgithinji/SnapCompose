@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
+
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
@@ -54,8 +54,7 @@ fun GalleryScreen(
     val refreshState = photos.loadState.refresh
 
     // Force a "switching" state when the tab changes so we see shimmers immediately.
-    // For the Editorial tab (null), we allow showing cached data immediately to avoid flicker.
-    var isSwitchingTopic by remember(selectedTopicId) { mutableStateOf(selectedTopicId != null) }
+    var isSwitchingTopic by remember(selectedTopicId) { mutableStateOf(true) }
     var hasSeenLoadingForTab by remember(selectedTopicId) { mutableStateOf(false) }
 
     LaunchedEffect(refreshState, photos.itemCount) {
@@ -69,8 +68,11 @@ fun GalleryScreen(
         
         // Hide shimmers if:
         // 1. We saw a loading cycle and it finished (Success or Error).
-        // 2. We already have data and the pager is idle (handles back navigation from detail).
-        if (isSwitchingTopic && (hasSeenLoadingForTab || photos.itemCount > 0) && refreshState !is LoadState.Loading) {
+        // 2. We already have data and the pager is not currently loading 
+        //    (this handles the case where Editorial tab skips initial refresh 
+        //    because it has cached data).
+        val canShowContent = hasSeenLoadingForTab || photos.itemCount > 0
+        if (isSwitchingTopic && canShowContent && refreshState !is LoadState.Loading) {
             isSwitchingTopic = false
         }
     }
@@ -109,7 +111,6 @@ fun GalleryScreen(
             isSwitchingTopic = isSwitchingTopic,
             onTopicSelected = { viewModel.selectTopic(it) },
             onRetryTopics = { viewModel.fetchTopics() },
-            loadState = refreshState,
             onPhotoClick = onPhotoClick,
             onRetry = { photos.retry() },
             onSearchClick = onSearchNavigate,
@@ -130,7 +131,6 @@ private fun PhotoGridContent(
     isSwitchingTopic: Boolean,
     onTopicSelected: (String?) -> Unit,
     onRetryTopics: () -> Unit,
-    loadState: LoadState,
     onPhotoClick: (Photo) -> Unit,
     onRetry: () -> Unit,
     onSearchClick: () -> Unit,
@@ -138,35 +138,19 @@ private fun PhotoGridContent(
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedContentScope
 ) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        if (loadState is LoadState.Error && photos.itemCount == 0) {
-            val reason = loadState.error.localizedMessage?.let {
-                stringResource(R.string.error_reason_prefix, it)
-            } ?: stringResource(R.string.unknown_error)
-
-            InfoMessageScreen(
-                title = stringResource(R.string.error_load_photos),
-                subtitle = reason,
-                imageRes = R.drawable.error_icon,
-                titleColor = MaterialTheme.colorScheme.error
-            ) {
-                RetryButton(onClick = onRetry)
-            }
-        } else {
-            PhotoGrid(
-                photos = photos,
-                gridState = gridState,
-                topicsState = topicsState,
-                selectedTopicId = selectedTopicId,
-                isSwitchingTopic = isSwitchingTopic,
-                onTopicSelected = onTopicSelected,
-                onRetryTopics = onRetryTopics,
-                onPhotoClick = onPhotoClick,
-                onSearchClick = onSearchClick,
-                onFavoritesClick = onFavoritesClick,
-                sharedTransitionScope = sharedTransitionScope,
-                animatedVisibilityScope = animatedVisibilityScope
-            )
-        }
-    }
+    PhotoGrid(
+        photos = photos,
+        gridState = gridState,
+        topicsState = topicsState,
+        selectedTopicId = selectedTopicId,
+        isSwitchingTopic = isSwitchingTopic,
+        onTopicSelected = onTopicSelected,
+        onRetryTopics = onRetryTopics,
+        onPhotoClick = onPhotoClick,
+        onRetry = onRetry,
+        onSearchClick = onSearchClick,
+        onFavoritesClick = onFavoritesClick,
+        sharedTransitionScope = sharedTransitionScope,
+        animatedVisibilityScope = animatedVisibilityScope
+    )
 }

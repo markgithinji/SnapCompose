@@ -64,6 +64,7 @@ class GalleryViewModel @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     val pagedPhotos: Flow<PagingData<Photo>> = _selectedTopicId
         .flatMapLatest { topicId ->
+            Timber.tag("GalleryViewModel").d("Switching to topic: %s", topicId ?: "Editorial")
             if (topicId == null) {
                 galleryRepository.getPagedPhotos()
             } else {

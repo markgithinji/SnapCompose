@@ -1,6 +1,6 @@
 package com.example.composegallery.feature.gallery.ui.gallery
 
-import android.util.Log
+
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.AnimatedVisibilityScope
@@ -9,6 +9,7 @@ import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
@@ -48,6 +50,8 @@ import timber.log.Timber
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.snapshotFlow
+import com.example.composegallery.feature.gallery.ui.common.InfoMessageScreen
+import com.example.composegallery.feature.gallery.ui.common.RetryButton
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -61,6 +65,7 @@ fun PhotoGrid(
     onTopicSelected: (String?) -> Unit,
     onRetryTopics: () -> Unit,
     onPhotoClick: (Photo) -> Unit,
+    onRetry: () -> Unit,
     onSearchClick: () -> Unit,
     onFavoritesClick: () -> Unit,
     sharedTransitionScope: SharedTransitionScope,
@@ -96,7 +101,40 @@ fun PhotoGrid(
         }
 
         val refreshState = photos.loadState.refresh
-        if (isSwitchingTopic || (refreshState is LoadState.Loading && photos.itemCount == 0)) {
+        
+        // We show an error area if:
+        // 1. We are on the Editorial tab and have no cached data.
+        // 2. We are on a specific Topic tab and the load failed (regardless of itemCount, 
+        //    as any items seen here would be leftover from a previous tab).
+        val isEditorial = selectedTopicId == null
+        val isError = refreshState is LoadState.Error
+        val hasNoItems = photos.itemCount == 0
+
+        if (isError && (hasNoItems || !isEditorial)) {
+            item(span = StaggeredGridItemSpan.FullLine) {
+                val reason = refreshState.error.localizedMessage?.let {
+                    stringResource(R.string.error_reason_prefix, it)
+                } ?: stringResource(R.string.unknown_error)
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 64.dp, horizontal = 24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    InfoMessageScreen(
+                        title = stringResource(R.string.error_load_photos),
+                        subtitle = reason,
+                        imageRes = R.drawable.error_icon,
+                        titleColor = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.height(400.dp)
+                    ) {
+                        RetryButton(onClick = onRetry)
+                    }
+                }
+            }
+        } else if (isSwitchingTopic || (refreshState is LoadState.Loading && photos.itemCount == 0)) {
             items(10) { index ->
                 val aspectRatio = if (index % 2 == 0) 0.7f else 1.3f
                 Box(
@@ -111,10 +149,12 @@ fun PhotoGrid(
                 )
             }
         } else {
-            // Use paging-specific items extension for better key stability and performance
+            // Use paging-specific items extension for better key stability and performance.
+            // We prefix the key with the selectedTopicId to force a full item reset
+            // when switching tabs, preventing old content from "sticking" around.
             items(
                 count = photos.itemCount,
-                key = photos.itemKey { it.id },
+                key = photos.itemKey { "topic_${selectedTopicId ?: "editorial"}_${it.id}" },
                 contentType = photos.itemContentType { "photo" },
                 span = { index ->
                     val photo = photos.peek(index)

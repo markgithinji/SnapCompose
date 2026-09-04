@@ -34,6 +34,7 @@ class DefaultGalleryRepository @Inject constructor(
 
     @OptIn(ExperimentalPagingApi::class)
     override fun getPagedPhotos(): Flow<PagingData<Photo>> {
+        Timber.tag("GalleryRepository").d("getPagedPhotos (Editorial) called")
         return Pager(
             config = PagingConfig(
                 pageSize = PagingDefaults.PAGE_SIZE,
@@ -51,6 +52,7 @@ class DefaultGalleryRepository @Inject constructor(
     }
 
     override fun getTopicPagedPhotos(topicIdOrSlug: String): Flow<PagingData<Photo>> {
+        Timber.tag("GalleryRepository").d("getTopicPagedPhotos called for: %s", topicIdOrSlug)
         return Pager(
             config = PagingConfig(
                 pageSize = PagingDefaults.PAGE_SIZE,
