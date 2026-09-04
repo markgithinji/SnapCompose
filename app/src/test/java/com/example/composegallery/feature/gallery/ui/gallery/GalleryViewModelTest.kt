@@ -25,6 +25,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -122,6 +123,35 @@ class GalleryViewModelTest {
         favoriteFlow.value = true
 
         assertThat(favorites).containsAtLeast(false, true).inOrder()
+        job.cancel()
+    }
+
+    @Test
+    fun selectTopic_triggersRepositoryCall() = runTest {
+        val topicId = "nature"
+        whenever(galleryRepository.getTopicPagedPhotos(topicId)).thenReturn(flowOf())
+
+        val job = launch(UnconfinedTestDispatcher()) {
+            viewModel.pagedPhotos.collect {}
+        }
+
+        viewModel.selectTopic(topicId)
+
+        verify(galleryRepository).getTopicPagedPhotos(topicId)
+        job.cancel()
+    }
+
+    @Test
+    fun selectTopic_null_triggersEditorialCall() = runTest {
+        whenever(galleryRepository.getPagedPhotos()).thenReturn(flowOf())
+
+        val job = launch(UnconfinedTestDispatcher()) {
+            viewModel.pagedPhotos.collect {}
+        }
+
+        viewModel.selectTopic(null)
+
+        verify(galleryRepository).getPagedPhotos()
         job.cancel()
     }
 

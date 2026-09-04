@@ -4,8 +4,7 @@ import androidx.paging.*
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.example.composegallery.feature.gallery.data.local.AppDatabase
-import com.example.composegallery.feature.gallery.data.local.PhotoEntity
+import com.example.composegallery.feature.gallery.data.local.*
 import com.example.composegallery.feature.gallery.data.model.*
 import com.example.composegallery.feature.gallery.data.remote.UnsplashApi
 import com.example.composegallery.feature.gallery.util.StringProvider
@@ -15,9 +14,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.any
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
+import org.mockito.kotlin.*
 
 @OptIn(ExperimentalPagingApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -102,6 +99,41 @@ class PhotoRemoteMediatorTest {
         val result = mediator.load(LoadType.REFRESH, pagingState)
 
         assertThat(result is RemoteMediator.MediatorResult.Error).isTrue()
+    }
+
+    @Test
+    fun appendLoadReturnsSuccessResult() = runTest {
+        val topicId = "nature"
+        // 1. Setup initial data and keys
+        val photo1 = createFakePhotoDto("1")
+        val domain1 = photo1.toDomainModel()!!
+        val entity1 = domain1.toEntity(topicId, 0)
+        database.photoDao().insertPhotos(listOf(entity1))
+        database.photoRemoteKeyDao().insertAll(listOf(
+            PhotoRemoteKeyEntity("1", topicId, null, 2)
+        ))
+
+        // 2. Mock API for page 2
+        val photo2 = createFakePhotoDto("2")
+        whenever(api.getTopicPhotos(eq(topicId), eq(2), any())).thenReturn(listOf(photo2))
+
+        val mediator = PhotoRemoteMediator(api, database, stringProvider, topicId)
+        
+        // PagingState needs the item
+        val pagingState = PagingState<Int, PhotoEntity>(
+            listOf(PagingSource.LoadResult.Page(listOf(entity1), null, 2)),
+            null,
+            PagingConfig(10),
+            10
+        )
+
+        val result = mediator.load(LoadType.APPEND, pagingState)
+
+        assertThat(result is RemoteMediator.MediatorResult.Success).isTrue()
+        assertThat((result as RemoteMediator.MediatorResult.Success).endOfPaginationReached).isFalse()
+        
+        val photoCount = database.photoDao().getCount(topicId)
+        assertThat(photoCount).isEqualTo(2)
     }
 
     private fun createFakePhotoDto(id: String) = UnsplashPhotoDto(

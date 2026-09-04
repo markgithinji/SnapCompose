@@ -1,6 +1,10 @@
 package com.example.composegallery.feature.gallery.ui.search
 
 import com.example.composegallery.feature.gallery.data.util.Result
+import com.example.composegallery.feature.gallery.domain.model.ColorFilter
+import com.example.composegallery.feature.gallery.domain.model.Orientation
+import com.example.composegallery.feature.gallery.domain.model.OrderBy
+import com.example.composegallery.feature.gallery.domain.model.SearchFilters
 import com.example.composegallery.feature.gallery.domain.repository.SearchRepository
 import com.example.composegallery.feature.gallery.domain.usecase.ObserveSearchResultsUseCase
 import com.example.composegallery.feature.gallery.domain.usecase.SubmitSearchUseCase
@@ -46,6 +50,31 @@ class SearchViewModelTest {
         val newQuery = "cats"
         viewModel.updateQuery(newQuery)
         assertThat(viewModel.filters.value.query).isEqualTo(newQuery)
+    }
+
+    @Test
+    fun updateOrientation_updatesFilters() {
+        viewModel.updateOrientation(Orientation.LANDSCAPE)
+        assertThat(viewModel.filters.value.orientation).isEqualTo(Orientation.LANDSCAPE)
+    }
+
+    @Test
+    fun updateColor_updatesFilters() {
+        viewModel.updateColor(ColorFilter.BLACK_AND_WHITE)
+        assertThat(viewModel.filters.value.color).isEqualTo(ColorFilter.BLACK_AND_WHITE)
+    }
+
+    @Test
+    fun updateOrderBy_updatesFilters() {
+        viewModel.updateOrderBy(OrderBy.LATEST)
+        assertThat(viewModel.filters.value.orderBy).isEqualTo(OrderBy.LATEST)
+    }
+
+    @Test
+    fun applyFilters_updatesAllFilters() {
+        val newFilters = SearchFilters(query = "cats", orientation = Orientation.PORTRAIT)
+        viewModel.applyFilters(newFilters)
+        assertThat(viewModel.filters.value).isEqualTo(newFilters)
     }
 
     @Test

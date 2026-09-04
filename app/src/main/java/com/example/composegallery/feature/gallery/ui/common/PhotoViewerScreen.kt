@@ -15,6 +15,8 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -46,9 +48,14 @@ fun PhotoViewerScreen(
             val photo = uiState.data
 
             val containerSize = LocalWindowInfo.current.containerSize
-            var scale by remember { mutableFloatStateOf(1f) }
-            var rotation by remember { mutableFloatStateOf(0f) }
-            var offset by remember { mutableStateOf(Offset.Zero) }
+            var scale by rememberSaveable { mutableFloatStateOf(1f) }
+            var rotation by rememberSaveable { mutableFloatStateOf(0f) }
+            var offset by rememberSaveable(
+                stateSaver = listSaver(
+                    save = { listOf(it.x, it.y) },
+                    restore = { Offset(it[0], it[1]) }
+                )
+            ) { mutableStateOf(Offset.Zero) }
 
             Box(
                 modifier = Modifier
