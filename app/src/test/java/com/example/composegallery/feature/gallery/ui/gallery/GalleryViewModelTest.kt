@@ -16,6 +16,10 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
@@ -99,6 +103,26 @@ class GalleryViewModelTest {
         viewModel.setWallpaper(photo)
 
         assertThat(viewModel.isWallpaperLoading.value).isFalse()
+    }
+
+    @Test
+    fun isFavorite_emitsCorrectValues() = runTest {
+        val photoId = "1"
+        val photo = createFakePhoto(photoId)
+        val favoriteFlow = MutableStateFlow(false)
+        whenever(favoriteRepository.isFavorite(photoId)).thenReturn(favoriteFlow)
+        whenever(galleryRepository.getPhoto(photoId)).thenReturn(Result.Success(photo))
+
+        val favorites = mutableListOf<Boolean>()
+        val job = launch(UnconfinedTestDispatcher()) {
+            viewModel.isFavorite.collect { favorites.add(it) }
+        }
+
+        viewModel.loadPhoto(photoId)
+        favoriteFlow.value = true
+
+        assertThat(favorites).containsAtLeast(false, true).inOrder()
+        job.cancel()
     }
 
     private fun createFakePhoto(id: String) = Photo(
