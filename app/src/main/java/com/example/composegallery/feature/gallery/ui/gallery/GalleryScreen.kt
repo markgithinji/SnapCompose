@@ -16,6 +16,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,9 +54,14 @@ fun GalleryScreen(
     var isManualRefreshing by remember { mutableStateOf(false) }
     val refreshState = photos.loadState.refresh
 
-    // Force a "switching" state when the tab changes so we see shimmers immediately.
-    var isSwitchingTopic by remember(selectedTopicId) { mutableStateOf(true) }
-    var hasSeenLoadingForTab by remember(selectedTopicId) { mutableStateOf(false) }
+    // Use rememberSaveable so the "switching" state survives navigation to detail and back.
+    // We initialize it to true ONLY if we don't already have data for the current topic.
+    var isSwitchingTopic by rememberSaveable(selectedTopicId) { 
+        mutableStateOf(photos.itemCount == 0) 
+    }
+    var hasSeenLoadingForTab by rememberSaveable(selectedTopicId) { 
+        mutableStateOf(false) 
+    }
 
     LaunchedEffect(refreshState, photos.itemCount) {
         if (refreshState !is LoadState.Loading) {
@@ -68,9 +74,8 @@ fun GalleryScreen(
         
         // Hide shimmers if:
         // 1. We saw a loading cycle and it finished (Success or Error).
-        // 2. We already have data and the pager is not currently loading 
-        //    (this handles the case where Editorial tab skips initial refresh 
-        //    because it has cached data).
+        // 2. We have data and the pager is idle (covers the cached Editorial case 
+        //    where refresh is skipped).
         val canShowContent = hasSeenLoadingForTab || photos.itemCount > 0
         if (isSwitchingTopic && canShowContent && refreshState !is LoadState.Loading) {
             isSwitchingTopic = false

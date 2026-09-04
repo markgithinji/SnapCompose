@@ -112,14 +112,15 @@ fun PhotoGrid(
 
         if (isError && (hasNoItems || !isEditorial)) {
             item(span = StaggeredGridItemSpan.FullLine) {
-                val reason = refreshState.error.localizedMessage?.let {
+                val reason = (refreshState as LoadState.Error).error.localizedMessage?.let {
                     stringResource(R.string.error_reason_prefix, it)
                 } ?: stringResource(R.string.unknown_error)
 
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 64.dp, horizontal = 24.dp),
+                        .padding(top = 100.dp, bottom = 64.dp)
+                        .padding(horizontal = 24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
@@ -128,7 +129,7 @@ fun PhotoGrid(
                         subtitle = reason,
                         imageRes = R.drawable.error_icon,
                         titleColor = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.height(400.dp)
+                        modifier = Modifier.fillMaxWidth() 
                     ) {
                         RetryButton(onClick = onRetry)
                     }
