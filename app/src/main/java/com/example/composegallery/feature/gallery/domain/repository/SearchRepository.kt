@@ -12,5 +12,6 @@ interface SearchRepository {
     fun searchPagedPhotos(filters: SearchFilters): Flow<PagingData<Photo>>
     fun getRecentSearches(limit: Int): Flow<List<RecentSearch>>
     suspend fun saveRecentSearch(query: String): Result<Unit>
+    suspend fun deleteRecentSearch(query: String): Result<Unit>
     suspend fun clearRecentSearches(): Result<Unit>
 }

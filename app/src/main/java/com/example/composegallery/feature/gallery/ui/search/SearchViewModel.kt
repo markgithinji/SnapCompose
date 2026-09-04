@@ -81,9 +81,9 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    // fun deleteRecentSearch(query: String) {
-    //     viewModelScope.launch {
-    //         searchRepository.deleteRecentSearch(query)
-    //     }
-    // }
+    fun deleteRecentSearch(query: String) {
+        viewModelScope.launch {
+            searchRepository.deleteRecentSearch(query)
+        }
+    }
 }

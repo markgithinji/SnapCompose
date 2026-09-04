@@ -45,6 +45,12 @@ class DefaultSearchRepository @Inject constructor(
         }
     }
 
+    override suspend fun deleteRecentSearch(query: String): Result<Unit> {
+        return safeDbCall(stringProvider) {
+            recentSearchDao.deleteSearch(query)
+        }
+    }
+
     override suspend fun clearRecentSearches(): Result<Unit> {
         return safeDbCall(stringProvider) {
             recentSearchDao.clearSearches()

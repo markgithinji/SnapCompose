@@ -5,6 +5,7 @@ import com.example.composegallery.feature.gallery.data.model.ProfileImageDto
 import com.example.composegallery.feature.gallery.data.model.UnsplashPhotoDto
 import com.example.composegallery.feature.gallery.data.model.UrlsDto
 import com.example.composegallery.feature.gallery.data.model.UserDto
+import com.example.composegallery.feature.gallery.data.local.AppDatabase
 import com.example.composegallery.feature.gallery.data.remote.UnsplashApi
 import com.example.composegallery.feature.gallery.data.util.Result
 import com.example.composegallery.feature.gallery.util.StringProvider
@@ -19,14 +20,16 @@ import org.mockito.kotlin.whenever
 class DefaultGalleryRepositoryTest {
 
     private lateinit var api: UnsplashApi
+    private lateinit var database: AppDatabase
     private lateinit var stringProvider: StringProvider
     private lateinit var repository: DefaultGalleryRepository
 
     @Before
     fun setup() {
         api = mock()
+        database = mock()
         stringProvider = mock()
-        repository = DefaultGalleryRepository(api, stringProvider)
+        repository = DefaultGalleryRepository(api, database, stringProvider)
     }
 
     @Test

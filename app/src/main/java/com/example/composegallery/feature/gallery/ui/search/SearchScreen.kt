@@ -41,7 +41,17 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -65,6 +75,7 @@ import androidx.paging.compose.itemContentType
 import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.domain.model.OrderBy
 import com.example.composegallery.feature.gallery.domain.model.Photo
+import com.example.composegallery.feature.gallery.domain.model.RecentSearch
 import com.example.composegallery.feature.gallery.domain.model.SearchFilters
 import com.example.composegallery.feature.gallery.ui.common.BottomLoadingIndicator
 import com.example.composegallery.feature.gallery.ui.common.InfoMessageScreen
@@ -91,6 +102,9 @@ fun SearchScreen(
     val retryKeys = remember { mutableStateMapOf<String, Int>() }
     val pagedPhotos = viewModel.searchResults.collectAsLazyPagingItems()
     var showFilters by remember { mutableStateOf(false) }
+    val recentSearches by viewModel.recentSearches.collectAsStateWithLifecycle()
+    var isFocused by remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
 
     Scaffold(
         modifier = Modifier.fillMaxSize()
@@ -100,29 +114,55 @@ fun SearchScreen(
                 .fillMaxSize()
                 .padding(bottom = innerPadding.calculateBottomPadding())
         ) {
-            SearchScreenContent(
-                showWelcome = !firstSearchDone,
-                paddingValues = PaddingValues(top = 100.dp), // Fixed space for the floating top bar
-                photos = pagedPhotos,
-                retryKeys = retryKeys,
-                onPhotoClick = onPhotoClick,
-                sharedTransitionScope = sharedTransitionScope,
-                animatedVisibilityScope = animatedVisibilityScope
-            )
+            val showRecentSearches = isFocused && filters.query.isEmpty() && recentSearches.isNotEmpty()
+
+            if (showRecentSearches) {
+                RecentSearchesList(
+                    recentSearches = recentSearches,
+                    onSearchClick = { query ->
+                        viewModel.updateQuery(query)
+                        viewModel.submitSearch(query)
+                        firstSearchDone = true
+                        focusManager.clearFocus()
+                    },
+                    onDeleteClick = { viewModel.deleteRecentSearch(it) },
+                    onClearAllClick = { viewModel.clearRecentSearches() },
+                    paddingValues = PaddingValues(top = 100.dp)
+                )
+            } else {
+                SearchScreenContent(
+                    showWelcome = !firstSearchDone,
+                    paddingValues = PaddingValues(top = 100.dp), // Fixed space for the floating top bar
+                    photos = pagedPhotos,
+                    retryKeys = retryKeys,
+                    onPhotoClick = onPhotoClick,
+                    sharedTransitionScope = sharedTransitionScope,
+                    animatedVisibilityScope = animatedVisibilityScope
+                )
+            }
 
             SearchScreenTopBar(
                 query = filters.query,
                 activeFilters = filters.orientation != null || filters.color != null || filters.orderBy != OrderBy.RELEVANT,
                 onQueryChange = { viewModel.updateQuery(it) },
+                onFocusChange = { isFocused = it },
+                onClearQuery = { viewModel.updateQuery("") },
                 onSearchSubmit = {
                     val trimmed = filters.query.trim()
                     if (trimmed.isNotEmpty()) {
                         viewModel.submitSearch(trimmed)
                         firstSearchDone = true
                     }
+                    focusManager.clearFocus()
                 },
                 onFilterClick = { showFilters = true },
-                onBack = onBack,
+                onBack = {
+                    if (isFocused) {
+                        focusManager.clearFocus()
+                    } else {
+                        onBack()
+                    }
+                },
                 sharedTransitionScope = sharedTransitionScope,
                 animatedVisibilityScope = animatedVisibilityScope
             )
@@ -149,6 +189,8 @@ private fun SearchScreenTopBar(
     query: String,
     activeFilters: Boolean,
     onQueryChange: (String) -> Unit,
+    onFocusChange: (Boolean) -> Unit,
+    onClearQuery: () -> Unit,
     onSearchSubmit: () -> Unit,
     onFilterClick: () -> Unit,
     onBack: () -> Unit,
@@ -229,7 +271,18 @@ private fun SearchScreenTopBar(
                     singleLine = true,
                     modifier = Modifier
                         .fillMaxSize()
-                        .alpha(textFieldInnerContentAlpha),
+                        .alpha(textFieldInnerContentAlpha)
+                        .onFocusChanged { onFocusChange(it.isFocused) },
+                    trailingIcon = {
+                        if (query.isNotEmpty()) {
+                            IconButton(onClick = onClearQuery) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = stringResource(R.string.clear_search)
+                                )
+                            }
+                        }
+                    },
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.Transparent,
                         unfocusedContainerColor = Color.Transparent,
@@ -417,6 +470,88 @@ private fun SearchScreenContent(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun RecentSearchesList(
+    recentSearches: List<RecentSearch>,
+    onSearchClick: (String) -> Unit,
+    onDeleteClick: (String) -> Unit,
+    onClearAllClick: () -> Unit,
+    paddingValues: PaddingValues,
+    modifier: Modifier = Modifier
+) {
+    LazyColumn(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(paddingValues),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.recent_searches),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                TextButton(onClick = onClearAllClick) {
+                    Text(text = stringResource(R.string.clear_all))
+                }
+            }
+        }
+
+        items(recentSearches, key = { it.query }) { search ->
+            RecentSearchItem(
+                query = search.query,
+                onClick = { onSearchClick(search.query) },
+                onDeleteClick = { onDeleteClick(search.query) }
+            )
+        }
+    }
+}
+
+@Composable
+private fun RecentSearchItem(
+    query: String,
+    onClick: () -> Unit,
+    onDeleteClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(8.dp))
+            .clickable(onClick = onClick)
+            .padding(vertical = 8.dp, horizontal = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = Icons.Default.History,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(
+            text = query,
+            modifier = Modifier.weight(1f),
+            style = MaterialTheme.typography.bodyLarge,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        IconButton(onClick = onDeleteClick) {
+            Icon(
+                imageVector = Icons.Default.Close,
+                contentDescription = stringResource(R.string.delete_search),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                modifier = Modifier.size(20.dp)
+            )
         }
     }
 }

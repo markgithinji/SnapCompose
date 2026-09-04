@@ -4,6 +4,7 @@ import androidx.paging.PagingData
 import com.example.composegallery.feature.gallery.data.util.Result
 import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.domain.model.RecentSearch
+import com.example.composegallery.feature.gallery.domain.model.SearchFilters
 import com.example.composegallery.feature.gallery.domain.repository.SearchRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,8 +21,8 @@ open class FakeSearchRepository : SearchRepository {
         fakeResults[query] = photos
     }
 
-    override fun searchPagedPhotos(query: String): Flow<PagingData<Photo>> {
-        val photos = fakeResults[query] ?: emptyList()
+    override fun searchPagedPhotos(filters: SearchFilters): Flow<PagingData<Photo>> {
+        val photos = fakeResults[filters.query] ?: emptyList()
         return flow {
             emit(PagingData.from(photos))
         }
@@ -39,6 +40,14 @@ open class FakeSearchRepository : SearchRepository {
         updatedList.add(0, RecentSearch(query))
         recentSearchesFlow.update { updatedList }
 
+        return Result.Success(Unit)
+    }
+
+    override suspend fun deleteRecentSearch(query: String): Result<Unit> {
+        val updatedList = recentSearchesFlow.value.toMutableList()
+            .filterNot { it.query == query }
+            .toMutableList()
+        recentSearchesFlow.update { updatedList }
         return Result.Success(Unit)
     }
 

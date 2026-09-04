@@ -4,6 +4,7 @@ import androidx.recyclerview.widget.DiffUtil
 import collectItemsForTest
 import com.example.composegallery.feature.gallery.data.repository.FakeSearchRepository
 import com.example.composegallery.feature.gallery.domain.model.Photo
+import com.example.composegallery.feature.gallery.domain.model.SearchFilters
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -76,8 +77,8 @@ class ObserveSearchResultsUseCaseTest { // TODO: Fix this test
 
     @Test
     fun observeSearchResults_shouldEmitPagingData_whenQueryIsValid() = runTest(testDispatcher) {
-        val queryFlow = MutableStateFlow("cats")
-        val resultFlow = useCase(queryFlow)
+        val filtersFlow = MutableStateFlow(SearchFilters(query = "cats"))
+        val resultFlow = useCase(filtersFlow)
 
         advanceTimeBy(350)
         advanceUntilIdle()
@@ -94,8 +95,8 @@ class ObserveSearchResultsUseCaseTest { // TODO: Fix this test
     @Test
     fun observeSearchResults_shouldEmitEmptyPagingData_whenQueryIsBlank() =
         runTest(testDispatcher) {
-            val queryFlow = MutableStateFlow("")
-            val resultFlow = useCase(queryFlow)
+            val filtersFlow = MutableStateFlow(SearchFilters(query = ""))
+            val resultFlow = useCase(filtersFlow)
 
             advanceTimeBy(350)
             advanceUntilIdle()
@@ -108,8 +109,8 @@ class ObserveSearchResultsUseCaseTest { // TODO: Fix this test
     @Test
     fun observeSearchResults_shouldEmitNewPagingData_forDifferentQueries() =
         runTest(testDispatcher) {
-            val queryFlow = MutableStateFlow("cats")
-            val catsFlow = useCase(queryFlow)
+            val filtersFlow = MutableStateFlow(SearchFilters(query = "cats"))
+            val catsFlow = useCase(filtersFlow)
 
             advanceTimeBy(350)
             advanceUntilIdle()
@@ -117,8 +118,8 @@ class ObserveSearchResultsUseCaseTest { // TODO: Fix this test
             assertThat(catsSnapshot).hasSize(2)
             assertThat(catsSnapshot[0].description).isEqualTo("A cute cat")
 
-            queryFlow.value = "dogs"
-            val dogsFlow = useCase(queryFlow)
+            filtersFlow.value = SearchFilters(query = "dogs")
+            val dogsFlow = useCase(filtersFlow)
 
             advanceTimeBy(350)
             advanceUntilIdle()
@@ -129,17 +130,17 @@ class ObserveSearchResultsUseCaseTest { // TODO: Fix this test
 
     @Test
     fun observeSearchResults_shouldDebounceRapidQueryChanges() = runTest(testDispatcher) {
-        val queryFlow = MutableStateFlow("")
+        val filtersFlow = MutableStateFlow(SearchFilters(query = ""))
 
-        queryFlow.value = "c"
+        filtersFlow.value = SearchFilters(query = "c")
         advanceTimeBy(100)
-        queryFlow.value = "ca"
+        filtersFlow.value = SearchFilters(query = "ca")
         advanceTimeBy(100)
-        queryFlow.value = "cat"
+        filtersFlow.value = SearchFilters(query = "cat")
         advanceTimeBy(100)
-        queryFlow.value = "cats"
+        filtersFlow.value = SearchFilters(query = "cats")
 
-        val resultFlow = useCase(queryFlow)
+        val resultFlow = useCase(filtersFlow)
         advanceTimeBy(350)
         advanceUntilIdle()
 
