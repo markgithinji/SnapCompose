@@ -33,7 +33,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -146,10 +145,7 @@ fun UserProfileContent(
                     location = location,
                     portfolioUrl = portfolioUrl,
                     instagramUsername = instagramUsername,
-                    unsplashProfileUrl = unsplashProfileUrl,
-                    sharedTransitionScope = sharedTransitionScope,
-                    animatedVisibilityScope = animatedVisibilityScope,
-                    username = username
+                    unsplashProfileUrl = unsplashProfileUrl
                 )
             }
 
@@ -304,7 +300,7 @@ private fun LazyStaggeredGridScope.renderPhotoItems(
         }
 
         else -> {
-            Unit // No-Op
+            // No-Op
         }
     }
 }
@@ -398,7 +394,7 @@ private fun LazyStaggeredGridScope.renderCollectionItems(
         }
 
         else -> {
-            Unit // No-Op
+            // No-Op
         }
     }
 }

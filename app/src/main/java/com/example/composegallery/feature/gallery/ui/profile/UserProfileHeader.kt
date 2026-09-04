@@ -1,9 +1,6 @@
 package com.example.composegallery.feature.gallery.ui.profile
 
 import ConfettiButton
-import androidx.compose.animation.AnimatedContentScope
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -35,11 +32,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.composegallery.R
-import com.example.composegallery.feature.gallery.ui.common.SharedTransitionKeys
 import com.example.composegallery.feature.gallery.ui.common.UserProfileImage
 import java.net.URI
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun UserProfileHeader(
     name: String,
@@ -49,9 +44,6 @@ fun UserProfileHeader(
     portfolioUrl: String?,
     instagramUsername: String?,
     unsplashProfileUrl: String,
-    sharedTransitionScope: SharedTransitionScope,
-    animatedVisibilityScope: AnimatedContentScope,
-    username: String,
     modifier: Modifier = Modifier
 ) {
     var isBioExpanded by remember { mutableStateOf(false) }
@@ -67,10 +59,7 @@ fun UserProfileHeader(
         UserProfileImage(
             imageUrl = profileImage,
             contentDescription = stringResource(R.string.profile_picture_desc, name),
-            modifier = Modifier.size(140.dp),
-            sharedTransitionScope = sharedTransitionScope,
-            animatedVisibilityScope = animatedVisibilityScope,
-            sharedKey = SharedTransitionKeys.userProfileImage(username)
+            modifier = Modifier.size(140.dp)
         )
 
         Spacer(modifier = Modifier.width(24.dp))

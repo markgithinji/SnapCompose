@@ -1,8 +1,5 @@
 package com.example.composegallery.feature.gallery.ui.common
 
-import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -24,57 +21,31 @@ import com.valentinilk.shimmer.ShimmerBounds
 import com.valentinilk.shimmer.rememberShimmer
 import com.valentinilk.shimmer.shimmer
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun UserProfileImage(
     imageUrl: String,
     contentDescription: String,
-    modifier: Modifier = Modifier,
-    sharedTransitionScope: SharedTransitionScope? = null,
-    animatedVisibilityScope: AnimatedVisibilityScope? = null,
-    sharedKey: String? = null
+    modifier: Modifier = Modifier
 ) {
     val shimmer = rememberShimmer(shimmerBounds = ShimmerBounds.View)
-    var isLoading by remember { mutableStateOf(true) }
     
     // Track the last successful painter to prevent flicker during URL upgrades
     var lastSuccessfulPainter by remember { mutableStateOf<Painter?>(null) }
 
-    val sharedModifier = if (sharedTransitionScope != null && animatedVisibilityScope != null && sharedKey != null) {
-        with(sharedTransitionScope) {
-            Modifier
-                // renderInSharedTransitionScopeOverlay ensures the image stays on top 
-                // and isn't clipped by parent containers during the animation.
-                .renderInSharedTransitionScopeOverlay(
-                    zIndexInOverlay = 1f,
-                    renderInOverlay = { true }
-                )
-                .sharedElement(
-                    rememberSharedContentState(key = sharedKey),
-                    animatedVisibilityScope = animatedVisibilityScope,
-                    clipInOverlayDuringTransition = OverlayClip(CircleShape)
-                )
-        }
-    } else {
-        Modifier
-    }
-
     Box(
         modifier = modifier
-            .clip(CircleShape) // Container-level clip
-            .then(sharedModifier)
+            .clip(CircleShape)
     ) {
         SubcomposeAsyncImage(
             model = imageUrl,
             contentDescription = contentDescription,
             modifier = Modifier
                 .fillMaxSize()
-                .clip(CircleShape), // Content-level clip for safety
+                .clip(CircleShape),
             onState = { state ->
                 if (state is AsyncImagePainter.State.Success) {
                     lastSuccessfulPainter = state.painter
                 }
-                isLoading = state is AsyncImagePainter.State.Loading || state is AsyncImagePainter.State.Empty
             }
         ) {
             val state = painter.state

@@ -365,9 +365,6 @@ private fun PhotoDetailContent(
                 Column(Modifier.verticalScroll(rememberScrollState())) {
                     PhotoDetailInfo(
                         photo = photo,
-                        origin = origin,
-                        sharedTransitionScope = sharedTransitionScope,
-                        animatedVisibilityScope = animatedVisibilityScope,
                         isActionLoading = isActionLoading,
                         isFavorite = isFavorite,
                         onUserClick = onUserClick,
@@ -388,9 +385,6 @@ private fun PhotoDetailContent(
 @Composable
 private fun PhotoDetailInfo(
     photo: Photo,
-    origin: String,
-    sharedTransitionScope: SharedTransitionScope,
-    animatedVisibilityScope: AnimatedContentScope,
     isActionLoading: Boolean,
     isFavorite: Boolean,
     onUserClick: (Photo) -> Unit,
@@ -416,19 +410,10 @@ private fun PhotoDetailInfo(
                 .clickable { onUserClick(photo) },
             verticalAlignment = Alignment.CenterVertically
         ) {
-            val userSharedKey = if (!origin.startsWith("profile")) {
-                SharedTransitionKeys.userProfileImage(photo.username ?: photo.authorName)
-            } else {
-                null
-            }
-
             UserProfileImage(
                 imageUrl = photo.authorProfileImageHighResUrl,
                 contentDescription = photo.authorName,
-                modifier = Modifier.size(48.dp),
-                sharedTransitionScope = sharedTransitionScope,
-                animatedVisibilityScope = animatedVisibilityScope,
-                sharedKey = userSharedKey
+                modifier = Modifier.size(48.dp)
             )
 
             Spacer(modifier = Modifier.width(12.dp))
