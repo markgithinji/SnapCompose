@@ -123,85 +123,91 @@ private fun TopicTabs(
     onTopicSelected: (String?) -> Unit,
     onRetry: () -> Unit
 ) {
-    LazyRow(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(48.dp),
-        contentPadding = PaddingValues(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        when (state) {
-            is UiState.Loading -> {
-                items(6) {
-                    Box(
-                        modifier = Modifier
-                            .width(80.dp)
-                            .height(36.dp)
-                            .clip(CircleShape)
-                            .shimmer()
-                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
+    if (state is UiState.Error) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp)
+                .padding(horizontal = 16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Surface(
+                onClick = onRetry,
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.7f),
+                contentColor = MaterialTheme.colorScheme.onErrorContainer
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.failed_to_load_topics),
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        text = "↺",
+                        style = MaterialTheme.typography.labelLarge
                     )
                 }
             }
-
-            is UiState.Error -> {
-                item {
-                    Surface(
-                        onClick = onRetry,
-                        shape = CircleShape,
-                        color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.7f),
-                        contentColor = MaterialTheme.colorScheme.onErrorContainer
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = stringResource(R.string.failed_to_load_topics),
-                                style = MaterialTheme.typography.labelMedium
-                            )
-                            Spacer(Modifier.width(4.dp))
-                            Text(
-                                text = "↺",
-                                style = MaterialTheme.typography.labelLarge
-                            )
-                        }
+        }
+    } else {
+        LazyRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            when (state) {
+                is UiState.Loading -> {
+                    items(6) {
+                        Box(
+                            modifier = Modifier
+                                .width(80.dp)
+                                .height(36.dp)
+                                .clip(CircleShape)
+                                .shimmer()
+                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
+                        )
                     }
                 }
-            }
 
-            is UiState.Content -> {
-                val topics = state.data
-                val allTabs = listOf(null) + topics.map { it.id }
-                items(allTabs, key = { it ?: "editorial" }) { topicId ->
-                    val isSelected = topicId == selectedTopicId
-                    val title = if (topicId == null) {
-                        stringResource(R.string.editorial)
-                    } else {
-                        topics.find { it.id == topicId }?.title ?: ""
-                    }
-
-                    Surface(
-                        onClick = { onTopicSelected(topicId) },
-                        shape = CircleShape,
-                        color = if (isSelected) {
-                            MaterialTheme.colorScheme.primary
+                is UiState.Content -> {
+                    val topics = state.data
+                    val allTabs = listOf(null) + topics.map { it.id }
+                    items(allTabs, key = { it ?: "editorial" }) { topicId ->
+                        val isSelected = topicId == selectedTopicId
+                        val title = if (topicId == null) {
+                            stringResource(R.string.editorial)
                         } else {
-                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
-                        },
-                        contentColor = if (isSelected) {
-                            MaterialTheme.colorScheme.onPrimary
-                        } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant
+                            topics.find { it.id == topicId }?.title ?: ""
                         }
-                    ) {
-                        Text(
-                            text = title,
-                            style = MaterialTheme.typography.labelLarge,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
-                        )
+
+                        Surface(
+                            onClick = { onTopicSelected(topicId) },
+                            shape = CircleShape,
+                            color = if (isSelected) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                            },
+                            contentColor = if (isSelected) {
+                                MaterialTheme.colorScheme.onPrimary
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            }
+                        ) {
+                            Text(
+                                text = title,
+                                style = MaterialTheme.typography.labelLarge,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                            )
+                        }
                     }
                 }
             }

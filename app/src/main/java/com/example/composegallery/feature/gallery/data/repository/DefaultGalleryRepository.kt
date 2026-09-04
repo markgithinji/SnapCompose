@@ -42,7 +42,8 @@ class DefaultGalleryRepository @Inject constructor(
 
     @OptIn(ExperimentalPagingApi::class)
     private fun getCachedPagedPhotos(topicId: String): Flow<PagingData<Photo>> {
-        Timber.tag("GalleryRepository").d("getCachedPagedPhotos called for: %s", topicId)
+        // We include topicId in the Pager's configuration or use a unique PagingSourceFactory
+        // to ensure that switching topics actually creates a new Paging pipeline.
         return Pager(
             config = PagingConfig(
                 pageSize = PagingDefaults.PAGE_SIZE,
@@ -51,19 +52,18 @@ class DefaultGalleryRepository @Inject constructor(
                 enablePlaceholders = true
             ),
             remoteMediator = PhotoRemoteMediator(api, database, stringProvider, topicId),
-            pagingSourceFactory = { database.photoDao().getPagedPhotos(topicId) }
+            pagingSourceFactory = { 
+                database.photoDao().getPagedPhotos(topicId) 
+            }
         ).flow
-            .distinctUntilChanged()
             .map { pagingData ->
                 pagingData.map { it.toDomainModel() }
             }
     }
 
     override suspend fun getTopics(): Result<List<Topic>> {
-        Timber.tag("GalleryRepository").d("getTopics: Fetching from API")
         return safeApiCall(stringProvider) {
             val response = api.getTopics()
-            Timber.tag("GalleryRepository").d("getTopics: Received %d topics", response.size)
             response.map { it.toDomainModel() }
         }.also {
             if (it is Result.Error) {

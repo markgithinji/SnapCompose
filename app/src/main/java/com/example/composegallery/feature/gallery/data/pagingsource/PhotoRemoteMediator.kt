@@ -8,6 +8,7 @@ import androidx.room.withTransaction
 import com.example.composegallery.feature.gallery.data.local.AppDatabase
 import com.example.composegallery.feature.gallery.data.local.PhotoEntity
 import com.example.composegallery.feature.gallery.data.local.PhotoRemoteKeyEntity
+import com.example.composegallery.feature.gallery.data.local.TopicCacheMetadataEntity
 import com.example.composegallery.feature.gallery.data.local.toEntity
 import com.example.composegallery.feature.gallery.data.model.toDomainModel
 import com.example.composegallery.feature.gallery.data.remote.UnsplashApi
@@ -15,6 +16,7 @@ import com.example.composegallery.feature.gallery.data.util.Result
 import com.example.composegallery.feature.gallery.data.util.safeApiCall
 import com.example.composegallery.feature.gallery.util.StringProvider
 import timber.log.Timber
+import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalPagingApi::class)
 class PhotoRemoteMediator(
@@ -26,14 +28,19 @@ class PhotoRemoteMediator(
 
     companion object {
         const val EDITORIAL = "editorial"
+        private const val CACHE_TIMEOUT_SECONDS = 3600L // 1 hour
     }
 
     override suspend fun initialize(): InitializeAction {
         val count = database.photoDao().getCount(topicId)
-        Timber.tag("PhotoRemoteMediator").d("initialize: topicId=$topicId, count=$count")
-        // If we already have data, skip the initial refresh to keep the grid stable.
-        // The user can still pull-to-refresh manually.
-        return if (count > 0) {
+        val metadata = database.topicCacheMetadataDao().getMetadata(topicId)
+        
+        val lastUpdated = metadata?.lastUpdated ?: 0L
+        val now = System.currentTimeMillis()
+        val diffSeconds = TimeUnit.MILLISECONDS.toSeconds(now - lastUpdated)
+        val isStale = diffSeconds > CACHE_TIMEOUT_SECONDS
+
+        return if (count > 0 && !isStale) {
             InitializeAction.SKIP_INITIAL_REFRESH
         } else {
             InitializeAction.LAUNCH_INITIAL_REFRESH
@@ -44,8 +51,6 @@ class PhotoRemoteMediator(
         loadType: LoadType,
         state: PagingState<Int, PhotoEntity>
     ): MediatorResult {
-        Timber.tag("PhotoRemoteMediator").d("load: START topicId=$topicId, loadType=$loadType, anchorPosition=${state.anchorPosition}")
-        
         val page = when (loadType) {
             LoadType.REFRESH -> 1
             LoadType.PREPEND -> {
@@ -62,7 +67,6 @@ class PhotoRemoteMediator(
         }
 
         val result = safeApiCall(stringProvider) {
-            Timber.tag("PhotoRemoteMediator").d("load: Fetching topic=$topicId page $page from API...")
             if (topicId == EDITORIAL) {
                 api.getPhotos(page = page, perPage = state.config.pageSize)
             } else {
@@ -73,13 +77,15 @@ class PhotoRemoteMediator(
         return when (result) {
             is Result.Success -> {
                 val photos = result.data.mapNotNull { it.toDomainModel() }
-                Timber.tag("PhotoRemoteMediator").d("load: SUCCESS topic=$topicId fetched ${photos.size} photos for page $page")
                 val endOfPaginationReached = photos.isEmpty()
 
                 database.withTransaction {
                     if (loadType == LoadType.REFRESH) {
                         database.photoRemoteKeyDao().clearRemoteKeys(topicId)
                         database.photoDao().clearAll(topicId)
+                        database.topicCacheMetadataDao().insertMetadata(
+                            TopicCacheMetadataEntity(topicId = topicId, lastUpdated = System.currentTimeMillis())
+                        )
                     }
 
                     val prevPage = if (page == 1) null else page - 1
