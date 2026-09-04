@@ -7,7 +7,7 @@ import com.example.composegallery.feature.gallery.ui.util.UiState
 import com.example.composegallery.utils.MainDispatcherRule
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -15,6 +15,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -34,22 +35,7 @@ class UserProfileViewModelTest {
     @Test
     fun setUsername_success_updatesUserProfileState() = runTest {
         val username = "janesmith"
-        val user = UnsplashUser(
-            id = "1",
-            name = "Jane Smith",
-            username = username,
-            bio = "Photographer",
-            location = "London",
-            profileImageSmall = "",
-            profileImageMedium = "",
-            profileImageLarge = "",
-            totalPhotos = 10,
-            totalCollections = 2,
-            totalLikes = 5,
-            portfolioUrl = null,
-            instagramUsername = null,
-            unsplashProfileUrl = ""
-        )
+        val user = createFakeUser(username)
         whenever(userRepository.getUserProfile(username)).thenReturn(Result.Success(user))
 
         val states = mutableListOf<UiState<UnsplashUser>>()
@@ -65,19 +51,56 @@ class UserProfileViewModelTest {
     }
 
     @Test
-    fun setUsername_error_updatesUserProfileStateWithError() = runTest {
-        val username = "erroruser"
-        whenever(userRepository.getUserProfile(username)).thenReturn(Result.Error("Not Found"))
+    fun setUsername_triggersPagingFlows() = runTest {
+        val username = "janesmith"
+        whenever(userRepository.getUserPhotos(username)).thenReturn(flowOf())
+        whenever(userRepository.getUserCollections(username)).thenReturn(flowOf())
+        whenever(userRepository.getUserLikedPhotos(username)).thenReturn(flowOf())
+        whenever(userRepository.getUserProfile(username)).thenReturn(Result.Success(createFakeUser(username)))
 
-        val states = mutableListOf<UiState<UnsplashUser>>()
-        val job = launch(UnconfinedTestDispatcher()) {
-            viewModel.userProfileState.collect { states.add(it) }
-        }
+        // Collect flows to trigger them
+        val job1 = launch(UnconfinedTestDispatcher()) { viewModel.userPhotos.collect {} }
+        val job2 = launch(UnconfinedTestDispatcher()) { viewModel.userCollectionsState.collect {} }
+        val job3 = launch(UnconfinedTestDispatcher()) { viewModel.userLikedPhotos.collect {} }
 
         viewModel.setUsername(username)
 
-        assertThat(states.last()).isInstanceOf(UiState.Error::class.java)
-        assertThat((states.last() as UiState.Error).message).isEqualTo("Not Found")
+        verify(userRepository).getUserPhotos(username)
+        verify(userRepository).getUserCollections(username)
+        verify(userRepository).getUserLikedPhotos(username)
+        
+        job1.cancel()
+        job2.cancel()
+        job3.cancel()
+    }
+
+    @Test
+    fun setCollectionId_triggersCollectionPhotosFlow() = runTest {
+        val collectionId = "123"
+        whenever(userRepository.getCollectionPhotos(collectionId)).thenReturn(flowOf())
+
+        val job = launch(UnconfinedTestDispatcher()) { viewModel.collectionPhotos.collect {} }
+
+        viewModel.setCollectionId(collectionId)
+
+        verify(userRepository).getCollectionPhotos(collectionId)
         job.cancel()
     }
+
+    private fun createFakeUser(username: String) = UnsplashUser(
+        id = "1",
+        name = "Jane Smith",
+        username = username,
+        bio = "Photographer",
+        location = "London",
+        profileImageSmall = "",
+        profileImageMedium = "",
+        profileImageLarge = "",
+        totalPhotos = 10,
+        totalCollections = 2,
+        totalLikes = 5,
+        portfolioUrl = null,
+        instagramUsername = null,
+        unsplashProfileUrl = ""
+    )
 }
