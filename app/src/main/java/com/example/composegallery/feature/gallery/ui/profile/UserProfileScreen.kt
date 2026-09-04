@@ -73,66 +73,42 @@ fun UserProfileScreen(
         viewModel.setUsername(username)
     }
 
-    when (val state = userProfileState) {
-        is UiState.Loading -> {
-            UserProfileContent(
-                username = username,
-                name = initialName ?: "",
-                bio = null,
-                location = null,
-                profileImageUrl = initialProfileImageUrl ?: "",
-                portfolioUrl = null,
-                instagramUsername = null,
-                totalPhotos = 0,
-                totalLikes = 0,
-                totalCollections = 0,
-                unsplashProfileUrl = "",
-                userPhotos = photos,
-                userLikes = userLikes,
-                userCollections = collections,
-                sharedTransitionScope = sharedTransitionScope,
-                animatedVisibilityScope = animatedVisibilityScope,
-                onPhotoClick = onPhotoClick,
-                onCollectionClick = onCollectionClick,
-                onStatsClick = { showStatsDialog = true },
-                onBack = onBack
-            )
-        }
-
-        is UiState.Error -> {
-            InfoMessageScreen(
-                imageRes = R.drawable.error_icon,
-                title = stringResource(R.string.failed_to_load_user_profile),
-                subtitle = stringResource(R.string.reason, state.message),
-                titleColor = MaterialTheme.colorScheme.error
-            )
-        }
-
-        is UiState.Content -> {
-            val user = state.data
-            UserProfileContent(
-                username = username,
-                name = user.name,
-                bio = user.bio,
-                location = user.location,
-                portfolioUrl = user.portfolioUrl,
-                instagramUsername = user.instagramUsername,
-                totalPhotos = user.totalPhotos,
-                totalLikes = user.totalLikes,
-                totalCollections = user.totalCollections,
-                profileImageUrl = user.profileImageLarge,
-                unsplashProfileUrl = user.unsplashProfileUrl,
-                userPhotos = photos,
-                userLikes = userLikes,
-                userCollections = collections,
-                sharedTransitionScope = sharedTransitionScope,
-                animatedVisibilityScope = animatedVisibilityScope,
-                onPhotoClick = onPhotoClick,
-                onCollectionClick = onCollectionClick,
-                onStatsClick = { showStatsDialog = true },
-                onBack = onBack
-            )
-        }
+    if (userProfileState is UiState.Error) {
+        InfoMessageScreen(
+            imageRes = R.drawable.error_icon,
+            title = stringResource(R.string.failed_to_load_user_profile),
+            subtitle = stringResource(R.string.reason, userProfileState.message),
+            titleColor = MaterialTheme.colorScheme.error
+        )
+    } else {
+        // We use a single call to UserProfileContent to maintain a stable UI tree.
+        // This prevents the Shared Element transition from being interrupted
+        // when the state flips from Loading to Content.
+        val user = (userProfileState as? UiState.Content)?.data
+        
+        UserProfileContent(
+            username = username,
+            name = user?.name ?: initialName ?: "",
+            bio = user?.bio,
+            location = user?.location,
+            profileImageUrl = user?.profileImageLarge ?: initialProfileImageUrl ?: "",
+            portfolioUrl = user?.portfolioUrl,
+            instagramUsername = user?.instagramUsername,
+            totalPhotos = user?.totalPhotos ?: 0,
+            totalLikes = user?.totalLikes ?: 0,
+            totalCollections = user?.totalCollections ?: 0,
+            unsplashProfileUrl = user?.unsplashProfileUrl ?: "",
+            userPhotos = photos,
+            userLikes = userLikes,
+            userCollections = collections,
+            gridState = viewModel.gridState,
+            sharedTransitionScope = sharedTransitionScope,
+            animatedVisibilityScope = animatedVisibilityScope,
+            onPhotoClick = onPhotoClick,
+            onCollectionClick = onCollectionClick,
+            onStatsClick = { showStatsDialog = true },
+            onBack = onBack
+        )
     }
 
     // Show the stats dialog if requested

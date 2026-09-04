@@ -4,7 +4,6 @@ import ConfettiButton
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -35,8 +34,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
 import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.ui.common.SharedTransitionKeys
 import com.example.composegallery.feature.gallery.ui.common.UserProfileImage
@@ -59,54 +56,49 @@ fun UserProfileHeader(
 ) {
     var isBioExpanded by remember { mutableStateOf(false) }
 
-    ConstraintLayout(
+    Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 16.dp)
-            .animateContentSize()
+            .padding(16.dp),
+        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.Start
     ) {
-        val (profileImageRef, columnContent) = createRefs()
-
+        // 1. Profile Image
         UserProfileImage(
             imageUrl = profileImage,
             contentDescription = stringResource(R.string.profile_picture_desc, name),
-            modifier = Modifier
-                .size(140.dp)
-                .constrainAs(profileImageRef) {
-                    start.linkTo(parent.start)
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
-                },
+            modifier = Modifier.size(140.dp),
             sharedTransitionScope = sharedTransitionScope,
             animatedVisibilityScope = animatedVisibilityScope,
             sharedKey = SharedTransitionKeys.userProfileImage(username)
         )
 
+        Spacer(modifier = Modifier.width(24.dp))
+
+        // 2. Details Column
         Column(
-            modifier = Modifier
-                .constrainAs(columnContent) {
-                    start.linkTo(profileImageRef.end, margin = 36.dp)
-                    top.linkTo(profileImageRef.top)
-                    bottom.linkTo(profileImageRef.bottom)
-                    end.linkTo(parent.end)
-                    width = Dimension.fillToConstraints
-                },
-            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.Start
         ) {
             var isTruncated by remember { mutableStateOf(false) }
 
-            Text(name, style = MaterialTheme.typography.headlineLarge)
+            Text(
+                text = name,
+                style = MaterialTheme.typography.headlineLarge,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
             Spacer(Modifier.height(4.dp))
 
             bio?.let {
-                Column(modifier = Modifier.animateContentSize()) {
+                Column {
                     Text(
                         text = it,
                         style = MaterialTheme.typography.headlineSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         overflow = TextOverflow.Ellipsis,
-                        maxLines = if (isBioExpanded) Int.MAX_VALUE else 3, // Shorter default to show more clearly
+                        maxLines = if (isBioExpanded) Int.MAX_VALUE else 3,
                         onTextLayout = { textLayoutResult ->
                             if (!isBioExpanded) {
                                 isTruncated = textLayoutResult.hasVisualOverflow
@@ -138,7 +130,12 @@ fun UserProfileHeader(
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(Modifier.width(4.dp))
-                    Text(it, style = MaterialTheme.typography.labelMedium)
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.labelMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
                 Spacer(Modifier.height(4.dp))
             }
@@ -146,8 +143,8 @@ fun UserProfileHeader(
             portfolioUrl?.let { url ->
                 val uriHandler = LocalUriHandler.current
                 val displayUrl =
-                    try { // A shorter alternative urls. Showing full URLs can be messy.
-                        URI(url).host.removePrefix("www.")
+                    try {
+                        URI(url).host?.removePrefix("www.") ?: url
                     } catch (e: Exception) {
                         url
                     }
@@ -162,6 +159,8 @@ fun UserProfileHeader(
                         text = displayUrl,
                         color = MaterialTheme.colorScheme.primary,
                         style = MaterialTheme.typography.labelMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.clickable { uriHandler.openUri(url) }
                     )
                 }
@@ -179,7 +178,9 @@ fun UserProfileHeader(
                     Text(
                         text = "@$it",
                         color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.labelMedium
+                        style = MaterialTheme.typography.labelMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
                 Spacer(Modifier.height(4.dp))
@@ -209,7 +210,9 @@ fun UserProfileHeader(
                 Text(
                     text = "View on Unsplash",
                     color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.labelMedium
+                    style = MaterialTheme.typography.labelMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
             Spacer(Modifier.height(8.dp))
@@ -218,4 +221,3 @@ fun UserProfileHeader(
         }
     }
 }
-

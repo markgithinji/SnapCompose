@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import com.example.composegallery.feature.gallery.data.util.Result
 import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.domain.model.PhotoCollection
@@ -31,6 +32,9 @@ import javax.inject.Inject
 class UserProfileViewModel @Inject constructor(
     private val userRepository: UserRepository
 ) : ViewModel() {
+
+    // Preserve grid state across navigation and loading state swaps
+    val gridState = LazyStaggeredGridState()
 
     private val _username = MutableStateFlow<String?>(null)
     private val _collectionId = MutableStateFlow<String?>(null)

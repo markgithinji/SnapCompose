@@ -17,10 +17,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridScope
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
-import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -78,6 +78,7 @@ fun UserProfileContent(
     userPhotos: LazyPagingItems<Photo>,
     userLikes: LazyPagingItems<Photo>,
     userCollections: LazyPagingItems<PhotoCollection>,
+    gridState: LazyStaggeredGridState,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedContentScope,
     onPhotoClick: (Photo) -> Unit,
@@ -89,8 +90,6 @@ fun UserProfileContent(
     var selectedTab by rememberSaveable(inputs = arrayOf(username)) { 
         mutableStateOf(UserTab.PHOTOS) 
     }
-
-    val gridState = rememberLazyStaggeredGridState()
     
     val retryKeys = remember { mutableStateMapOf<String, Int>() }
     val retryHandler: (String) -> Unit = { id ->
