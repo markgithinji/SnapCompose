@@ -1,11 +1,13 @@
 package com.example.composegallery.feature.gallery.ui.search
 
 import androidx.compose.animation.AnimatedContentScope
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.fadeIn
@@ -91,8 +93,23 @@ fun SearchScreen(
     var showFilters by remember { mutableStateOf(false) }
 
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        topBar = {
+        modifier = Modifier.fillMaxSize()
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = innerPadding.calculateBottomPadding())
+        ) {
+            SearchScreenContent(
+                showWelcome = !firstSearchDone,
+                paddingValues = PaddingValues(top = 100.dp), // Fixed space for the floating top bar
+                photos = pagedPhotos,
+                retryKeys = retryKeys,
+                onPhotoClick = onPhotoClick,
+                sharedTransitionScope = sharedTransitionScope,
+                animatedVisibilityScope = animatedVisibilityScope
+            )
+
             SearchScreenTopBar(
                 query = filters.query,
                 activeFilters = filters.orientation != null || filters.color != null || filters.orderBy != OrderBy.RELEVANT,
@@ -110,16 +127,6 @@ fun SearchScreen(
                 animatedVisibilityScope = animatedVisibilityScope
             )
         }
-    ) { padding ->
-        SearchScreenContent(
-            showWelcome = !firstSearchDone,
-            paddingValues = padding,
-            photos = pagedPhotos,
-            retryKeys = retryKeys,
-            onPhotoClick = onPhotoClick,
-            sharedTransitionScope = sharedTransitionScope,
-            animatedVisibilityScope = animatedVisibilityScope
-        )
     }
 
     if (showFilters) {
@@ -171,23 +178,29 @@ private fun SearchScreenTopBar(
     Row(
         modifier = Modifier
             .statusBarsPadding()
-            .padding(16.dp)
-            .fillMaxWidth(),
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .fillMaxWidth()
+            .height(72.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Use AnimatedVisibility for non-shared elements to prevent layout snaps on return
-        AnimatedVisibility(
-            visible = animatedVisibilityScope.transition.targetState == EnterExitState.Visible,
-            enter = fadeIn(tween(300)),
-            exit = fadeOut(tween(150))
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onBack) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-            }
+        val controlsAlpha by animatedVisibilityScope.transition.animateFloat(
+            transitionSpec = { 
+                if (targetState == EnterExitState.Visible) tween(300) 
+                else tween(150) 
+            },
+            label = "controls_alpha"
+        ) { state ->
+            if (state == EnterExitState.Visible) 1f else 0f
         }
+
+        IconButton(
+            onClick = onBack,
+            modifier = Modifier.alpha(controlsAlpha)
+        ) {
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+        }
+
+        Spacer(modifier = Modifier.width(8.dp))
 
         with(sharedTransitionScope) {
             Surface(
@@ -235,32 +248,25 @@ private fun SearchScreenTopBar(
             }
         }
 
-        AnimatedVisibility(
-            visible = animatedVisibilityScope.transition.targetState == EnterExitState.Visible,
-            enter = fadeIn(tween(300)),
-            exit = fadeOut(tween(150))
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Spacer(modifier = Modifier.width(8.dp))
-                Box {
-                    IconButton(onClick = onFilterClick) {
-                        Icon(
-                            Icons.Default.Tune,
-                            contentDescription = stringResource(R.string.filters),
-                            tint = if (activeFilters) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                    if (activeFilters) {
-                        Box(
-                            modifier = Modifier
-                                .size(8.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primary)
-                                .align(Alignment.TopEnd)
-                                .padding(2.dp)
-                        )
-                    }
-                }
+        Spacer(modifier = Modifier.width(8.dp))
+
+        Box(modifier = Modifier.alpha(controlsAlpha)) {
+            IconButton(onClick = onFilterClick) {
+                Icon(
+                    Icons.Default.Tune,
+                    contentDescription = stringResource(R.string.filters),
+                    tint = if (activeFilters) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                )
+            }
+            if (activeFilters) {
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary)
+                        .align(Alignment.TopEnd)
+                        .padding(2.dp)
+                )
             }
         }
     }

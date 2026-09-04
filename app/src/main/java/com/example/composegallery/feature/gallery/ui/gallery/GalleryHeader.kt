@@ -233,7 +233,7 @@ fun DummySearchBar(
             },
             label = "dummy_search_bar_alpha"
         ) { state ->
-            if (state != EnterExitState.Visible) 0f else 1f // Alpha 0 when exiting, 1 otherwise
+            if (state != EnterExitState.Visible) 0f else 1f
         }
 
         Surface(
