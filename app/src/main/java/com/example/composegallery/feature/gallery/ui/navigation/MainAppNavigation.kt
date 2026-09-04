@@ -3,11 +3,10 @@ package com.example.composegallery.feature.gallery.ui.navigation
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
@@ -122,74 +121,78 @@ fun MainAppNavigation() {
                     }
                 }
             ) { innerPadding ->
-                NavHost(
-                    navController = navController,
-                    startDestination = GalleryRoute,
-                    modifier = Modifier.padding(innerPadding)
-                ) {
-                    galleryRoute(
-                        sharedTransitionScope = this@SharedTransitionLayout,
-                        onSearchClick = { navController.navigate(SearchRoute) },
-                        onPhotoClick = { photo, origin ->
-                            navController.navigate(
-                                PhotoDetailRoute(
-                                    photoId = photo.id,
-                                    width = photo.width,
-                                    height = photo.height,
-                                    thumbUrl = photo.smallUrl,
-                                    blurHash = photo.blurHash,
-                                    origin = origin
+                // We purposefully don't apply innerPadding to NavHost to keep shared elements stable.
+                // Instead, we handle bottom padding inside the individual screens.
+                Box(modifier = Modifier.fillMaxSize()) {
+                    NavHost(
+                        navController = navController,
+                        startDestination = GalleryRoute,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        galleryRoute(
+                            sharedTransitionScope = this@SharedTransitionLayout,
+                            onSearchClick = { navController.navigate(SearchRoute) },
+                            onPhotoClick = { photo, origin ->
+                                navController.navigate(
+                                    PhotoDetailRoute(
+                                        photoId = photo.id,
+                                        width = photo.width,
+                                        height = photo.height,
+                                        thumbUrl = photo.smallUrl,
+                                        blurHash = photo.blurHash,
+                                        origin = origin
+                                    )
                                 )
-                            )
-                        }
-                    )
+                            }
+                        )
 
-                    searchRoute(
-                        sharedTransitionScope = this@SharedTransitionLayout,
-                        onBack = { navController.popBackStack() },
-                        onPhotoClick = { photo, origin ->
-                            navController.navigate(
-                                PhotoDetailRoute(
-                                    photoId = photo.id,
-                                    width = photo.width,
-                                    height = photo.height,
-                                    thumbUrl = photo.smallUrl,
-                                    blurHash = photo.blurHash,
-                                    origin = origin
+                        searchRoute(
+                            sharedTransitionScope = this@SharedTransitionLayout,
+                            onBack = { navController.popBackStack() },
+                            onPhotoClick = { photo, origin ->
+                                navController.navigate(
+                                    PhotoDetailRoute(
+                                        photoId = photo.id,
+                                        width = photo.width,
+                                        height = photo.height,
+                                        thumbUrl = photo.smallUrl,
+                                        blurHash = photo.blurHash,
+                                        origin = origin
+                                    )
                                 )
-                            )
-                        }
-                    )
+                            }
+                        )
 
-                    favoritesRoute(
-                        sharedTransitionScope = this@SharedTransitionLayout,
-                        onPhotoClick = { photo ->
-                            navController.navigate(
-                                PhotoDetailRoute(
-                                    photoId = photo.id,
-                                    width = photo.width,
-                                    height = photo.height,
-                                    thumbUrl = photo.smallUrl,
-                                    blurHash = photo.blurHash,
-                                    origin = "favorites"
+                        favoritesRoute(
+                            sharedTransitionScope = this@SharedTransitionLayout,
+                            onPhotoClick = { photo ->
+                                navController.navigate(
+                                    PhotoDetailRoute(
+                                        photoId = photo.id,
+                                        width = photo.width,
+                                        height = photo.height,
+                                        thumbUrl = photo.smallUrl,
+                                        blurHash = photo.blurHash,
+                                        origin = "favorites"
+                                    )
                                 )
-                            )
-                        }
-                    )
+                            }
+                        )
 
-                    photoDetailRoute(
-                        sharedTransitionScope = this@SharedTransitionLayout,
-                        navController = navController
-                    )
-                    fullscreenPhotoRoute()
-                    userProfileRoute(
-                        sharedTransitionScope = this@SharedTransitionLayout,
-                        navController = navController
-                    )
-                    collectionDetailRoute(
-                        sharedTransitionScope = this@SharedTransitionLayout,
-                        navController = navController
-                    )
+                        photoDetailRoute(
+                            sharedTransitionScope = this@SharedTransitionLayout,
+                            navController = navController
+                        )
+                        fullscreenPhotoRoute()
+                        userProfileRoute(
+                            sharedTransitionScope = this@SharedTransitionLayout,
+                            navController = navController
+                        )
+                        collectionDetailRoute(
+                            sharedTransitionScope = this@SharedTransitionLayout,
+                            navController = navController
+                        )
+                    }
                 }
             }
         }

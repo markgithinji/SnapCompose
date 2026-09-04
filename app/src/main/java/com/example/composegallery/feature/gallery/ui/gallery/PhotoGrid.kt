@@ -81,7 +81,7 @@ fun PhotoGrid(
         modifier = Modifier
             .fillMaxSize()
             .testTag("PhotoGrid"),
-        contentPadding = PaddingValues(8.dp),
+        contentPadding = PaddingValues(start = 8.dp, top = 8.dp, end = 8.dp, bottom = 144.dp),
         verticalItemSpacing = 8.dp,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {

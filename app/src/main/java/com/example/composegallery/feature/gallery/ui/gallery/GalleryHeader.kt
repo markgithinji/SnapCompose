@@ -228,7 +228,7 @@ fun DummySearchBar(
                 if (targetState != EnterExitState.Visible) {
                     tween(durationMillis = 150) // Fade out quickly when this composable is going away
                 } else {
-                    tween(durationMillis = 0) // When going back to GalleryScreen, appear instantly
+                    tween(durationMillis = 300, delayMillis = 100)
                 }
             },
             label = "dummy_search_bar_alpha"
@@ -239,6 +239,7 @@ fun DummySearchBar(
         Surface(
             modifier = modifier
                 .fillMaxWidth()
+                .height(56.dp) // Match the real search bar height for a smoother transition
                 .sharedElement(
                     sharedContentState = rememberSharedContentState(key = SharedTransitionKeys.SEARCH_BAR),
                     animatedVisibilityScope = animatedVisibilityScope

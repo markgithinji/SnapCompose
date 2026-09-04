@@ -31,52 +31,48 @@ fun FavoritesScreen(
 ) {
     val favorites by viewModel.favoritePhotos.collectAsStateWithLifecycle()
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize()
-    ) { padding ->
-        Column(
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+    ) {
+        Text(
+            text = stringResource(R.string.favorites),
+            style = MaterialTheme.typography.displayLarge,
             modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
-            Text(
-                text = stringResource(R.string.favorites),
-                style = MaterialTheme.typography.displayLarge,
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .padding(top = 24.dp, bottom = 16.dp)
-            )
+                .padding(horizontal = 16.dp)
+                .padding(top = 24.dp, bottom = 16.dp)
+        )
 
-            if (favorites.isEmpty()) {
-                Box(modifier = Modifier.weight(1f)) {
-                    EmptyContentMessage(
-                        message = stringResource(R.string.no_favorites_yet)
+        if (favorites.isEmpty()) {
+            Box(modifier = Modifier.weight(1f)) {
+                EmptyContentMessage(
+                    message = stringResource(R.string.no_favorites_yet)
+                )
+            }
+        } else {
+            LazyVerticalStaggeredGrid(
+                columns = StaggeredGridCells.Fixed(calculateResponsiveColumnCount()),
+                modifier = Modifier.weight(1f),
+                contentPadding = PaddingValues(start = 16.dp, top = 0.dp, end = 16.dp, bottom = 144.dp),
+                verticalItemSpacing = 12.dp,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(favorites, key = { it.id }) { photo ->
+                    PhotoCard(
+                        imageUrl = photo.smallUrl,
+                        authorName = photo.authorName,
+                        authorImageUrl = photo.authorProfileImageMediumResUrl,
+                        onRetry = { /* No-op for favorites */ },
+                        sharedTransitionScope = sharedTransitionScope,
+                        animatedVisibilityScope = animatedVisibilityScope,
+                        photoId = photo.id,
+                        origin = "favorites",
+                        aspectRatio = photo.width.toFloat() / photo.height,
+                        blurHash = photo.blurHash,
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = { onPhotoClick(photo) }
                     )
-                }
-            } else {
-                LazyVerticalStaggeredGrid(
-                    columns = StaggeredGridCells.Fixed(calculateResponsiveColumnCount()),
-                    modifier = Modifier.weight(1f),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalItemSpacing = 12.dp,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(favorites, key = { it.id }) { photo ->
-                        PhotoCard(
-                            imageUrl = photo.smallUrl,
-                            authorName = photo.authorName,
-                            authorImageUrl = photo.authorProfileImageMediumResUrl,
-                            onRetry = { /* No-op for favorites */ },
-                            sharedTransitionScope = sharedTransitionScope,
-                            animatedVisibilityScope = animatedVisibilityScope,
-                            photoId = photo.id,
-                            origin = "favorites",
-                            aspectRatio = photo.width.toFloat() / photo.height,
-                            blurHash = photo.blurHash,
-                            modifier = Modifier.fillMaxWidth(),
-                            onClick = { onPhotoClick(photo) }
-                        )
-                    }
                 }
             }
         }

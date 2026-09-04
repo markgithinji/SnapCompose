@@ -150,7 +150,7 @@ fun CollectionDetailScreen(
                         modifier = Modifier
                             .padding(padding)
                             .fillMaxSize(),
-                        contentPadding = PaddingValues(12.dp),
+                        contentPadding = PaddingValues(start = 12.dp, top = 12.dp, end = 12.dp, bottom = 32.dp),
                         verticalItemSpacing = 12.dp,
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {

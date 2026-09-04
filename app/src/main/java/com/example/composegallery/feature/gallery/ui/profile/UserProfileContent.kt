@@ -129,7 +129,7 @@ fun UserProfileContent(
         LazyVerticalStaggeredGrid(
             columns = StaggeredGridCells.Fixed(columnCount),
             state = gridState,
-            contentPadding = PaddingValues(16.dp),
+            contentPadding = PaddingValues(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 32.dp),
             verticalItemSpacing = 12.dp,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier

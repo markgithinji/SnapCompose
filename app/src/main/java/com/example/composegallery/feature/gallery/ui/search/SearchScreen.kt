@@ -1,6 +1,7 @@
 package com.example.composegallery.feature.gallery.ui.search
 
 import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
@@ -24,6 +25,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -89,9 +91,7 @@ fun SearchScreen(
     var showFilters by remember { mutableStateOf(false) }
 
     Scaffold(
-        modifier = Modifier
-            .fillMaxSize()
-            .windowInsetsPadding(WindowInsets.systemBars),
+        modifier = Modifier.fillMaxSize(),
         topBar = {
             SearchScreenTopBar(
                 query = filters.query,
@@ -159,9 +159,9 @@ private fun SearchScreenTopBar(
     val textFieldInnerContentAlpha by textFieldContentTransition.animateFloat(
         transitionSpec = {
             if (targetState == EnterExitState.Visible) {
-                tween(durationMillis = 200, delayMillis = 100)
+                tween(durationMillis = 300, delayMillis = 100)
             } else {
-                tween(durationMillis = 0)
+                tween(durationMillis = 150) // Smooth fade out on return
             }
         }, label = "text_field_alpha"
     ) { state ->
@@ -170,75 +170,97 @@ private fun SearchScreenTopBar(
 
     Row(
         modifier = Modifier
+            .statusBarsPadding()
             .padding(16.dp)
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(onClick = onBack) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+        // Use AnimatedVisibility for non-shared elements to prevent layout snaps on return
+        AnimatedVisibility(
+            visible = animatedVisibilityScope.transition.targetState == EnterExitState.Visible,
+            enter = fadeIn(tween(300)),
+            exit = fadeOut(tween(150))
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = onBack) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+            }
         }
 
-        Spacer(modifier = Modifier.width(8.dp))
-
         with(sharedTransitionScope) {
-            TextField(
-                value = query,
-                onValueChange = onQueryChange,
-                textStyle = MaterialTheme.typography.headlineSmall,
-                placeholder = {
-                    Text(
-                        text = stringResource(R.string.search_unsplash),
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
-                        modifier = Modifier.alpha(textFieldInnerContentAlpha)
-                    )
-                },
-                singleLine = true,
+            Surface(
                 modifier = Modifier
                     .weight(1f)
                     .height(56.dp)
                     .sharedElement(
                         sharedContentState = rememberSharedContentState(key = SharedTransitionKeys.SEARCH_BAR),
                         animatedVisibilityScope = animatedVisibilityScope
-                    )
-                    .alpha(textFieldInnerContentAlpha),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                    disabledContainerColor = MaterialTheme.colorScheme.surface,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
-                ),
+                    ),
                 shape = MaterialTheme.shapes.searchBar,
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                keyboardActions = KeyboardActions(
-                    onSearch = {
-                        keyboardController?.hide()
-                        onSearchSubmit()
-                    }
-                )
-            )
-        }
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        Box {
-            IconButton(onClick = onFilterClick) {
-                Icon(
-                    Icons.Default.Tune,
-                    contentDescription = stringResource(R.string.filters),
-                    tint = if (activeFilters) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.primaryContainer
+            ) {
+                TextField(
+                    value = query,
+                    onValueChange = onQueryChange,
+                    textStyle = MaterialTheme.typography.headlineSmall,
+                    placeholder = {
+                        Text(
+                            text = stringResource(R.string.search_unsplash),
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
+                            modifier = Modifier.alpha(textFieldInnerContentAlpha)
+                        )
+                    },
+                    singleLine = true,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .alpha(textFieldInnerContentAlpha),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        disabledContainerColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent
+                    ),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                    keyboardActions = KeyboardActions(
+                        onSearch = {
+                            keyboardController?.hide()
+                            onSearchSubmit()
+                        }
+                    )
                 )
             }
-            if (activeFilters) {
-                Box(
-                    modifier = Modifier
-                        .size(8.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary)
-                        .align(Alignment.TopEnd)
-                        .padding(2.dp)
-                )
+        }
+
+        AnimatedVisibility(
+            visible = animatedVisibilityScope.transition.targetState == EnterExitState.Visible,
+            enter = fadeIn(tween(300)),
+            exit = fadeOut(tween(150))
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Spacer(modifier = Modifier.width(8.dp))
+                Box {
+                    IconButton(onClick = onFilterClick) {
+                        Icon(
+                            Icons.Default.Tune,
+                            contentDescription = stringResource(R.string.filters),
+                            tint = if (activeFilters) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                    if (activeFilters) {
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primary)
+                                .align(Alignment.TopEnd)
+                                .padding(2.dp)
+                        )
+                    }
+                }
             }
         }
     }
@@ -323,7 +345,7 @@ private fun SearchScreenContent(
                     LazyVerticalStaggeredGrid(
                         columns = StaggeredGridCells.Fixed(calculateResponsiveColumnCount()),
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(16.dp),
+                        contentPadding = PaddingValues(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 80.dp),
                         verticalItemSpacing = 12.dp,
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
