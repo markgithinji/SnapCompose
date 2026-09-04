@@ -261,8 +261,8 @@ fun DummySearchBar(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = stringResource(R.string.search_hint),
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    text = stringResource(R.string.search_unsplash),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
                     style = MaterialTheme.typography.headlineSmall,
                     modifier = Modifier.weight(1f)
                 )

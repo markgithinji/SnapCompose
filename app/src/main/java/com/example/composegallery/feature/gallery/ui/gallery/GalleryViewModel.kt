@@ -7,6 +7,7 @@ import androidx.paging.cachedIn
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import com.example.composegallery.R
 import com.example.composegallery.feature.gallery.data.util.Result
+import com.example.composegallery.feature.gallery.domain.model.DownloadStatus
 import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.domain.model.Topic
 import com.example.composegallery.feature.gallery.domain.repository.FavoriteRepository
@@ -54,8 +55,11 @@ class GalleryViewModel @Inject constructor(
     private val _actionEvent = MutableSharedFlow<String>()
     val actionEvent: SharedFlow<String> = _actionEvent.asSharedFlow()
 
-    private val _isActionLoading = MutableStateFlow(false)
-    val isActionLoading: StateFlow<Boolean> = _isActionLoading
+    private val _isWallpaperLoading = MutableStateFlow(false)
+    val isWallpaperLoading: StateFlow<Boolean> = _isWallpaperLoading
+
+    private val _downloadStatus = MutableStateFlow<DownloadStatus>(DownloadStatus.Idle)
+    val downloadStatus: StateFlow<DownloadStatus> = _downloadStatus.asStateFlow()
 
     private val _topicsState = MutableStateFlow<UiState<List<Topic>>>(UiState.Loading)
     val topicsState: StateFlow<UiState<List<Topic>>> = _topicsState.asStateFlow()
@@ -153,25 +157,26 @@ class GalleryViewModel @Inject constructor(
 
     fun downloadPhoto(photo: Photo) {
         viewModelScope.launch {
-            when (val result = downloadPhotoUseCase(photo)) {
-                is Result.Success -> {
-                    _actionEvent.emit(stringProvider.get(R.string.download_started))
-                }
-                is Result.Error -> _actionEvent.emit(result.message)
+            downloadPhotoUseCase(photo).collect { status ->
+                _downloadStatus.value = status
             }
         }
     }
 
+    fun resetDownloadStatus() {
+        _downloadStatus.value = DownloadStatus.Idle
+    }
+
     fun setWallpaper(photo: Photo) {
         viewModelScope.launch {
-            _isActionLoading.value = true
+            _isWallpaperLoading.value = true
             when (val result = setWallpaperUseCase(photo)) {
                 is Result.Success -> {
                     _actionEvent.emit(stringProvider.get(R.string.wallpaper_set_success))
                 }
                 is Result.Error -> _actionEvent.emit(result.message)
             }
-            _isActionLoading.value = false
+            _isWallpaperLoading.value = false
         }
     }
 

@@ -41,8 +41,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -68,9 +70,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.composegallery.R
+import com.example.composegallery.feature.gallery.domain.model.DownloadStatus
 import com.example.composegallery.feature.gallery.domain.model.Photo
 import com.example.composegallery.feature.gallery.ui.common.InfoMessageScreen
 import com.example.composegallery.feature.gallery.ui.common.PhotoImage
@@ -98,20 +102,34 @@ fun PhotoDetailScreen(
     viewModel: GalleryViewModel = hiltViewModel()
 ) {
     val photoState by viewModel.uiState.collectAsStateWithLifecycle()
-    val isActionLoading by viewModel.isActionLoading.collectAsStateWithLifecycle()
+    val isWallpaperLoading by viewModel.isWallpaperLoading.collectAsStateWithLifecycle()
+    val downloadStatus by viewModel.downloadStatus.collectAsStateWithLifecycle()
     val isFavorite by viewModel.isFavorite.collectAsStateWithLifecycle()
     val retryKey = remember(photoId) { mutableIntStateOf(0) }
     val snackbarHostState = remember { SnackbarHostState() }
 
     var pendingAction by remember { mutableStateOf<PhotoDetailAction?>(null) }
+    val context = LocalContext.current
 
     LaunchedEffect(photoId) {
         viewModel.loadPhoto(photoId)
     }
 
-    LaunchedEffect(Unit) {
-        viewModel.actionEvent.collect { message ->
-            snackbarHostState.showSnackbar(message)
+    LaunchedEffect(downloadStatus) {
+        when (val status = downloadStatus) {
+            is DownloadStatus.Success -> {
+                snackbarHostState.showSnackbar(
+                    message = context.getString(R.string.download_success_path, status.path),
+                    actionLabel = context.getString(R.string.dismiss),
+                    duration = SnackbarDuration.Indefinite
+                )
+                viewModel.resetDownloadStatus()
+            }
+            is DownloadStatus.Error -> {
+                snackbarHostState.showSnackbar(status.message)
+                viewModel.resetDownloadStatus()
+            }
+            else -> {}
         }
     }
 
@@ -175,8 +193,6 @@ fun PhotoDetailScreen(
         )
     }
 
-    val context = LocalContext.current
-
     Scaffold(
         modifier = Modifier.testTag("PhotoDetailScreen"),
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -223,7 +239,8 @@ fun PhotoDetailScreen(
                     sharedTransitionScope = sharedTransitionScope,
                     animatedVisibilityScope = animatedVisibilityScope,
                     retryKey = retryKey.intValue,
-                    isActionLoading = isActionLoading,
+                    isWallpaperLoading = isWallpaperLoading,
+                    downloadStatus = downloadStatus,
                     isFavorite = isFavorite,
                     onRetry = { retryKey.intValue++ },
                     modifier = Modifier.padding(padding),
@@ -269,7 +286,8 @@ private fun PhotoDetailContent(
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedContentScope,
     retryKey: Int,
-    isActionLoading: Boolean,
+    isWallpaperLoading: Boolean,
+    downloadStatus: DownloadStatus,
     isFavorite: Boolean,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
@@ -365,7 +383,8 @@ private fun PhotoDetailContent(
                 Column(Modifier.verticalScroll(rememberScrollState())) {
                     PhotoDetailInfo(
                         photo = photo,
-                        isActionLoading = isActionLoading,
+                        isWallpaperLoading = isWallpaperLoading,
+                        downloadStatus = downloadStatus,
                         isFavorite = isFavorite,
                         onUserClick = onUserClick,
                         onDownloadClick = onDownloadClick,
@@ -385,7 +404,8 @@ private fun PhotoDetailContent(
 @Composable
 private fun PhotoDetailInfo(
     photo: Photo,
-    isActionLoading: Boolean,
+    isWallpaperLoading: Boolean,
+    downloadStatus: DownloadStatus,
     isFavorite: Boolean,
     onUserClick: (Photo) -> Unit,
     onDownloadClick: () -> Unit,
@@ -493,25 +513,46 @@ private fun PhotoDetailInfo(
                 Icon(Icons.Default.Share, contentDescription = stringResource(R.string.share))
             }
 
+            val currentStatus = downloadStatus
+            val isDownloading = currentStatus is DownloadStatus.Progress
+
             FilledTonalIconButton(
                 onClick = onDownloadClick,
                 modifier = Modifier.size(56.dp),
+                enabled = !isDownloading,
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Icon(Icons.Default.Download, contentDescription = stringResource(R.string.download))
+                if (isDownloading && currentStatus is DownloadStatus.Progress) {
+                    val progress = currentStatus.percentage / 100f
+                    Box(contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(
+                            progress = { progress },
+                            modifier = Modifier.size(24.dp),
+                            strokeWidth = 2.dp,
+                            color = LocalContentColor.current
+                        )
+                        Text(
+                            text = "${currentStatus.percentage}",
+                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
+                            color = LocalContentColor.current
+                        )
+                    }
+                } else {
+                    Icon(Icons.Default.Download, contentDescription = stringResource(R.string.download))
+                }
             }
 
             FilledIconButton(
                 onClick = onWallpaperClick,
                 modifier = Modifier.size(56.dp),
-                enabled = !isActionLoading,
+                enabled = !isWallpaperLoading,
                 shape = RoundedCornerShape(16.dp)
             ) {
-                if (isActionLoading) {
+                if (isWallpaperLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
                         strokeWidth = 2.dp,
-                        color = MaterialTheme.colorScheme.onPrimary
+                        color = LocalContentColor.current
                     )
                 } else {
                     Icon(
