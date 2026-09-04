@@ -46,6 +46,7 @@ fun PhotoCard(
     sharedTransitionScope: SharedTransitionScope? = null,
     animatedVisibilityScope: AnimatedVisibilityScope? = null,
     photoId: String? = null,
+    origin: String = "gallery",
     onClick: (() -> Unit)? = null,
 ) {
     Log.d("PhotoCard", "id=$photoId, ratio=$aspectRatio")
@@ -65,7 +66,7 @@ fun PhotoCard(
             shape = shape,
             sharedTransitionScope = sharedTransitionScope,
             animatedVisibilityScope = animatedVisibilityScope,
-            sharedKey = photoId?.let { SharedTransitionKeys.photoImage(it) },
+            sharedKey = photoId?.let { SharedTransitionKeys.photoImage(it, origin) },
             onRetry = onRetry
         )
 

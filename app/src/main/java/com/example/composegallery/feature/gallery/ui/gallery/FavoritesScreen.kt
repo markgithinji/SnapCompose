@@ -70,6 +70,7 @@ fun FavoritesScreen(
                             sharedTransitionScope = sharedTransitionScope,
                             animatedVisibilityScope = animatedVisibilityScope,
                             photoId = photo.id,
+                            origin = "favorites",
                             aspectRatio = photo.width.toFloat() / photo.height,
                             blurHash = photo.blurHash,
                             modifier = Modifier.fillMaxWidth(),

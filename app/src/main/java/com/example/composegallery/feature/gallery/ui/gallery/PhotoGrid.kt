@@ -175,6 +175,7 @@ fun PhotoGrid(
                         sharedTransitionScope = sharedTransitionScope,
                         animatedVisibilityScope = animatedVisibilityScope,
                         photoId = photo.id,
+                        origin = "gallery",
                         aspectRatio = photo.width.toFloat() / photo.height,
                         modifier = Modifier
                             .animateItem(

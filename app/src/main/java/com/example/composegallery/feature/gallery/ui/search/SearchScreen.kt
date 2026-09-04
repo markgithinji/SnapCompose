@@ -346,6 +346,7 @@ private fun SearchScreenContent(
                                     sharedTransitionScope = sharedTransitionScope,
                                     animatedVisibilityScope = animatedVisibilityScope,
                                     photoId = photo.id,
+                                    origin = "search",
                                     aspectRatio = photo.width.toFloat() / photo.height,
                                     blurHash = photo.blurHash,
                                     modifier = Modifier.fillMaxWidth(),

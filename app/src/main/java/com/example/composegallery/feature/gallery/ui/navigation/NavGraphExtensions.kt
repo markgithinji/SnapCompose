@@ -56,7 +56,7 @@ fun NavGraphBuilder.searchRoute(
             sharedTransitionScope = sharedTransitionScope,
             animatedVisibilityScope = this,
             onBack = onBack,
-            onPhotoClick = { photo -> onPhotoClick(photo, "gallery") }
+            onPhotoClick = { photo -> onPhotoClick(photo, "search") }
         )
     }
 }
