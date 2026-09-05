@@ -1,4 +1,4 @@
-package com.example.composegallery.feature.home.data.local
+package com.example.composegallery.core.database.local
 
 import androidx.room.Embedded
 import androidx.room.Entity
@@ -23,12 +23,12 @@ data class FavoritePhotoEntity(
     val authorUnsplashUrl: String?,
     val username: String?,
     val downloadLocationUrl: String?,
-    @Embedded(prefix = "location_") val location: PhotoLocation?,
+    val location: PhotoLocation?,
     val blurHash: String? = null,
     val description: String? = null,
     val createdAt: String? = null,
-    @Embedded(prefix = "exif_") val exif: Exif? = null,
-    val favoritedAt: Long = System.currentTimeMillis()
+    val exif: Exif? = null,
+    val favoritedAt: Long
 )
 
 fun FavoritePhotoEntity.toDomainModel(): Photo {
@@ -75,6 +75,7 @@ fun Photo.toFavoriteEntity(): FavoritePhotoEntity {
         blurHash = blurHash,
         description = description,
         createdAt = createdAt,
-        exif = exif
+        exif = exif,
+        favoritedAt = System.currentTimeMillis()
     )
 }

@@ -1,4 +1,4 @@
-package com.example.composegallery.feature.home.data.local
+package com.example.composegallery.core.database.local
 
 import androidx.room.Embedded
 import androidx.room.Entity
@@ -27,11 +27,11 @@ data class PhotoEntity(
     val username: String?,
     val downloadLocationUrl: String?,
     val pagingOrder: Int = 0,
-    @Embedded(prefix = "location_") val location: PhotoLocation?,
+    val location: PhotoLocation?,
     val blurHash: String? = null,
     val description: String? = null,
     val createdAt: String? = null,
-    @Embedded(prefix = "exif_") val exif: Exif? = null
+    val exif: Exif? = null
 )
 
 fun PhotoEntity.toDomainModel(): Photo {

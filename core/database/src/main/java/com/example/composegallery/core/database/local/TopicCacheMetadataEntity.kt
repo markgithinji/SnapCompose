@@ -1,4 +1,4 @@
-package com.example.composegallery.feature.home.data.local
+package com.example.composegallery.core.database.local
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
