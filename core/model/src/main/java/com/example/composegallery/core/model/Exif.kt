@@ -1,5 +1,8 @@
 package com.example.composegallery.core.model
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Exif(
     val make: String?,
     val model: String?,
