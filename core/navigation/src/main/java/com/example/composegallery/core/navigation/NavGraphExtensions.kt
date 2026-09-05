@@ -1,0 +1,191 @@
+package com.example.composegallery.core.navigation
+
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.navigation.NavController
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.composable
+import androidx.navigation.toRoute
+import com.example.composegallery.core.model.CollectionDetailRoute
+import com.example.composegallery.core.model.FavoritesRoute
+import com.example.composegallery.core.model.FullscreenPhotoRoute
+import com.example.composegallery.core.model.GalleryRoute
+import com.example.composegallery.core.model.Photo
+import com.example.composegallery.core.model.PhotoDetailRoute
+import com.example.composegallery.core.model.SearchRoute
+import com.example.composegallery.core.model.UserProfileRoute
+import com.example.composegallery.feature.photodetail.ui.PhotoViewerScreen
+import com.example.composegallery.feature.home.ui.GalleryScreen
+import com.example.composegallery.feature.home.ui.FavoritesScreen
+import com.example.composegallery.feature.photodetail.ui.PhotoDetailScreen
+import com.example.composegallery.feature.profile.ui.CollectionDetailScreen
+import com.example.composegallery.feature.profile.ui.UserProfileScreen
+import com.example.composegallery.feature.search.ui.SearchScreen
+
+@OptIn(ExperimentalSharedTransitionApi::class)
+fun NavGraphBuilder.galleryRoute(
+    sharedTransitionScope: SharedTransitionScope,
+    onSearchClick: () -> Unit,
+    onPhotoClick: (Photo, String) -> Unit
+) {
+    composable<GalleryRoute>(
+        enterTransition = { fadeIn(animationSpec = tween(400)) },
+        exitTransition = { fadeOut(animationSpec = tween(400)) },
+        popEnterTransition = { fadeIn(animationSpec = tween(400)) },
+        popExitTransition = { fadeOut(animationSpec = tween(400)) }
+    ) {
+        GalleryScreen(
+            sharedTransitionScope = sharedTransitionScope,
+            animatedVisibilityScope = this,
+            onSearchNavigate = onSearchClick,
+            onPhotoClick = { photo -> onPhotoClick(photo, "gallery") }
+        )
+    }
+}
+
+@OptIn(ExperimentalSharedTransitionApi::class)
+fun NavGraphBuilder.favoritesRoute(
+    sharedTransitionScope: SharedTransitionScope,
+    onPhotoClick: (Photo) -> Unit
+) {
+    composable<FavoritesRoute>(
+        enterTransition = { fadeIn(animationSpec = tween(400)) },
+        exitTransition = { fadeOut(animationSpec = tween(400)) },
+        popEnterTransition = { fadeIn(animationSpec = tween(400)) },
+        popExitTransition = { fadeOut(animationSpec = tween(400)) }
+    ) {
+        FavoritesScreen(
+            sharedTransitionScope = sharedTransitionScope,
+            animatedVisibilityScope = this,
+            onPhotoClick = onPhotoClick
+        )
+    }
+}
+
+@OptIn(ExperimentalSharedTransitionApi::class)
+fun NavGraphBuilder.searchRoute(
+    sharedTransitionScope: SharedTransitionScope,
+    onBack: () -> Unit,
+    onPhotoClick: (Photo, String) -> Unit
+) {
+    composable<SearchRoute> {
+        SearchScreen(
+            sharedTransitionScope = sharedTransitionScope,
+            animatedVisibilityScope = this,
+            onBack = onBack,
+            onPhotoClick = { photo -> onPhotoClick(photo, "search") }
+        )
+    }
+}
+
+@OptIn(ExperimentalSharedTransitionApi::class)
+fun NavGraphBuilder.photoDetailRoute(
+    sharedTransitionScope: SharedTransitionScope,
+    navController: NavController
+) {
+    composable<PhotoDetailRoute> { backStackEntry ->
+        val args = backStackEntry.toRoute<PhotoDetailRoute>()
+        PhotoDetailScreen(
+            photoId = args.photoId,
+            initialWidth = args.width,
+            initialHeight = args.height,
+            initialThumbUrl = args.thumbUrl,
+            initialBlurHash = args.blurHash,
+            origin = args.origin,
+            sharedTransitionScope = sharedTransitionScope,
+            animatedVisibilityScope = this,
+            onBack = { navController.popBackStack() },
+            onExpandClick = { photoId ->
+                navController.navigate(FullscreenPhotoRoute(photoId))
+            },
+            onUserClick = { user ->
+                navController.navigate(
+                    UserProfileRoute(
+                        username = user.username ?: user.authorName,
+                        name = user.authorName,
+                        profileImageUrl = user.authorProfileImageHighResUrl
+                    )
+                )
+            }
+        )
+    }
+}
+
+fun NavGraphBuilder.fullscreenPhotoRoute() {
+    composable<FullscreenPhotoRoute> { backStackEntry ->
+        val args = backStackEntry.toRoute<FullscreenPhotoRoute>()
+        PhotoViewerScreen(photoId = args.photoId)
+    }
+}
+
+@OptIn(ExperimentalSharedTransitionApi::class)
+fun NavGraphBuilder.userProfileRoute(
+    sharedTransitionScope: SharedTransitionScope,
+    navController: NavController
+) {
+    composable<UserProfileRoute> { backStackEntry ->
+        val args = backStackEntry.toRoute<UserProfileRoute>()
+        UserProfileScreen(
+            username = args.username,
+            initialName = args.name,
+            initialProfileImageUrl = args.profileImageUrl,
+            sharedTransitionScope = sharedTransitionScope,
+            animatedVisibilityScope = this,
+            onBack = { navController.popBackStack() },
+            onPhotoClick = { photo ->
+                navController.navigate(
+                    PhotoDetailRoute(
+                        photoId = photo.id,
+                        width = photo.width,
+                        height = photo.height,
+                        thumbUrl = photo.smallUrl,
+                        blurHash = photo.blurHash,
+                        origin = "profile_${args.username}"
+                    )
+                )
+            },
+            onCollectionClick = { collection ->
+                navController.navigate(
+                    CollectionDetailRoute(
+                        collectionId = collection.id,
+                        collectionTitle = collection.title,
+                        totalPhotos = collection.totalPhotos
+                    )
+                )
+            }
+        )
+    }
+}
+
+@OptIn(ExperimentalSharedTransitionApi::class)
+fun NavGraphBuilder.collectionDetailRoute(
+    sharedTransitionScope: SharedTransitionScope,
+    navController: NavController
+) {
+    composable<CollectionDetailRoute> { backStackEntry ->
+        val args = backStackEntry.toRoute<CollectionDetailRoute>()
+        CollectionDetailScreen(
+            collectionId = args.collectionId,
+            collectionTitle = args.collectionTitle,
+            totalPhotos = args.totalPhotos,
+            sharedTransitionScope = sharedTransitionScope,
+            animatedVisibilityScope = this,
+            onBack = { navController.popBackStack() },
+            onPhotoClick = { photo ->
+                navController.navigate(
+                    PhotoDetailRoute(
+                        photoId = photo.id,
+                        width = photo.width,
+                        height = photo.height,
+                        thumbUrl = photo.smallUrl,
+                        blurHash = photo.blurHash,
+                        origin = "collection_${args.collectionId}"
+                    )
+                )
+            }
+        )
+    }
+}
