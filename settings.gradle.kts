@@ -25,3 +25,16 @@ dependencyResolutionManagement {
 rootProject.name = "ComposeGallery"
 include(":app")
 include(":baselineprofile")
+
+// Core Modules
+include(":core:model")
+include(":core:data")
+include(":core:ui")
+include(":core:database")
+include(":core:navigation")
+
+// Feature Modules
+include(":feature:home")
+include(":feature:search")
+include(":feature:profile")
+include(":feature:photodetail")
