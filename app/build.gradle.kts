@@ -88,6 +88,15 @@ spotless {
 }
 
 dependencies {
+    implementation(project(":core:model"))
+    implementation(project(":core:data"))
+    implementation(project(":core:database"))
+    implementation(project(":core:ui"))
+    implementation(project(":core:navigation"))
+    implementation(project(":feature:home"))
+    implementation(project(":feature:search"))
+    implementation(project(":feature:profile"))
+    implementation(project(":feature:photodetail"))
 
     // Kotlin & Core Libraries
     implementation(libs.androidx.core.ktx)
@@ -139,7 +148,6 @@ dependencies {
 // Room (Database)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.paging)
-    ksp(libs.androidx.room.compiler)
 
 // ConstraintLayout
     implementation(libs.androidx.constraintlayout.compose)
