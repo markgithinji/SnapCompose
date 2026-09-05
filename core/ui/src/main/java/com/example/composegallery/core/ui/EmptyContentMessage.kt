@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.example.composegallery.R
+import com.example.composegallery.core.ui.R
 
 @Composable
 fun EmptyContentMessage(

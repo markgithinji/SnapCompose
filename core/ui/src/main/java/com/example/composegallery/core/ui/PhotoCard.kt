@@ -29,8 +29,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.example.composegallery.R
-import com.example.composegallery.ui.theme.ComposeGalleryTheme
+import com.example.composegallery.core.ui.R
+import com.example.composegallery.core.ui.theme.ComposeGalleryTheme
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable

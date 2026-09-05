@@ -17,7 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.example.composegallery.R
+import com.example.composegallery.core.ui.R
 
 @Composable
 fun RetryButton(
