@@ -1,4 +1,4 @@
-package com.example.composegallery.core.data.paging.home
+package com.example.composegallery.feature.home.data
 
 import com.example.composegallery.core.data.model.toDomainModel
 import com.example.composegallery.core.data.paging.BaseUnsplashPagingSource

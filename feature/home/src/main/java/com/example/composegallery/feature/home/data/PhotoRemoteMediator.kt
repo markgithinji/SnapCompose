@@ -1,4 +1,4 @@
-package com.example.composegallery.core.data.paging.home
+package com.example.composegallery.feature.home.data
 
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
