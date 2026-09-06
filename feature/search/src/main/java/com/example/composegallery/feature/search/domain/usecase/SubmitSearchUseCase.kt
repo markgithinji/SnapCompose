@@ -1,7 +1,7 @@
 package com.example.composegallery.feature.search.domain.usecase
 
 import com.example.composegallery.core.model.Result
-import com.example.composegallery.core.repository.SearchRepository
+import com.example.composegallery.feature.search.domain.repository.SearchRepository
 import javax.inject.Inject
 
 /**

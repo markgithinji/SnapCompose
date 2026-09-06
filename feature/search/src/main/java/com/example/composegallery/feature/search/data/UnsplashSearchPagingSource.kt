@@ -1,0 +1,27 @@
+package com.example.composegallery.feature.search.data
+
+import com.example.composegallery.core.data.model.toDomainModel
+import com.example.composegallery.core.data.paging.BaseUnsplashPagingSource
+import com.example.composegallery.core.model.Photo
+import com.example.composegallery.core.data.remote.UnsplashApi
+import com.example.composegallery.core.util.StringProvider
+import com.example.composegallery.core.model.SearchFilters
+
+class UnsplashSearchPagingSource(
+    private val api: UnsplashApi,
+    private val filters: SearchFilters,
+    stringProvider: StringProvider
+) : BaseUnsplashPagingSource<Photo>(
+    stringProvider = stringProvider,
+    api = { page, perPage ->
+        if (filters.query.isBlank()) emptyList()
+        else api.searchPhotos(
+            query = filters.query,
+            page = page,
+            perPage = perPage,
+            orientation = filters.orientation?.value,
+            color = filters.color?.value,
+            orderBy = filters.orderBy.value
+        ).results.mapNotNull { it.toDomainModel() }
+    }
+)

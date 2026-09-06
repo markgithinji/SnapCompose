@@ -11,7 +11,7 @@ import com.example.composegallery.core.model.OrderBy
 import com.example.composegallery.core.model.Orientation
 import com.example.composegallery.core.model.RecentSearch
 import com.example.composegallery.core.model.SearchFilters
-import com.example.composegallery.core.repository.SearchRepository
+import com.example.composegallery.feature.search.domain.repository.SearchRepository
 import com.example.composegallery.feature.search.domain.usecase.ObserveSearchResultsUseCase
 import com.example.composegallery.feature.search.domain.usecase.SubmitSearchUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
