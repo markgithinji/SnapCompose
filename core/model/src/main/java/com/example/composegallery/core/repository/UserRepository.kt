@@ -3,7 +3,7 @@ package com.example.composegallery.core.repository
 import androidx.paging.PagingData
 import com.example.composegallery.core.model.Photo
 import com.example.composegallery.core.model.PhotoCollection
-import com.example.composegallery.core.model.Result
+import com.example.composegallery.core.common.Result
 import com.example.composegallery.core.model.UnsplashUser
 import com.example.composegallery.core.model.UserStatistics
 import kotlinx.coroutines.flow.Flow

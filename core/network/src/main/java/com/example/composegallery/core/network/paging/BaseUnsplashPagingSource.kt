@@ -2,9 +2,9 @@ package com.example.composegallery.core.network.paging
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.example.composegallery.core.network.AppException
-import com.example.composegallery.core.util.StringProvider
-import com.example.composegallery.core.ui.R
+import com.example.composegallery.core.common.AppException
+import com.example.composegallery.core.common.StringProvider
+import com.example.composegallery.core.common.R
 
 abstract class BaseUnsplashPagingSource<T : Any>(
     private val stringProvider: StringProvider,

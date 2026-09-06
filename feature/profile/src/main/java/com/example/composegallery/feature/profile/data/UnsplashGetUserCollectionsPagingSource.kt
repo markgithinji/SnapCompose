@@ -3,7 +3,7 @@ package com.example.composegallery.feature.profile.data
 import com.example.composegallery.core.network.model.toDomainModel
 import com.example.composegallery.core.network.paging.BaseUnsplashPagingSource
 import com.example.composegallery.core.network.remote.UnsplashApi
-import com.example.composegallery.core.util.StringProvider
+import com.example.composegallery.core.common.StringProvider
 import com.example.composegallery.core.model.PhotoCollection
 
 class UnsplashGetUserCollectionsPagingSource(

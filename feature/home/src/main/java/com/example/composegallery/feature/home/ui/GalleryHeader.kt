@@ -41,7 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.composegallery.core.ui.R
 import com.example.composegallery.core.ui.SharedTransitionKeys
-import com.example.composegallery.core.util.UiState
+import com.example.composegallery.core.common.UiState
 import com.example.composegallery.core.model.Topic
 import com.example.composegallery.core.ui.theme.searchBar
 import com.valentinilk.shimmer.shimmer

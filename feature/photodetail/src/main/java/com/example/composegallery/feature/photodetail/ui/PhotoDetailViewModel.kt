@@ -2,11 +2,11 @@ package com.example.composegallery.feature.photodetail.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.composegallery.core.model.Result
+import com.example.composegallery.core.common.Result
 import com.example.composegallery.core.model.DownloadStatus
 import com.example.composegallery.core.model.Photo
-import com.example.composegallery.core.util.UiState
-import com.example.composegallery.core.util.StringProvider
+import com.example.composegallery.core.common.UiState
+import com.example.composegallery.core.common.StringProvider
 import com.example.composegallery.core.repository.FavoriteRepository
 import com.example.composegallery.core.repository.GalleryRepository
 import com.example.composegallery.feature.photodetail.domain.usecase.DownloadPhotoUseCase

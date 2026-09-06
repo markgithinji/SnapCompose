@@ -5,13 +5,13 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
-import com.example.composegallery.core.ui.R
-import com.example.composegallery.core.model.Result
-import com.example.composegallery.core.network.safeApiCall
+import com.example.composegallery.core.common.R
+import com.example.composegallery.core.common.Result
+import com.example.composegallery.core.common.safeApiCall
 import com.example.composegallery.core.network.model.toDomainModel
 import com.example.composegallery.core.network.paging.PagingDefaults
 import com.example.composegallery.core.network.remote.UnsplashApi
-import com.example.composegallery.core.util.StringProvider
+import com.example.composegallery.core.common.StringProvider
 import com.example.composegallery.core.database.local.AppDatabase
 import com.example.composegallery.core.database.local.home.entity.toDomainModel
 import com.example.composegallery.core.model.Photo

@@ -43,7 +43,7 @@ import com.example.composegallery.core.ui.R
 import com.example.composegallery.core.model.Photo
 import com.example.composegallery.core.ui.InfoMessageScreen
 import com.example.composegallery.core.ui.ProgressIndicator
-import com.example.composegallery.core.util.UiState
+import com.example.composegallery.core.common.UiState
 import com.example.composegallery.core.model.PhotoCollection
 import com.example.composegallery.core.model.UserStatistics
 

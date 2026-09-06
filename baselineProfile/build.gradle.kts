@@ -38,6 +38,7 @@ baselineProfile {
 }
 
 dependencies {
+    implementation(project(":core:common"))
     implementation(libs.androidx.junit)
     implementation(libs.androidx.espresso.core)
     implementation(libs.androidx.uiautomator)

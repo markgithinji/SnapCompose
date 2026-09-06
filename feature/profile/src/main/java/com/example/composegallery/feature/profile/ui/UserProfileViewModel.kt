@@ -5,10 +5,10 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
-import com.example.composegallery.core.model.Result
+import com.example.composegallery.core.common.Result
 import com.example.composegallery.core.model.Photo
 import com.example.composegallery.core.model.UnsplashUser
-import com.example.composegallery.core.util.UiState
+import com.example.composegallery.core.common.UiState
 import com.example.composegallery.core.model.PhotoCollection
 import com.example.composegallery.core.model.UserStatistics
 import com.example.composegallery.core.repository.UserRepository

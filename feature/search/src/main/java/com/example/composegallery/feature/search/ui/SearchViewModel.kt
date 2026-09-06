@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import com.example.composegallery.core.model.Result
+import com.example.composegallery.core.common.Result
 import com.example.composegallery.core.model.Photo
 import com.example.composegallery.core.model.ColorFilter
 import com.example.composegallery.core.model.OrderBy

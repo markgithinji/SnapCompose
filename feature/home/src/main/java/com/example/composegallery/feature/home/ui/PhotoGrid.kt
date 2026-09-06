@@ -42,7 +42,7 @@ import com.example.composegallery.core.ui.LoadMoreListError
 import com.example.composegallery.core.ui.PhotoCard
 import com.example.composegallery.core.ui.RetryButton
 import com.example.composegallery.core.ui.calculateResponsiveColumnCount
-import com.example.composegallery.core.util.UiState
+import com.example.composegallery.core.common.UiState
 import com.example.composegallery.core.model.Topic
 import com.valentinilk.shimmer.shimmer
 

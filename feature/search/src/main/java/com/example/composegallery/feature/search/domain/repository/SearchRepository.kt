@@ -3,7 +3,7 @@ package com.example.composegallery.feature.search.domain.repository
 import androidx.paging.PagingData
 import com.example.composegallery.core.model.Photo
 import com.example.composegallery.core.model.RecentSearch
-import com.example.composegallery.core.model.Result
+import com.example.composegallery.core.common.Result
 import com.example.composegallery.core.model.SearchFilters
 import kotlinx.coroutines.flow.Flow
 

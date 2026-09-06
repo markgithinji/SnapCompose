@@ -30,7 +30,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.composegallery.core.ui.R
 import com.example.composegallery.core.model.Photo
 import com.example.composegallery.core.ui.ProgressIndicator
-import com.example.composegallery.core.util.UiState
+import com.example.composegallery.core.common.UiState
 import com.example.composegallery.core.model.Topic
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)

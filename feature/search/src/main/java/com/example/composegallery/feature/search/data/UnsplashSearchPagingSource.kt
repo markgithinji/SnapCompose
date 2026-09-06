@@ -4,7 +4,7 @@ import com.example.composegallery.core.network.model.toDomainModel
 import com.example.composegallery.core.network.paging.BaseUnsplashPagingSource
 import com.example.composegallery.core.model.Photo
 import com.example.composegallery.core.network.remote.UnsplashApi
-import com.example.composegallery.core.util.StringProvider
+import com.example.composegallery.core.common.StringProvider
 import com.example.composegallery.core.model.SearchFilters
 
 class UnsplashSearchPagingSource(

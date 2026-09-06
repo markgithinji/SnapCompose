@@ -31,7 +31,7 @@ import coil.compose.SubcomposeAsyncImage
 import com.example.composegallery.core.ui.R
 import com.example.composegallery.core.ui.InfoMessageScreen
 import com.example.composegallery.core.ui.ProgressIndicator
-import com.example.composegallery.core.util.UiState
+import com.example.composegallery.core.common.UiState
 
 @Composable
 fun PhotoViewerScreen(

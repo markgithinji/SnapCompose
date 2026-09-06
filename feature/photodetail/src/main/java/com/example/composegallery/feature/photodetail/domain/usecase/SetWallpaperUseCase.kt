@@ -1,6 +1,6 @@
 package com.example.composegallery.feature.photodetail.domain.usecase
 
-import com.example.composegallery.core.model.Result
+import com.example.composegallery.core.common.Result
 import com.example.composegallery.core.model.Photo
 import com.example.composegallery.core.repository.GalleryRepository
 import com.example.composegallery.core.repository.PhotoActionService

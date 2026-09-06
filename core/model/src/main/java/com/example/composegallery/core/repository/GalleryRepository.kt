@@ -2,7 +2,7 @@ package com.example.composegallery.core.repository
 
 import androidx.paging.PagingData
 import com.example.composegallery.core.model.Photo
-import com.example.composegallery.core.model.Result
+import com.example.composegallery.core.common.Result
 import com.example.composegallery.core.model.Topic
 import kotlinx.coroutines.flow.Flow
 

@@ -6,11 +6,11 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import com.example.composegallery.core.ui.R
-import com.example.composegallery.core.model.Result
+import com.example.composegallery.core.common.Result
 import com.example.composegallery.core.model.DownloadStatus
 import com.example.composegallery.core.model.Photo
-import com.example.composegallery.core.util.UiState
-import com.example.composegallery.core.util.StringProvider
+import com.example.composegallery.core.common.UiState
+import com.example.composegallery.core.common.StringProvider
 import com.example.composegallery.core.model.Topic
 import com.example.composegallery.core.repository.FavoriteRepository
 import com.example.composegallery.core.repository.GalleryRepository
@@ -114,7 +114,7 @@ class GalleryViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 Timber.tag("GalleryViewModel").e(e, "fetchTopics: Unexpected exception")
-                _topicsState.value = UiState.Error(stringProvider.get(R.string.error_unexpected))
+                _topicsState.value = UiState.Error(stringProvider.get(com.example.composegallery.core.common.R.string.error_unexpected))
             }
         }
     }

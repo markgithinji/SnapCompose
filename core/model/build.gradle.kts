@@ -18,6 +18,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:common"))
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.paging.common)
 }

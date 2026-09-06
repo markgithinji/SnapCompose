@@ -21,7 +21,7 @@ import com.example.composegallery.core.model.Photo
 import com.example.composegallery.core.ui.EmptyContentMessage
 import com.example.composegallery.core.ui.PhotoCard
 import com.example.composegallery.core.ui.calculateResponsiveColumnCount
-import com.example.composegallery.core.util.UiState
+import com.example.composegallery.core.common.UiState
 import com.valentinilk.shimmer.shimmer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape

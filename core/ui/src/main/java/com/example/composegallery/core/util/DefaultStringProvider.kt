@@ -1,6 +1,7 @@
 package com.example.composegallery.core.util
 
 import android.content.Context
+import com.example.composegallery.core.common.StringProvider
 import androidx.annotation.StringRes
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject

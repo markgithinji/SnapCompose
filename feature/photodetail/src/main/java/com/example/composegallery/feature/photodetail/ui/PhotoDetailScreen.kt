@@ -82,7 +82,7 @@ import com.example.composegallery.core.ui.PhotoImage
 import com.example.composegallery.core.ui.ProgressIndicator
 import com.example.composegallery.core.ui.SharedTransitionKeys
 import com.example.composegallery.core.ui.UserProfileImage
-import com.example.composegallery.core.util.UiState
+import com.example.composegallery.core.common.UiState
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)

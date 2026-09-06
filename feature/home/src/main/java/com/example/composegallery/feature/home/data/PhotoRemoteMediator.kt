@@ -5,11 +5,11 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
-import com.example.composegallery.core.model.Result
+import com.example.composegallery.core.common.Result
 import com.example.composegallery.core.network.model.toDomainModel
-import com.example.composegallery.core.network.safeApiCall
+import com.example.composegallery.core.common.safeApiCall
 import com.example.composegallery.core.network.remote.UnsplashApi
-import com.example.composegallery.core.util.StringProvider
+import com.example.composegallery.core.common.StringProvider
 import com.example.composegallery.core.database.local.AppDatabase
 import com.example.composegallery.core.database.local.home.entity.PhotoEntity
 import com.example.composegallery.core.database.local.home.entity.PhotoRemoteKeyEntity
