@@ -1,0 +1,14 @@
+R_DEF: Internal format may change without notice
+local
+string error_bad_request
+string error_database
+string error_forbidden
+string error_http_generic
+string error_invalid_data_received
+string error_no_internet_connection
+string error_not_found
+string error_server_error
+string error_service_unavailable
+string error_unauthorized
+string error_unexpected
+string error_unexpected_data_format

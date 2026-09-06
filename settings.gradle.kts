@@ -31,6 +31,7 @@ include(":core:model")
 include(":core:network")
 include(":core:ui")
 include(":core:database")
+include(":core:common")
 include(":core:navigation")
 
 // Feature Modules

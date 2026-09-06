@@ -1,0 +1,8 @@
+com.example.composegallery.core.common-pngs-0 C:\Users\Mark\AndroidStudioProjects\PublicRepo\ComposeGallery\core\common\build\generated\res\pngs\debug
+com.example.composegallery.core.common-updated_navigation_xml-1 C:\Users\Mark\AndroidStudioProjects\PublicRepo\ComposeGallery\core\common\build\generated\updated_navigation_xml\debug
+com.example.composegallery.core.common-mergeDebugResources-2 C:\Users\Mark\AndroidStudioProjects\PublicRepo\ComposeGallery\core\common\build\intermediates\incremental\debug\mergeDebugResources\merged.dir
+com.example.composegallery.core.common-mergeDebugResources-3 C:\Users\Mark\AndroidStudioProjects\PublicRepo\ComposeGallery\core\common\build\intermediates\incremental\debug\mergeDebugResources\stripped.dir
+com.example.composegallery.core.common-debug-4 C:\Users\Mark\AndroidStudioProjects\PublicRepo\ComposeGallery\core\common\build\intermediates\merged_res\debug\mergeDebugResources
+com.example.composegallery.core.common-debug-5 C:\Users\Mark\AndroidStudioProjects\PublicRepo\ComposeGallery\core\common\build\intermediates\packaged_res\debug\packageDebugResources
+com.example.composegallery.core.common-debug-6 C:\Users\Mark\AndroidStudioProjects\PublicRepo\ComposeGallery\core\common\src\debug\res
+com.example.composegallery.core.common-main-7 C:\Users\Mark\AndroidStudioProjects\PublicRepo\ComposeGallery\core\common\src\main\res
