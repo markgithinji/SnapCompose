@@ -1,4 +1,4 @@
-package com.example.composegallery.core.network.di
+package com.example.composegallery.core.database.di
 
 import android.content.Context
 import androidx.room.Room

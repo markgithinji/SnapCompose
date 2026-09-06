@@ -32,6 +32,10 @@ dependencies {
     // Serialization for TypeConverters
     implementation(libs.kotlinx.serialization.json)
 
+    // Hilt
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.android.compiler)
+
     androidTestImplementation(libs.truth)
     androidTestImplementation(libs.mockito.android)
     androidTestImplementation(libs.mockito.kotlin)
