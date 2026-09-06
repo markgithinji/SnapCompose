@@ -9,9 +9,9 @@ import com.example.composegallery.core.database.local.PhotoEntity
 import com.example.composegallery.core.database.local.PhotoRemoteKeyEntity
 import com.example.composegallery.core.database.local.toDomainModel
 import com.example.composegallery.core.database.local.toEntity
-import com.example.composegallery.core.data.paging.home.PhotoRemoteMediator
-import com.example.composegallery.core.data.remote.UnsplashApi
-import com.example.composegallery.core.data.model.*
+import com.example.composegallery.core.network.paging.home.PhotoRemoteMediator
+import com.example.composegallery.core.network.remote.UnsplashApi
+import com.example.composegallery.core.network.model.*
 import com.example.composegallery.core.util.StringProvider
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest

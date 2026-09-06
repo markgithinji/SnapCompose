@@ -1,19 +1,19 @@
 package com.example.composegallery.feature.home.data.repository
 
 import com.example.composegallery.core.model.Result
-import com.example.composegallery.core.data.model.ExifDto
-import com.example.composegallery.core.data.model.ProfileImageDto
-import com.example.composegallery.core.data.model.UnsplashPhotoDto
-import com.example.composegallery.core.data.model.UrlsDto
-import com.example.composegallery.core.data.model.UserDto
+import com.example.composegallery.core.network.model.ExifDto
+import com.example.composegallery.core.network.model.ProfileImageDto
+import com.example.composegallery.core.network.model.UnsplashPhotoDto
+import com.example.composegallery.core.network.model.UrlsDto
+import com.example.composegallery.core.network.model.UserDto
 import com.example.composegallery.core.model.Photo
 import com.example.composegallery.core.database.local.AppDatabase
 import com.example.composegallery.core.database.local.PhotoDao
 import com.example.composegallery.core.database.local.PhotoEntity
 import com.example.composegallery.core.database.local.toDomainModel
-import com.example.composegallery.core.data.remote.UnsplashApi
+import com.example.composegallery.core.network.remote.UnsplashApi
 import com.example.composegallery.core.util.StringProvider
-import com.example.composegallery.core.data.repository.home.DefaultGalleryRepository
+import com.example.composegallery.core.network.repository.home.DefaultGalleryRepository
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Before

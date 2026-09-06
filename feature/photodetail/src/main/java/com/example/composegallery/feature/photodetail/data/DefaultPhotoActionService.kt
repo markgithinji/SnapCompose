@@ -11,7 +11,7 @@ import coil.ImageLoader
 import coil.request.ImageRequest
 import coil.request.SuccessResult
 import com.example.composegallery.core.ui.R
-import com.example.composegallery.core.data.AppException
+import com.example.composegallery.core.network.AppException
 import com.example.composegallery.core.model.Result
 import com.example.composegallery.core.model.DownloadStatus
 import com.example.composegallery.core.repository.PhotoActionService

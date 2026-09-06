@@ -6,9 +6,9 @@ import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
 import com.example.composegallery.core.model.Result
-import com.example.composegallery.core.data.model.toDomainModel
-import com.example.composegallery.core.data.safeApiCall
-import com.example.composegallery.core.data.remote.UnsplashApi
+import com.example.composegallery.core.network.model.toDomainModel
+import com.example.composegallery.core.network.safeApiCall
+import com.example.composegallery.core.network.remote.UnsplashApi
 import com.example.composegallery.core.util.StringProvider
 import com.example.composegallery.core.database.local.AppDatabase
 import com.example.composegallery.core.database.local.PhotoEntity

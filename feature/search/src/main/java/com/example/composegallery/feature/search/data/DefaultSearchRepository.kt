@@ -4,10 +4,10 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.example.composegallery.core.model.Result
-import com.example.composegallery.core.data.paging.PagingDefaults
-import com.example.composegallery.core.data.safeDbCall
+import com.example.composegallery.core.network.paging.PagingDefaults
+import com.example.composegallery.core.network.safeDbCall
 import com.example.composegallery.core.model.Photo
-import com.example.composegallery.core.data.remote.UnsplashApi
+import com.example.composegallery.core.network.remote.UnsplashApi
 import com.example.composegallery.core.util.StringProvider
 import com.example.composegallery.core.database.local.RecentSearchDao
 import com.example.composegallery.core.model.RecentSearch

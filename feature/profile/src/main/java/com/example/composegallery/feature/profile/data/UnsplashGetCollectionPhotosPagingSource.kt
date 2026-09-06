@@ -1,9 +1,9 @@
 package com.example.composegallery.feature.profile.data
 
-import com.example.composegallery.core.data.model.toDomainModel
-import com.example.composegallery.core.data.paging.BaseUnsplashPagingSource
+import com.example.composegallery.core.network.model.toDomainModel
+import com.example.composegallery.core.network.paging.BaseUnsplashPagingSource
 import com.example.composegallery.core.model.Photo
-import com.example.composegallery.core.data.remote.UnsplashApi
+import com.example.composegallery.core.network.remote.UnsplashApi
 import com.example.composegallery.core.util.StringProvider
 
 class UnsplashGetCollectionPhotosPagingSource(
