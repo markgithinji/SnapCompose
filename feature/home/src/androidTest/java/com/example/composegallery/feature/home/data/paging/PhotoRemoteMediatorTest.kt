@@ -5,8 +5,8 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.composegallery.core.database.local.AppDatabase
-import com.example.composegallery.core.database.local.PhotoEntity
-import com.example.composegallery.core.database.local.PhotoRemoteKeyEntity
+import com.example.composegallery.core.database.local.home.entity.PhotoEntity
+import com.example.composegallery.core.database.local.home.entity.PhotoRemoteKeyEntity
 import com.example.composegallery.core.database.local.toDomainModel
 import com.example.composegallery.core.database.local.toEntity
 import com.example.composegallery.core.network.paging.home.PhotoRemoteMediator

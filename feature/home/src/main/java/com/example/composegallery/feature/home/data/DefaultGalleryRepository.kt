@@ -13,7 +13,7 @@ import com.example.composegallery.core.network.paging.PagingDefaults
 import com.example.composegallery.core.network.remote.UnsplashApi
 import com.example.composegallery.core.util.StringProvider
 import com.example.composegallery.core.database.local.AppDatabase
-import com.example.composegallery.core.database.local.toDomainModel
+import com.example.composegallery.core.database.local.home.entity.toDomainModel
 import com.example.composegallery.core.model.Photo
 import com.example.composegallery.core.model.Topic
 import com.example.composegallery.core.repository.GalleryRepository

@@ -3,8 +3,8 @@ package com.example.composegallery.feature.search.data.repository
 import com.example.composegallery.core.model.Result
 import com.example.composegallery.core.network.remote.UnsplashApi
 import com.example.composegallery.core.util.StringProvider
-import com.example.composegallery.core.database.local.RecentSearchDao
-import com.example.composegallery.core.database.local.RecentSearchEntity
+import com.example.composegallery.core.database.local.search.dao.RecentSearchDao
+import com.example.composegallery.core.database.local.search.entity.RecentSearchEntity
 import com.example.composegallery.core.model.RecentSearch
 import com.example.composegallery.core.network.repository.search.DefaultSearchRepository
 import com.google.common.truth.Truth.assertThat

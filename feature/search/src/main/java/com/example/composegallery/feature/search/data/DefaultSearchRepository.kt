@@ -9,12 +9,12 @@ import com.example.composegallery.core.network.safeDbCall
 import com.example.composegallery.core.model.Photo
 import com.example.composegallery.core.network.remote.UnsplashApi
 import com.example.composegallery.core.util.StringProvider
-import com.example.composegallery.core.database.local.RecentSearchDao
+import com.example.composegallery.core.database.local.search.dao.RecentSearchDao
 import com.example.composegallery.core.model.RecentSearch
 import com.example.composegallery.core.model.SearchFilters
 import com.example.composegallery.feature.search.domain.repository.SearchRepository
-import com.example.composegallery.core.database.local.toDomainModel
-import com.example.composegallery.core.database.local.toEntity
+import com.example.composegallery.core.database.local.search.entity.toDomainModel
+import com.example.composegallery.core.database.local.search.entity.toEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject

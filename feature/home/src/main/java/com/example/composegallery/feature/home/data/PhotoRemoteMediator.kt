@@ -11,10 +11,10 @@ import com.example.composegallery.core.network.safeApiCall
 import com.example.composegallery.core.network.remote.UnsplashApi
 import com.example.composegallery.core.util.StringProvider
 import com.example.composegallery.core.database.local.AppDatabase
-import com.example.composegallery.core.database.local.PhotoEntity
-import com.example.composegallery.core.database.local.PhotoRemoteKeyEntity
-import com.example.composegallery.core.database.local.TopicCacheMetadataEntity
-import com.example.composegallery.core.database.local.toEntity
+import com.example.composegallery.core.database.local.home.entity.PhotoEntity
+import com.example.composegallery.core.database.local.home.entity.PhotoRemoteKeyEntity
+import com.example.composegallery.core.database.local.home.entity.TopicCacheMetadataEntity
+import com.example.composegallery.core.database.local.home.entity.toEntity
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 

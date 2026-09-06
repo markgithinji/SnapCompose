@@ -3,11 +3,11 @@ package com.example.composegallery.core.network.di
 import android.content.Context
 import androidx.room.Room
 import com.example.composegallery.core.database.local.AppDatabase
-import com.example.composegallery.core.database.local.FavoritePhotoDao
-import com.example.composegallery.core.database.local.PhotoDao
-import com.example.composegallery.core.database.local.PhotoRemoteKeyDao
-import com.example.composegallery.core.database.local.RecentSearchDao
-import com.example.composegallery.core.database.local.TopicCacheMetadataDao
+import com.example.composegallery.core.database.local.home.dao.FavoritePhotoDao
+import com.example.composegallery.core.database.local.home.dao.PhotoDao
+import com.example.composegallery.core.database.local.home.dao.PhotoRemoteKeyDao
+import com.example.composegallery.core.database.local.home.dao.TopicCacheMetadataDao
+import com.example.composegallery.core.database.local.search.dao.RecentSearchDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

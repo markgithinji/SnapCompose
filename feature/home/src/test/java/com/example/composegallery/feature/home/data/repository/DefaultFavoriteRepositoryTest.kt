@@ -1,8 +1,8 @@
 package com.example.composegallery.feature.home.data.repository
 
 import com.example.composegallery.core.model.Photo
-import com.example.composegallery.core.database.local.FavoritePhotoDao
-import com.example.composegallery.core.database.local.FavoritePhotoEntity
+import com.example.composegallery.core.database.local.home.dao.FavoritePhotoDao
+import com.example.composegallery.core.database.local.home.entity.FavoritePhotoEntity
 import com.example.composegallery.core.network.repository.home.DefaultFavoriteRepository
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.first

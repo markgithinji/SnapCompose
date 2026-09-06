@@ -3,6 +3,8 @@ package com.example.composegallery.core.database.local
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.example.composegallery.core.database.local.home.dao.PhotoDao
+import com.example.composegallery.core.database.local.home.entity.PhotoEntity
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.After
