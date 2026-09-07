@@ -27,7 +27,7 @@ include(":app")
 include(":baselineprofile")
 
 // Core Modules
-include(":core:model")
+include(":core:domain")
 include(":core:network")
 include(":core:ui")
 include(":core:database")

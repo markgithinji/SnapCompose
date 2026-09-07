@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.composegallery.core.model"
+    namespace = "com.example.composegallery.core.domain"
     compileSdk = 37
 
     defaultConfig {
