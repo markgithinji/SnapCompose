@@ -11,6 +11,10 @@ class DefaultStringProvider @Inject constructor(
 ) : StringProvider {
 
     override fun get(@StringRes resId: Int, vararg args: Any): String {
-        return context.getString(resId, *args)
+        return if (args.isEmpty()) {
+            context.getString(resId)
+        } else {
+            context.getString(resId, *args)
+        }
     }
 }

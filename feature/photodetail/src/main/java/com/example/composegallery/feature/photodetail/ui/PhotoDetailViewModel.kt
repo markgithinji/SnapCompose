@@ -86,7 +86,7 @@ class PhotoDetailViewModel @Inject constructor(
                 _downloadStatus.value = status
                 if (status is DownloadStatus.Success) {
                     messageManager.showMessage(
-                        message = stringProvider.get(UiR.string.download_success_path).format(status.path),
+                        message = stringProvider.get(UiR.string.download_success_path, status.path),
                         actionLabel = stringProvider.get(UiR.string.dismiss),
                         duration = MessageDuration.Indefinite
                     )
