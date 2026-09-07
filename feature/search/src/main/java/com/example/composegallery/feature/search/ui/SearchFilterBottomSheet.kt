@@ -38,12 +38,13 @@ fun SearchFilterBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
         dragHandle = { BottomSheetDefaults.DragHandle() },
-        containerColor = MaterialTheme.colorScheme.surface
+        containerColor = MaterialTheme.colorScheme.surface,
+        windowInsets = WindowInsets.navigationBars
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 32.dp, start = 16.dp, end = 16.dp)
+                .padding(start = 16.dp, end = 16.dp, bottom = 32.dp)
         ) {
             Text(
                 text = stringResource(R.string.filters),
