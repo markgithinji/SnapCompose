@@ -1,7 +1,7 @@
 package com.example.composegallery.feature.home.di
 
-import com.example.composegallery.core.repository.FavoriteRepository
-import com.example.composegallery.core.repository.GalleryRepository
+import com.example.composegallery.core.domain.repository.FavoriteRepository
+import com.example.composegallery.core.domain.repository.GalleryRepository
 import com.example.composegallery.feature.home.data.DefaultFavoriteRepository
 import com.example.composegallery.feature.home.data.DefaultGalleryRepository
 import dagger.Binds

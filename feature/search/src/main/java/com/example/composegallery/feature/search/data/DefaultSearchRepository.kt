@@ -6,12 +6,12 @@ import androidx.paging.PagingData
 import com.example.composegallery.core.common.Result
 import com.example.composegallery.core.network.paging.PagingDefaults
 import com.example.composegallery.core.common.safeDbCall
-import com.example.composegallery.core.model.Photo
+import com.example.composegallery.core.domain.model.Photo
 import com.example.composegallery.core.network.remote.UnsplashApi
 import com.example.composegallery.core.common.StringProvider
 import com.example.composegallery.core.database.local.search.dao.RecentSearchDao
-import com.example.composegallery.core.model.RecentSearch
-import com.example.composegallery.core.model.SearchFilters
+import com.example.composegallery.core.domain.model.RecentSearch
+import com.example.composegallery.core.domain.model.SearchFilters
 import com.example.composegallery.feature.search.domain.repository.SearchRepository
 import com.example.composegallery.core.database.local.search.entity.toDomainModel
 import com.example.composegallery.core.database.local.search.entity.toEntity

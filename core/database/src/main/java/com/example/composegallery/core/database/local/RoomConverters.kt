@@ -1,8 +1,8 @@
 package com.example.composegallery.core.database.local
 
 import androidx.room.TypeConverter
-import com.example.composegallery.core.model.Exif
-import com.example.composegallery.core.model.PhotoLocation
+import com.example.composegallery.core.domain.model.Exif
+import com.example.composegallery.core.domain.model.PhotoLocation
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 

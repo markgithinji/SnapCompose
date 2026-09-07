@@ -1,11 +1,11 @@
 package com.example.composegallery.feature.search.ui
 
-import com.example.composegallery.core.model.Result
-import com.example.composegallery.core.model.ColorFilter
-import com.example.composegallery.core.model.Orientation
-import com.example.composegallery.core.model.OrderBy
-import com.example.composegallery.core.model.SearchFilters
-import com.example.composegallery.core.repository.SearchRepository
+import com.example.composegallery.core.common.Result
+import com.example.composegallery.core.domain.model.ColorFilter
+import com.example.composegallery.core.domain.model.Orientation
+import com.example.composegallery.core.domain.model.OrderBy
+import com.example.composegallery.core.domain.model.SearchFilters
+import com.example.composegallery.feature.search.domain.repository.SearchRepository
 import com.example.composegallery.feature.search.domain.usecase.ObserveSearchResultsUseCase
 import com.example.composegallery.feature.search.domain.usecase.SubmitSearchUseCase
 import com.example.composegallery.core.util.MainDispatcherRule

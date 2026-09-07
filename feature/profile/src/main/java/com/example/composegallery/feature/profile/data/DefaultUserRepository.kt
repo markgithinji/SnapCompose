@@ -8,13 +8,13 @@ import com.example.composegallery.core.common.safeApiCall
 import com.example.composegallery.core.network.model.toDomainModel
 import com.example.composegallery.core.network.model.toDomain
 import com.example.composegallery.core.network.paging.PagingDefaults
-import com.example.composegallery.core.model.Photo
-import com.example.composegallery.core.model.UnsplashUser
+import com.example.composegallery.core.domain.model.Photo
+import com.example.composegallery.core.domain.model.UnsplashUser
 import com.example.composegallery.core.network.remote.UnsplashApi
 import com.example.composegallery.core.common.StringProvider
-import com.example.composegallery.core.model.PhotoCollection
-import com.example.composegallery.core.model.UserStatistics
-import com.example.composegallery.core.repository.UserRepository
+import com.example.composegallery.core.domain.model.PhotoCollection
+import com.example.composegallery.core.domain.model.UserStatistics
+import com.example.composegallery.core.domain.repository.UserRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 

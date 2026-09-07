@@ -3,8 +3,8 @@ package com.example.composegallery.core.network.paging
 import androidx.paging.PagingConfig
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.example.composegallery.core.network.AppException
-import com.example.composegallery.core.util.StringProvider
+import com.example.composegallery.core.common.AppException
+import com.example.composegallery.core.common.StringProvider
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Before

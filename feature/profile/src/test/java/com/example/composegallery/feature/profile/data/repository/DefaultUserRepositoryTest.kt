@@ -1,9 +1,9 @@
 package com.example.composegallery.feature.profile.data.repository
 
 
-import com.example.composegallery.core.model.Result
-import com.example.composegallery.core.model.UnsplashUser
-import com.example.composegallery.core.model.UserStatistics
+import com.example.composegallery.core.common.Result
+import com.example.composegallery.core.domain.model.UnsplashUser
+import com.example.composegallery.core.domain.model.UserStatistics
 import com.example.composegallery.core.network.model.HistoricalDto
 import com.example.composegallery.core.network.model.ProfileImageDto
 import com.example.composegallery.core.network.model.StatValueDto
@@ -11,8 +11,8 @@ import com.example.composegallery.core.network.model.StatsDto
 import com.example.composegallery.core.network.model.UnsplashUserDto
 import com.example.composegallery.core.network.model.UserStatisticsDto
 import com.example.composegallery.core.network.remote.UnsplashApi
-import com.example.composegallery.core.network.repository.profile.DefaultUserRepository
-import com.example.composegallery.core.util.StringProvider
+import com.example.composegallery.feature.profile.data.DefaultUserRepository
+import com.example.composegallery.core.common.StringProvider
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Before

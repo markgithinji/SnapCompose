@@ -3,9 +3,9 @@ package com.example.composegallery.core.database.local.home.entity
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.example.composegallery.core.model.Exif
-import com.example.composegallery.core.model.Photo
-import com.example.composegallery.core.model.PhotoLocation
+import com.example.composegallery.core.domain.model.Exif
+import com.example.composegallery.core.domain.model.Photo
+import com.example.composegallery.core.domain.model.PhotoLocation
 
 @Entity(tableName = "favorites")
 data class FavoritePhotoEntity(

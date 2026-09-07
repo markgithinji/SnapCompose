@@ -1,6 +1,6 @@
 package com.example.composegallery.feature.search.domain.usecase
 
-import com.example.composegallery.core.model.Result
+import com.example.composegallery.core.common.Result
 import com.example.composegallery.feature.search.data.repository.FakeSearchRepository
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.first

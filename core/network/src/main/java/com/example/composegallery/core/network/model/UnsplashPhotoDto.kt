@@ -1,7 +1,7 @@
 package com.example.composegallery.core.network.model
 
-import com.example.composegallery.core.model.Photo
-import com.example.composegallery.core.model.PhotoLocation
+import com.example.composegallery.core.domain.model.Photo
+import com.example.composegallery.core.domain.model.PhotoLocation
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

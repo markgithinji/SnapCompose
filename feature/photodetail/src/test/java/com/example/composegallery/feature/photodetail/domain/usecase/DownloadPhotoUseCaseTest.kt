@@ -1,9 +1,9 @@
 package com.example.composegallery.feature.photodetail.domain.usecase
 
-import com.example.composegallery.core.model.DownloadStatus
-import com.example.composegallery.core.model.Photo
-import com.example.composegallery.core.repository.GalleryRepository
-import com.example.composegallery.core.repository.PhotoActionService
+import com.example.composegallery.core.domain.model.DownloadStatus
+import com.example.composegallery.core.domain.model.Photo
+import com.example.composegallery.core.domain.repository.GalleryRepository
+import com.example.composegallery.core.domain.repository.PhotoActionService
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toList

@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.composegallery.core.ui.R
-import com.example.composegallery.core.model.Photo
+import com.example.composegallery.core.domain.model.Photo
 import com.example.composegallery.core.ui.EmptyContentMessage
 import com.example.composegallery.core.ui.PhotoCard
 import com.example.composegallery.core.ui.calculateResponsiveColumnCount

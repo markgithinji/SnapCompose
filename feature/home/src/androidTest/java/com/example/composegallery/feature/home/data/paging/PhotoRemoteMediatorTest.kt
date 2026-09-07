@@ -12,7 +12,7 @@ import com.example.composegallery.core.database.local.toEntity
 import com.example.composegallery.core.network.paging.home.PhotoRemoteMediator
 import com.example.composegallery.core.network.remote.UnsplashApi
 import com.example.composegallery.core.network.model.*
-import com.example.composegallery.core.util.StringProvider
+import com.example.composegallery.core.common.StringProvider
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.After

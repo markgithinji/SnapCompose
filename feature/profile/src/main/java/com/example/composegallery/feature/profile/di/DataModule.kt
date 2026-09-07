@@ -1,6 +1,6 @@
 package com.example.composegallery.feature.profile.di
 
-import com.example.composegallery.core.repository.UserRepository
+import com.example.composegallery.core.domain.repository.UserRepository
 import com.example.composegallery.feature.profile.data.DefaultUserRepository
 import dagger.Binds
 import dagger.Module

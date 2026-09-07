@@ -1,8 +1,8 @@
 package com.example.composegallery.feature.search.domain.usecase
 
 import androidx.paging.PagingData
-import com.example.composegallery.core.model.Photo
-import com.example.composegallery.core.model.SearchFilters
+import com.example.composegallery.core.domain.model.Photo
+import com.example.composegallery.core.domain.model.SearchFilters
 import com.example.composegallery.feature.search.domain.repository.SearchRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview

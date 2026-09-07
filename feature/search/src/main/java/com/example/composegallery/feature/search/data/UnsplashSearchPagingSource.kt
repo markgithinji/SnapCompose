@@ -2,10 +2,10 @@ package com.example.composegallery.feature.search.data
 
 import com.example.composegallery.core.network.model.toDomainModel
 import com.example.composegallery.core.network.paging.BaseUnsplashPagingSource
-import com.example.composegallery.core.model.Photo
+import com.example.composegallery.core.domain.model.Photo
 import com.example.composegallery.core.network.remote.UnsplashApi
 import com.example.composegallery.core.common.StringProvider
-import com.example.composegallery.core.model.SearchFilters
+import com.example.composegallery.core.domain.model.SearchFilters
 
 class UnsplashSearchPagingSource(
     private val api: UnsplashApi,

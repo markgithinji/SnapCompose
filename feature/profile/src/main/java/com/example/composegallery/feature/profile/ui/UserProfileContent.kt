@@ -51,13 +51,13 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemKey
 import androidx.paging.compose.itemContentType
 import com.example.composegallery.core.ui.R
-import com.example.composegallery.core.model.Photo
+import com.example.composegallery.core.domain.model.Photo
 import com.example.composegallery.core.ui.BottomLoadingIndicator
 import com.example.composegallery.core.ui.EmptyContentMessage
 import com.example.composegallery.core.ui.LoadMoreListError
 import com.example.composegallery.core.ui.SharedTransitionKeys
 import com.example.composegallery.core.ui.calculateResponsiveColumnCount
-import com.example.composegallery.core.model.PhotoCollection
+import com.example.composegallery.core.domain.model.PhotoCollection
 import com.valentinilk.shimmer.shimmer
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)

@@ -1,13 +1,13 @@
 package com.example.composegallery.feature.home.ui
 
 import com.example.composegallery.core.ui.R
-import com.example.composegallery.core.model.Result
-import com.example.composegallery.core.model.DownloadStatus
-import com.example.composegallery.core.model.Photo
-import com.example.composegallery.core.util.UiState
-import com.example.composegallery.core.util.StringProvider
-import com.example.composegallery.core.repository.FavoriteRepository
-import com.example.composegallery.core.repository.GalleryRepository
+import com.example.composegallery.core.common.Result
+import com.example.composegallery.core.domain.model.DownloadStatus
+import com.example.composegallery.core.domain.model.Photo
+import com.example.composegallery.core.common.UiState
+import com.example.composegallery.core.common.StringProvider
+import com.example.composegallery.core.domain.repository.FavoriteRepository
+import com.example.composegallery.core.domain.repository.GalleryRepository
 import com.example.composegallery.feature.photodetail.domain.usecase.DownloadPhotoUseCase
 import com.example.composegallery.feature.photodetail.domain.usecase.SetWallpaperUseCase
 import com.example.composegallery.feature.photodetail.domain.usecase.ToggleFavoriteUseCase

@@ -75,8 +75,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.composegallery.core.ui.R
-import com.example.composegallery.core.model.DownloadStatus
-import com.example.composegallery.core.model.Photo
+import com.example.composegallery.core.domain.model.DownloadStatus
+import com.example.composegallery.core.domain.model.Photo
 import com.example.composegallery.core.ui.InfoMessageScreen
 import com.example.composegallery.core.ui.PhotoImage
 import com.example.composegallery.core.ui.ProgressIndicator

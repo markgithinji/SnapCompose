@@ -1,11 +1,11 @@
-package com.example.composegallery.core.repository
+package com.example.composegallery.core.domain.repository
 
 import androidx.paging.PagingData
-import com.example.composegallery.core.model.Photo
-import com.example.composegallery.core.model.PhotoCollection
+import com.example.composegallery.core.domain.model.Photo
+import com.example.composegallery.core.domain.model.PhotoCollection
 import com.example.composegallery.core.common.Result
-import com.example.composegallery.core.model.UnsplashUser
-import com.example.composegallery.core.model.UserStatistics
+import com.example.composegallery.core.domain.model.UnsplashUser
+import com.example.composegallery.core.domain.model.UserStatistics
 import kotlinx.coroutines.flow.Flow
 
 interface UserRepository {

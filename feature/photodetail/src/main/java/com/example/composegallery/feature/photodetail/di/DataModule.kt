@@ -1,6 +1,6 @@
 package com.example.composegallery.feature.photodetail.di
 
-import com.example.composegallery.core.repository.PhotoActionService
+import com.example.composegallery.core.domain.repository.PhotoActionService
 import com.example.composegallery.feature.photodetail.data.DefaultPhotoActionService
 import dagger.Binds
 import dagger.Module

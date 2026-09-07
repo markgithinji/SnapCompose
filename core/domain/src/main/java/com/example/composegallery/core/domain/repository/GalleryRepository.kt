@@ -1,9 +1,9 @@
-package com.example.composegallery.core.repository
+package com.example.composegallery.core.domain.repository
 
 import androidx.paging.PagingData
-import com.example.composegallery.core.model.Photo
+import com.example.composegallery.core.domain.model.Photo
 import com.example.composegallery.core.common.Result
-import com.example.composegallery.core.model.Topic
+import com.example.composegallery.core.domain.model.Topic
 import kotlinx.coroutines.flow.Flow
 
 interface GalleryRepository {

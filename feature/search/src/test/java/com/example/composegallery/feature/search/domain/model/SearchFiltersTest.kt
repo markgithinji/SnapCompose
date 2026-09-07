@@ -1,9 +1,9 @@
 package com.example.composegallery.feature.search.domain.model
 
-import com.example.composegallery.core.model.SearchFilters
-import com.example.composegallery.core.model.OrderBy
-import com.example.composegallery.core.model.Orientation
-import com.example.composegallery.core.model.ColorFilter
+import com.example.composegallery.core.domain.model.SearchFilters
+import com.example.composegallery.core.domain.model.OrderBy
+import com.example.composegallery.core.domain.model.Orientation
+import com.example.composegallery.core.domain.model.ColorFilter
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 

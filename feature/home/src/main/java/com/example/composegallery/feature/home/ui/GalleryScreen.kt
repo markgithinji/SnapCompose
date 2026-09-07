@@ -28,10 +28,10 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.composegallery.core.ui.R
-import com.example.composegallery.core.model.Photo
+import com.example.composegallery.core.domain.model.Photo
 import com.example.composegallery.core.ui.ProgressIndicator
 import com.example.composegallery.core.common.UiState
-import com.example.composegallery.core.model.Topic
+import com.example.composegallery.core.domain.model.Topic
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable

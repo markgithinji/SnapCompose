@@ -13,8 +13,8 @@ import coil.request.SuccessResult
 import com.example.composegallery.core.ui.R
 import com.example.composegallery.core.common.AppException
 import com.example.composegallery.core.common.Result
-import com.example.composegallery.core.model.DownloadStatus
-import com.example.composegallery.core.repository.PhotoActionService
+import com.example.composegallery.core.domain.model.DownloadStatus
+import com.example.composegallery.core.domain.repository.PhotoActionService
 import com.example.composegallery.core.common.StringProvider
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers

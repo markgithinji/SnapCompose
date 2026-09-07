@@ -1,11 +1,11 @@
 package com.example.composegallery.feature.search.data.repository
 
 import androidx.paging.PagingData
-import com.example.composegallery.core.model.Result
-import com.example.composegallery.core.model.Photo
-import com.example.composegallery.core.model.RecentSearch
-import com.example.composegallery.core.model.SearchFilters
-import com.example.composegallery.core.repository.SearchRepository
+import com.example.composegallery.core.common.Result
+import com.example.composegallery.core.domain.model.Photo
+import com.example.composegallery.core.domain.model.RecentSearch
+import com.example.composegallery.core.domain.model.SearchFilters
+import com.example.composegallery.feature.search.domain.repository.SearchRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow

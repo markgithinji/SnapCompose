@@ -19,10 +19,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.composegallery.core.ui.R
-import com.example.composegallery.core.model.ColorFilter
-import com.example.composegallery.core.model.OrderBy
-import com.example.composegallery.core.model.Orientation
-import com.example.composegallery.core.model.SearchFilters
+import com.example.composegallery.core.domain.model.ColorFilter
+import com.example.composegallery.core.domain.model.OrderBy
+import com.example.composegallery.core.domain.model.Orientation
+import com.example.composegallery.core.domain.model.SearchFilters
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -45,7 +45,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import androidx.paging.compose.itemContentType
 import com.example.composegallery.core.ui.R
-import com.example.composegallery.core.model.Photo
+import com.example.composegallery.core.domain.model.Photo
 import com.example.composegallery.core.ui.BottomLoadingIndicator
 import com.example.composegallery.core.ui.EmptyContentMessage
 import com.example.composegallery.core.ui.InfoMessageScreen

@@ -14,9 +14,9 @@ import com.example.composegallery.core.network.remote.UnsplashApi
 import com.example.composegallery.core.common.StringProvider
 import com.example.composegallery.core.database.local.AppDatabase
 import com.example.composegallery.core.database.local.home.entity.toDomainModel
-import com.example.composegallery.core.model.Photo
-import com.example.composegallery.core.model.Topic
-import com.example.composegallery.core.repository.GalleryRepository
+import com.example.composegallery.core.domain.model.Photo
+import com.example.composegallery.core.domain.model.Topic
+import com.example.composegallery.core.domain.repository.GalleryRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import timber.log.Timber

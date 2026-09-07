@@ -74,7 +74,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import com.example.composegallery.core.ui.R
-import com.example.composegallery.core.model.Photo
+import com.example.composegallery.core.domain.model.Photo
 import com.example.composegallery.core.ui.BottomLoadingIndicator
 import com.example.composegallery.core.ui.InfoMessageScreen
 import com.example.composegallery.core.ui.LoadMoreListError
@@ -83,8 +83,8 @@ import com.example.composegallery.core.ui.ProgressIndicator
 import com.example.composegallery.core.ui.RetryButton
 import com.example.composegallery.core.ui.SharedTransitionKeys
 import com.example.composegallery.core.ui.calculateResponsiveColumnCount
-import com.example.composegallery.core.model.OrderBy
-import com.example.composegallery.core.model.RecentSearch
+import com.example.composegallery.core.domain.model.OrderBy
+import com.example.composegallery.core.domain.model.RecentSearch
 import com.example.composegallery.core.ui.theme.searchBar
 import com.valentinilk.shimmer.shimmer
 

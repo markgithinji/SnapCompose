@@ -35,10 +35,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.composegallery.core.ui.R
-import com.example.composegallery.core.model.HistoricalData
-import com.example.composegallery.core.model.StatData
-import com.example.composegallery.core.model.StatValue
-import com.example.composegallery.core.model.UserStatistics
+import com.example.composegallery.core.domain.model.HistoricalData
+import com.example.composegallery.core.domain.model.StatData
+import com.example.composegallery.core.domain.model.StatValue
+import com.example.composegallery.core.domain.model.UserStatistics
 import java.util.Locale
 import kotlin.math.abs
 

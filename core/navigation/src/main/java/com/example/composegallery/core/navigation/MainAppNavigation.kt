@@ -34,10 +34,10 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.composegallery.core.model.FavoritesRoute
-import com.example.composegallery.core.model.GalleryRoute
-import com.example.composegallery.core.model.PhotoDetailRoute
-import com.example.composegallery.core.model.SearchRoute
+import com.example.composegallery.core.domain.model.FavoritesRoute
+import com.example.composegallery.core.domain.model.GalleryRoute
+import com.example.composegallery.core.domain.model.PhotoDetailRoute
+import com.example.composegallery.core.domain.model.SearchRoute
 import com.example.composegallery.core.ui.R
 import com.example.composegallery.core.ui.theme.ComposeGalleryTheme
 

@@ -1,7 +1,7 @@
 package com.example.composegallery.feature.photodetail.domain.usecase
 
-import com.example.composegallery.core.model.Photo
-import com.example.composegallery.core.repository.FavoriteRepository
+import com.example.composegallery.core.domain.model.Photo
+import com.example.composegallery.core.domain.repository.FavoriteRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test

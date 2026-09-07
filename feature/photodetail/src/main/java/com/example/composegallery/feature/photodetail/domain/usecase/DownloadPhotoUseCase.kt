@@ -1,9 +1,9 @@
 package com.example.composegallery.feature.photodetail.domain.usecase
 
-import com.example.composegallery.core.model.DownloadStatus
-import com.example.composegallery.core.model.Photo
-import com.example.composegallery.core.repository.GalleryRepository
-import com.example.composegallery.core.repository.PhotoActionService
+import com.example.composegallery.core.domain.model.DownloadStatus
+import com.example.composegallery.core.domain.model.Photo
+import com.example.composegallery.core.domain.repository.GalleryRepository
+import com.example.composegallery.core.domain.repository.PhotoActionService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject

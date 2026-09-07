@@ -1,6 +1,6 @@
-package com.example.composegallery.core.repository
+package com.example.composegallery.core.domain.repository
 
-import com.example.composegallery.core.model.Photo
+import com.example.composegallery.core.domain.model.Photo
 import kotlinx.coroutines.flow.Flow
 
 interface FavoriteRepository {

@@ -1,10 +1,10 @@
 package com.example.composegallery.feature.search.domain.usecase
 
 import androidx.recyclerview.widget.DiffUtil
-import com.example.composegallery.core.model.Photo
+import com.example.composegallery.core.domain.model.Photo
 import com.example.composegallery.core.util.collectItemsForTest
 import com.example.composegallery.feature.search.data.repository.FakeSearchRepository
-import com.example.composegallery.core.model.SearchFilters
+import com.example.composegallery.core.domain.model.SearchFilters
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi

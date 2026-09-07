@@ -35,7 +35,7 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemKey
 import androidx.paging.compose.itemContentType
 import com.example.composegallery.core.ui.R
-import com.example.composegallery.core.model.Photo
+import com.example.composegallery.core.domain.model.Photo
 import com.example.composegallery.core.ui.BottomLoadingIndicator
 import com.example.composegallery.core.ui.InfoMessageScreen
 import com.example.composegallery.core.ui.LoadMoreListError
@@ -43,7 +43,7 @@ import com.example.composegallery.core.ui.PhotoCard
 import com.example.composegallery.core.ui.RetryButton
 import com.example.composegallery.core.ui.calculateResponsiveColumnCount
 import com.example.composegallery.core.common.UiState
-import com.example.composegallery.core.model.Topic
+import com.example.composegallery.core.domain.model.Topic
 import com.valentinilk.shimmer.shimmer
 
 @OptIn(ExperimentalSharedTransitionApi::class)

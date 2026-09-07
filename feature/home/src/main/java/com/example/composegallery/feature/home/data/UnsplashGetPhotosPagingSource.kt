@@ -2,7 +2,7 @@ package com.example.composegallery.feature.home.data
 
 import com.example.composegallery.core.network.model.toDomainModel
 import com.example.composegallery.core.network.paging.BaseUnsplashPagingSource
-import com.example.composegallery.core.model.Photo
+import com.example.composegallery.core.domain.model.Photo
 import com.example.composegallery.core.network.remote.UnsplashApi
 import com.example.composegallery.core.common.StringProvider
 

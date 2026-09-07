@@ -1,9 +1,9 @@
 package com.example.composegallery.core.network.model
 
-import com.example.composegallery.core.model.HistoricalData
-import com.example.composegallery.core.model.StatData
-import com.example.composegallery.core.model.StatValue
-import com.example.composegallery.core.model.UserStatistics
+import com.example.composegallery.core.domain.model.HistoricalData
+import com.example.composegallery.core.domain.model.StatData
+import com.example.composegallery.core.domain.model.StatValue
+import com.example.composegallery.core.domain.model.UserStatistics
 import kotlinx.serialization.Serializable
 
 @Serializable

@@ -1,10 +1,10 @@
 package com.example.composegallery.feature.home.data
 
-import com.example.composegallery.core.model.Photo
+import com.example.composegallery.core.domain.model.Photo
 import com.example.composegallery.core.database.local.home.dao.FavoritePhotoDao
 import com.example.composegallery.core.database.local.home.entity.toDomainModel
 import com.example.composegallery.core.database.local.home.entity.toFavoriteEntity
-import com.example.composegallery.core.repository.FavoriteRepository
+import com.example.composegallery.core.domain.repository.FavoriteRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject

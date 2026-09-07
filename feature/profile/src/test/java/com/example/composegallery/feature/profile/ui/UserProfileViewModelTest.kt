@@ -1,9 +1,9 @@
 package com.example.composegallery.feature.profile.ui
 
-import com.example.composegallery.core.model.Result
-import com.example.composegallery.core.model.UnsplashUser
-import com.example.composegallery.core.util.UiState
-import com.example.composegallery.core.repository.UserRepository
+import com.example.composegallery.core.common.Result
+import com.example.composegallery.core.domain.model.UnsplashUser
+import com.example.composegallery.core.common.UiState
+import com.example.composegallery.core.domain.repository.UserRepository
 import com.example.composegallery.core.util.MainDispatcherRule
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi

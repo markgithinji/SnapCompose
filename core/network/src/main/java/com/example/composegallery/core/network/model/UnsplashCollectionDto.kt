@@ -1,6 +1,6 @@
 package com.example.composegallery.core.network.model
 
-import com.example.composegallery.core.model.PhotoCollection
+import com.example.composegallery.core.domain.model.PhotoCollection
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

@@ -40,12 +40,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.composegallery.core.ui.R
-import com.example.composegallery.core.model.Photo
+import com.example.composegallery.core.domain.model.Photo
 import com.example.composegallery.core.ui.InfoMessageScreen
 import com.example.composegallery.core.ui.ProgressIndicator
 import com.example.composegallery.core.common.UiState
-import com.example.composegallery.core.model.PhotoCollection
-import com.example.composegallery.core.model.UserStatistics
+import com.example.composegallery.core.domain.model.PhotoCollection
+import com.example.composegallery.core.domain.model.UserStatistics
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable

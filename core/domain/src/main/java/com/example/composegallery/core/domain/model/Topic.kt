@@ -1,4 +1,4 @@
-package com.example.composegallery.core.model
+package com.example.composegallery.core.domain.model
 
 data class Topic(
     val id: String,

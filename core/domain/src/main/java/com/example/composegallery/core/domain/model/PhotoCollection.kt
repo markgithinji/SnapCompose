@@ -1,6 +1,4 @@
-package com.example.composegallery.core.model
-
-import com.example.composegallery.core.model.Photo
+package com.example.composegallery.core.domain.model
 
 data class PhotoCollection(
     val id: String,
