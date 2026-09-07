@@ -45,10 +45,17 @@ fun GalleryScreen(
     val photos = viewModel.pagedPhotos.collectAsLazyPagingItems()
     val topicsState by viewModel.topicsState.collectAsStateWithLifecycle()
     val selectedTopicId by viewModel.selectedTopicId.collectAsStateWithLifecycle()
+    val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
     val pullRefreshState = rememberPullToRefreshState()
     val gridState = viewModel.gridState
     var isManualRefreshing by remember { mutableStateOf(false) }
     val refreshState = photos.loadState.refresh
+
+    LaunchedEffect(isOnline) {
+        if (isOnline && refreshState is LoadState.Error) {
+            photos.retry()
+        }
+    }
 
     var isSwitchingTopic by rememberSaveable(selectedTopicId) { 
         mutableStateOf(photos.itemCount == 0) 

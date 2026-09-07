@@ -7,6 +7,7 @@ import androidx.paging.cachedIn
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import com.example.composegallery.core.ui.R
 import com.example.composegallery.core.common.Result
+import com.example.composegallery.core.common.network.NetworkMonitor
 import com.example.composegallery.core.domain.model.DownloadStatus
 import com.example.composegallery.core.domain.model.Photo
 import com.example.composegallery.core.common.UiState
@@ -42,8 +43,12 @@ class GalleryViewModel @Inject constructor(
     private val downloadPhotoUseCase: DownloadPhotoUseCase,
     private val setWallpaperUseCase: SetWallpaperUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
-    private val stringProvider: StringProvider
+    private val stringProvider: StringProvider,
+    networkMonitor: NetworkMonitor
 ) : ViewModel() {
+
+    val isOnline: StateFlow<Boolean> = networkMonitor.isOnline
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
 
     val gridState = LazyStaggeredGridState()
     val favoritesGridState = LazyStaggeredGridState()

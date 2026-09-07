@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.example.composegallery.core.common.Result
+import com.example.composegallery.core.common.network.NetworkMonitor
 import com.example.composegallery.core.domain.model.Photo
 import com.example.composegallery.core.domain.model.ColorFilter
 import com.example.composegallery.core.domain.model.OrderBy
@@ -30,11 +31,15 @@ import javax.inject.Inject
 class SearchViewModel @Inject constructor(
     observeSearchResults: ObserveSearchResultsUseCase,
     private val submitSearchUseCase: SubmitSearchUseCase,
-    private val searchRepository: SearchRepository
+    private val searchRepository: SearchRepository,
+    networkMonitor: NetworkMonitor
 ) : ViewModel() {
 
     private val _filters = MutableStateFlow(SearchFilters())
     val filters: StateFlow<SearchFilters> = _filters.asStateFlow()
+
+    val isOnline: StateFlow<Boolean> = networkMonitor.isOnline
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
 
     val searchResults: Flow<PagingData<Photo>> =
         observeSearchResults(filters).cachedIn(viewModelScope)

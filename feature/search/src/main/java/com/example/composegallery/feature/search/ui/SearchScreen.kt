@@ -46,6 +46,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -103,8 +104,15 @@ fun SearchScreen(
     val pagedPhotos = viewModel.searchResults.collectAsLazyPagingItems()
     var showFilters by remember { mutableStateOf(false) }
     val recentSearches by viewModel.recentSearches.collectAsStateWithLifecycle()
+    val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
     var isFocused by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
+
+    LaunchedEffect(isOnline) {
+        if (isOnline && pagedPhotos.loadState.refresh is LoadState.Error) {
+            pagedPhotos.retry()
+        }
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize()
