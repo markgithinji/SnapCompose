@@ -10,6 +10,8 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -36,6 +38,7 @@ fun FavoritesScreen(
 ) {
     val favoritesState by viewModel.favoritesState.collectAsStateWithLifecycle()
     val gridState = viewModel.favoritesGridState
+    val retryKeys = remember { mutableStateMapOf<String, Int>() }
 
     Column(
         modifier = Modifier
@@ -92,11 +95,14 @@ fun FavoritesScreen(
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         items(photos, key = { it.id }) { photo ->
+                            val retryKey = retryKeys[photo.id] ?: 0
+                            val url = if (retryKey > 0) "${photo.smallUrl}?retry=$retryKey" else photo.smallUrl
+
                             PhotoCard(
-                                imageUrl = photo.smallUrl,
+                                imageUrl = url,
                                 authorName = photo.authorName,
                                 authorImageUrl = photo.authorProfileImageMediumResUrl,
-                                onRetry = { },
+                                onRetry = { retryKeys[photo.id] = retryKey + 1 },
                                 sharedTransitionScope = sharedTransitionScope,
                                 animatedVisibilityScope = animatedVisibilityScope,
                                 photoId = photo.id,

@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 fun ProgressIndicator(
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.primary,
-    indicatorSize: Dp = 48.dp
+    indicatorSize: Dp = 40.dp
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "loading")
     
@@ -52,11 +52,11 @@ fun ProgressIndicator(
     )
 
     Box(
-        modifier = modifier.size(indicatorSize),
+        modifier = modifier,
         contentAlignment = Alignment.Center
     ) {
         Canvas(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.size(indicatorSize)
         ) {
             val canvasSize = size.minDimension
             val canvasCenter = Offset(size.width / 2, size.height / 2)

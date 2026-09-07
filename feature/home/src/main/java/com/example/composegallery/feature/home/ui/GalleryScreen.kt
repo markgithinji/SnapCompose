@@ -100,7 +100,7 @@ fun GalleryScreen(
                         .size(40.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    ProgressIndicator(indicatorSize = 20.dp)
+                    ProgressIndicator(indicatorSize = 24.dp)
                 }
             }
         }

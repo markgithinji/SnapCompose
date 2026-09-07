@@ -110,7 +110,7 @@ fun ConfettiButton(
                 if (loading) {
                     ProgressIndicator(
                         color = textColor,
-                        indicatorSize = 20.dp
+                        indicatorSize = 24.dp
                     )
                 } else {
                     Text(

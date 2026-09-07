@@ -18,6 +18,6 @@ fun BottomLoadingIndicator() {
             .navigationBarsPadding(),
         contentAlignment = Alignment.Center
     ) {
-        ProgressIndicator(indicatorSize = 28.dp)
+        ProgressIndicator(indicatorSize = 32.dp)
     }
 }

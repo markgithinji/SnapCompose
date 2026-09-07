@@ -7,6 +7,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
@@ -27,12 +32,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination.Companion.hasRoute
@@ -99,13 +106,22 @@ fun MainAppNavigation(
             }
 
             Scaffold(
+                modifier = Modifier.fillMaxSize(),
                 snackbarHost = {
-                    SnackbarHost(hostState = snackbarHostState) { data ->
+                    SnackbarHost(
+                        hostState = snackbarHostState,
+                        modifier = Modifier.zIndex(1f) // Ensure snackbar is above transitions
+                    ) { data ->
                         SnapToast(snackbarData = data)
                     }
                 },
                 bottomBar = {
-                    if (showBottomBar) {
+                    AnimatedVisibility(
+                        visible = showBottomBar,
+                        enter = fadeIn() + expandVertically(expandFrom = Alignment.Bottom),
+                        exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Bottom),
+                        modifier = Modifier.zIndex(2f) // Higher Z-index to prevent shared elements from overlapping during exit
+                    ) {
                         Column(
                             modifier = Modifier.background(MaterialTheme.colorScheme.background)
                         ) {
@@ -162,7 +178,7 @@ fun MainAppNavigation(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(innerPadding)
+                        .padding(bottom = if (showBottomBar) innerPadding.calculateBottomPadding() else 0.dp)
                 ) {
                     NavHost(
                         navController = navController,

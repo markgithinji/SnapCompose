@@ -61,7 +61,7 @@ fun PhotoImage(
     }
     
     val shimmer = rememberShimmer(shimmerBounds = ShimmerBounds.View)
-    var isError by remember { mutableStateOf(false) }
+    var isError by remember(imageUrl) { mutableStateOf(false) }
     
     // Track the successful resolution
     var lastSuccessfulPainter by remember(sharedKey) { mutableStateOf<Painter?>(null) }
@@ -95,6 +95,7 @@ fun PhotoImage(
             onState = { state ->
                 when (state) {
                     is AsyncImagePainter.State.Loading -> {
+                        isError = false
                         onLoading?.invoke(true)
                     }
                     is AsyncImagePainter.State.Success -> {

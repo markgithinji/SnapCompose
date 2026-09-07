@@ -365,7 +365,11 @@ private fun SearchScreenContent(
             }
 
             isRefreshLoading && photos.itemCount == 0 -> {
-                ProgressIndicator(modifier = Modifier.fillMaxSize())
+                ProgressIndicator(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = 100.dp) // Offset from top bar
+                )
             }
 
             isRefreshError -> {
