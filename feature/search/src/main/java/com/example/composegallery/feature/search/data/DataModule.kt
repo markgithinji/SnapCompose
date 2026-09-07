@@ -1,4 +1,4 @@
-package com.example.composegallery.feature.search.di
+package com.example.composegallery.feature.search.data
 
 import com.example.composegallery.feature.search.data.DefaultSearchRepository
 import com.example.composegallery.feature.search.domain.repository.SearchRepository
