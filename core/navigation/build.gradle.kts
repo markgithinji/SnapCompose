@@ -1,27 +1,12 @@
 plugins {
-    alias(libs.plugins.android.library)
+    id("snap.android.library")
+    id("snap.android.compose")
+    id("snap.android.hilt")
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.hilt)
-    alias(libs.plugins.ksp)
 }
 
 android {
     namespace = "com.example.composegallery.core.navigation"
-    compileSdk = 37
-
-    defaultConfig {
-        minSdk = 24
-    }
-
-    buildFeatures {
-        compose = true
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
 }
 
 dependencies {
@@ -35,13 +20,7 @@ dependencies {
 
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
-    implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.material.icons.extended)
-
-    // Hilt
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.android.compiler)
-    implementation(libs.androidx.hilt.navigation.compose)
 }

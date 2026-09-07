@@ -2,10 +2,9 @@ import java.util.Properties
 import java.io.FileInputStream
 
 plugins {
-    alias(libs.plugins.android.library)
+    id("snap.android.library")
+    id("snap.android.hilt")
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.hilt)
-    alias(libs.plugins.ksp)
 }
 
 val localProperties = Properties()
@@ -20,21 +19,13 @@ val unsplashApiKey: String = (project.findProperty("UNSPLASH_API_KEY") as? Strin
 
 android {
     namespace = "com.example.composegallery.core.network"
-    compileSdk = 37
 
     buildFeatures {
         buildConfig = true
     }
 
     defaultConfig {
-        minSdk = 24
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "UNSPLASH_API_KEY", "\"$unsplashApiKey\"")
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
     }
 }
 
@@ -45,10 +36,6 @@ dependencies {
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.serialization.json)
-    
-    // Hilt
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.android.compiler)
     
     // Room
     implementation(libs.androidx.room.runtime)

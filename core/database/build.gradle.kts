@@ -1,21 +1,10 @@
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.ksp)
+    id("snap.android.library")
+    id("snap.android.hilt")
 }
 
 android {
     namespace = "com.example.composegallery.core.database"
-    compileSdk = 37
-
-    defaultConfig {
-        minSdk = 24
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
 }
 
 dependencies {
@@ -32,10 +21,6 @@ dependencies {
     
     // Serialization for TypeConverters
     implementation(libs.kotlinx.serialization.json)
-
-    // Hilt
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.android.compiler)
 
     androidTestImplementation(libs.truth)
     androidTestImplementation(libs.mockito.android)
