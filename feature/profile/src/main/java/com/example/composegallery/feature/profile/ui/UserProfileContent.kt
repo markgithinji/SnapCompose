@@ -48,7 +48,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.itemKey
 import androidx.paging.compose.itemContentType
 import com.example.composegallery.core.ui.R
 import com.example.composegallery.core.domain.model.Photo
@@ -229,7 +228,10 @@ private fun LazyStaggeredGridScope.renderPhotoItems(
 
     items(
         count = photos.itemCount,
-        key = photos.itemKey { it.id },
+        key = { index -> 
+            val photo = photos.peek(index)
+            photo?.let { "${it.id}_$index" } ?: index
+        },
         contentType = photos.itemContentType { "photo" }
     ) { index ->
         val photo = photos[index]
@@ -315,7 +317,10 @@ private fun LazyStaggeredGridScope.renderCollectionItems(
 
     items(
         count = collections.itemCount,
-        key = collections.itemKey { it.id },
+        key = { index -> 
+            val collection = collections.peek(index)
+            collection?.let { "${it.id}_$index" } ?: index
+        },
         contentType = collections.itemContentType { "collection" }
     ) { index ->
         val collection = collections[index]

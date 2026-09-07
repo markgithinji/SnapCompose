@@ -73,7 +73,6 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
-import androidx.paging.compose.itemKey
 import com.example.composegallery.core.ui.R
 import com.example.composegallery.core.domain.model.Photo
 import com.example.composegallery.core.ui.BottomLoadingIndicator
@@ -406,7 +405,10 @@ private fun SearchScreenContent(
                 ) {
                     items(
                         count = photos.itemCount,
-                        key = photos.itemKey { it.id },
+                        key = { index -> 
+                            val photo = photos.peek(index)
+                            photo?.let { "search_${it.id}_$index" } ?: index
+                        },
                         contentType = photos.itemContentType { "photo" }
                     ) { index ->
                         val photo = photos[index]

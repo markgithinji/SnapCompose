@@ -32,7 +32,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.itemKey
 import androidx.paging.compose.itemContentType
 import com.example.composegallery.core.ui.R
 import com.example.composegallery.core.domain.model.Photo
@@ -142,7 +141,10 @@ fun PhotoGrid(
         } else {
             items(
                 count = photos.itemCount,
-                key = photos.itemKey { "topic_${selectedTopicId ?: "editorial"}_${it.id}" },
+                key = { index ->
+                    val photo = photos.peek(index)
+                    photo?.let { "topic_${selectedTopicId ?: "editorial"}_${it.id}_$index" } ?: index
+                },
                 contentType = photos.itemContentType { "photo" },
                 span = { index ->
                     val photo = photos.peek(index)

@@ -42,7 +42,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.itemKey
 import androidx.paging.compose.itemContentType
 import com.example.composegallery.core.ui.R
 import com.example.composegallery.core.domain.model.Photo
@@ -154,7 +153,10 @@ fun CollectionDetailScreen(
                     ) {
                         items(
                             count = photos.itemCount,
-                            key = photos.itemKey { it.id },
+                            key = { index -> 
+                                val photo = photos.peek(index)
+                                photo?.let { "${it.id}_$index" } ?: index
+                            },
                             contentType = photos.itemContentType { "photo" }
                         ) { index ->
                             val photo = photos[index]
