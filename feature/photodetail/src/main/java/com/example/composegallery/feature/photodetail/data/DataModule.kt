@@ -1,4 +1,4 @@
-package com.example.composegallery.feature.photodetail.di
+package com.example.composegallery.feature.photodetail.data
 
 import com.example.composegallery.core.domain.repository.PhotoActionService
 import com.example.composegallery.feature.photodetail.data.DefaultPhotoActionService
