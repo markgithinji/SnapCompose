@@ -1,6 +1,6 @@
 # 📸 ComposeGallery
 
-A modern Android app built with **Jetpack Compose**, showcasing best practices and clean architecture while consuming the **Unsplash API**. This project highlights advanced UI, pagination, dependency injection, and architecture patterns.
+A modern Android app built with **Jetpack Compose**, showcasing best practices and clean architecture while consuming the **Unsplash API**. This project highlights a robust **multi-module architecture**, advanced UI, pagination, and dependency injection.
 
 ---
 
@@ -12,6 +12,7 @@ A modern Android app built with **Jetpack Compose**, showcasing best practices a
 
 ## 🚀 Features
 
+- 🏗️ **Multi-Module Architecture**: Scalable, decoupled structure separating features and core logic for better build performance and maintainability.
 - 🔍 **Search Unsplash photos** with infinite scroll and **advanced filters** (Orientation, Color, Sorting)
 - ❤️ **Favorites System**: Save your favorite photos locally with persistent storage
 - ☁️ **Offline-First**: Robust caching strategy using Room and Paging 3 Mediator for seamless offline viewing
@@ -20,12 +21,10 @@ A modern Android app built with **Jetpack Compose**, showcasing best practices a
 - 🕒 **Recent Searches**: Persistent search history management (view, reuse, or clear)
 - 📷 **Photo details** with metadata, exif, and location info
 - 👥 **User profile** with statistics, photos, liked images & collections
-- 📂 **Collection viewer**
 - 🌑 **Jetpack Compose UI** with Material 3 styling
 - 💉 **Hilt Dependency Injection**
 - 🌐 **Retrofit-based API integration**
-- 🛠️ **MVI/MVVM Clean Architecture** with Use Cases
-- 🧪 **Unit & UI tests (in progress)**
+- 🧪 **Unit & Instrumented tests** covering all layers
 - 🎯 **Built for performance and readability**
 
 ---
@@ -33,17 +32,17 @@ A modern Android app built with **Jetpack Compose**, showcasing best practices a
 ## 🧱 Tech Stack
 
 - **UI**: Jetpack Compose, Material 3, Shimmer (valentinilk), BlurHash (woltapp)
-- **Architecture**: MVVM + Clean Architecture  
+- **Architecture**: Multi-module MVVM + Clean Architecture  
 - **Dependency Injection**: Hilt  
 - **Networking**: Retrofit + Kotlinx Serialization  
 - **Pagination**: Paging 3 (RemoteMediator for offline-first support)
 - **Local Storage**: Room Database (Caching, Favorites, Search History)
 - **Image Loading**: Coil
-- **System Integration**: DownloadManager, MediaStore API (Photo Downloads), WallpaperManager
+- **Build System**: Gradle (KTS) with **Convention Plugins** for modular configuration
+- **System Integration**: DownloadManager, MediaStore API, WallpaperManager
 - **Logging**: Timber  
-- **Code Quality**: Spotless (code formatting), Detekt (static analysis)  
-- **Testing**: JUnit, Mockito, Turbine, Truth, Compose UI Testing (WIP) 
-- **Build**: Gradle (KTS), GitHub Actions (WIP)
+- **Code Quality**: Spotless (formatting), Detekt (static analysis)  
+- **Testing**: JUnit, Mockito, Turbine, Truth, Compose UI Testing
 
 ---
 
@@ -51,7 +50,7 @@ A modern Android app built with **Jetpack Compose**, showcasing best practices a
 
 This app demonstrates attention to smooth user experiences with:
 
-- **Shared Element Transitions**: Seamless visual continuity when navigating between the gallery, search, and user profiles.
+- **Shared Element Transitions**: Seamless visual continuity when navigating between the gallery, search, and user profiles across module boundaries.
 - **Progressive Image Loading**: Instant "flicker-free" transitions using cached thumbnails that upscale to high-resolution in the background with localized progress indicators.
 - **Namespaced Animations**: Smart transition logic that isolates animations to specific navigation stacks, preventing visual "swapping" during complex navigation flows.
 - **Confetti Celebration**: Interactive confetti animations to reward specific user actions (e.g., following a user).
@@ -68,10 +67,9 @@ This project **requires an Unsplash API key** to function properly. Without it, 
 ### How to Get an API Key:
 1. Visit [Unsplash Developers](https://unsplash.com/developers) and create an account.
 2. Register a new application to receive your **Access Key**.
-3. This key is necessary for authentication when fetching images from the Unsplash API.
 
 ### How to Provide the API Key:
-Create a `local.properties` file at the **root of the project** (next to your `gradlew` file), and add the following line:
+Create a `local.properties` file at the **root of the project**, and add the following line:
 
 UNSPLASH_API_KEY=your_actual_unsplash_access_key_here
 
@@ -79,39 +77,35 @@ UNSPLASH_API_KEY=your_actual_unsplash_access_key_here
 
 ## 📂 Project Structure
 
+The project is organized into logical layers and features using a multi-module approach:
+
 ```plaintext
 java/
-└── com/example/composegallery/
-    ├── feature/gallery/                    # Gallery feature and its sub-features
-    │   ├── data/                            # Data layer (API, database, paging sources, repositories)
-    │   │   ├── di/                          # Dependency injection (Hilt modules, providers)
-    │   │   ├── local/                       # Local storage (Room DAOs, entities)
-    │   │   ├── model/                       # Network and database models (DTOs)
-    │   │   ├── pagingsource/                # Paging sources for infinite scroll
-    │   │   ├── remote/                      # Remote APIs (Retrofit interfaces)
-    │   │   ├── repository/                  # Repository implementations
-    │   │   └── util/                        # Utilities, error handling, network results
-    │   ├── domain/                          # Domain layer (clean architecture)
-    │   │   ├── model/                       # Domain models (entities used by UI)
-    │   │   ├── repository/                  # Repository interfaces
-    │   │   └── usecase/                     # Use cases (business logic)
-    │   └── ui/                              # UI layer (screens, components, ViewModels)
-    │       ├── common/                      # Shared UI components across screens
-    │       ├── gallery/                     # Gallery screen and components
-    │       ├── navigation/                  # App navigation graph and route definitions
-    │       ├── photodetail/                 # Photo detail screen and ViewModel
-    │       ├── profile/                     # User profile screen, stats, charts, confetti
-    │       ├── search/                      # Search screen and related components
-    │       └── util/                        # UI utilities (blurhash decoder, UIState)
-    ├── ui.theme/                            # App theme (colors, typography, shapes)
-    ├── GalleryApplication.kt                # Application class (Hilt setup, global config)
-    └── MainActivity.kt                      # Main activity, entry point for Compose
-
-res/
-├── drawable/                                # Image assets
-├── drawable-hdpi/                           # HDPI image assets
-└── values/                                  # Strings, colors, styles, themes
-    └── strings.xml
-
+├── app/                                     # Main application entry point & DI configuration
+├── build-logic/                             # Gradle convention plugins (reusable build logic)
+├── core/                                    # Shared foundational modules
+│   ├── common/                              # Generic utilities, base classes, and Result types
+│   ├── database/                            # Room setup, entities, and DAOs for offline persistence
+│   ├── domain/                              # Business logic, use cases, and repository interfaces
+│   ├── network/                             # Networking setup (Retrofit, API models, Interceptors)
+│   ├── navigation/                          # Centralized navigation logic and route definitions
+│   └── ui/                                  # Shared UI components, theme, and Responsive Layouts
+└── feature/                                 # Feature-specific isolated modules
+    ├── <feature_name>/                      # Typical internal feature structure:
+    │   ├── data/                            #   - Feature-specific repositories and data sources
+    │   ├── domain/                          #   - Feature-specific use cases (where applicable)
+    │   └── ui/                              #   - Compose screens, components, and ViewModels
+    ├── home/                                # Main gallery feed, topics, and favorites management
+    ├── photodetail/                         # Detailed photo view, metadata, and high-res download actions
+    ├── profile/                             # User profiles, statistics, and interactive charts
+    └── search/                              # Search functionality with advanced filter options
 ```
 
+---
+
+## 🧪 Testing
+
+The app is thoroughly tested at multiple levels:
+- **Unit Tests**: Over 70 tests covering ViewModels, Use Cases, Repositories, and Data Mappers.
+- **Instrumented Tests**: 20+ tests verifying Room DAOs, Paging Mediator, and UI components in an Android environment.
+- **Architecture**: Designed for testability using constructor injection and repository patterns.
