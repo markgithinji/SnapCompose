@@ -42,6 +42,6 @@ class ObserveSearchResultsUseCase @Inject constructor(
     }
 
     companion object {
-        private const val SEARCH_DEBOUNCE_MILLIS = 300L
+        private const val SEARCH_DEBOUNCE_MILLIS = 600L
     }
 }
