@@ -77,6 +77,7 @@ dependencies {
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.coil.compose)
     implementation(libs.androidx.profileinstaller)
     "baselineProfile"(project(":baselineprofile"))
     
