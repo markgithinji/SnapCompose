@@ -1,4 +1,4 @@
-package com.example.composegallery.feature.profile.di
+package com.example.composegallery.feature.profile.data
 
 import com.example.composegallery.core.domain.repository.UserRepository
 import com.example.composegallery.feature.profile.data.DefaultUserRepository
