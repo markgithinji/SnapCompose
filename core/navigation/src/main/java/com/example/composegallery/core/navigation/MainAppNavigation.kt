@@ -19,36 +19,65 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.composegallery.core.common.message.MessageDuration
 import com.example.composegallery.core.domain.model.FavoritesRoute
 import com.example.composegallery.core.domain.model.GalleryRoute
 import com.example.composegallery.core.domain.model.PhotoDetailRoute
 import com.example.composegallery.core.domain.model.SearchRoute
 import com.example.composegallery.core.ui.R
+import com.example.composegallery.core.ui.component.SnapToast
 import com.example.composegallery.core.ui.theme.ComposeGalleryTheme
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun MainAppNavigation() {
+fun MainAppNavigation(
+    viewModel: MainViewModel = hiltViewModel()
+) {
     ComposeGalleryTheme {
         SharedTransitionLayout {
             val navController = rememberNavController()
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val currentDestination = navBackStackEntry?.destination
+            val snackbarHostState = remember { SnackbarHostState() }
+            val messages by viewModel.messageManager.messages.collectAsStateWithLifecycle()
+
+            if (messages.isNotEmpty()) {
+                val message = messages.first()
+                LaunchedEffect(message) {
+                    snackbarHostState.showSnackbar(
+                        message = message.message,
+                        actionLabel = message.actionLabel,
+                        duration = when (message.duration) {
+                            MessageDuration.Short -> SnackbarDuration.Short
+                            MessageDuration.Long -> SnackbarDuration.Long
+                            MessageDuration.Indefinite -> SnackbarDuration.Indefinite
+                        }
+                    )
+                    viewModel.messageManager.messageShown(message.id)
+                }
+            }
 
             val topLevelDestinations = listOf(
                 TopLevelDestination(
@@ -70,6 +99,11 @@ fun MainAppNavigation() {
             }
 
             Scaffold(
+                snackbarHost = {
+                    SnackbarHost(hostState = snackbarHostState) { data ->
+                        SnapToast(snackbarData = data)
+                    }
+                },
                 bottomBar = {
                     if (showBottomBar) {
                         Column(

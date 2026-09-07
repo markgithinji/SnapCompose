@@ -19,6 +19,7 @@ dependencies {
     implementation(project(":feature:photodetail"))
 
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.ui)
     implementation(libs.androidx.material3)
