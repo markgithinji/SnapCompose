@@ -1,23 +1,13 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.util.Properties
 import java.io.FileInputStream
 
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.compose)
-
+    id("snap.android.application")
+    id("snap.android.hilt")
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.hilt)
-    alias(libs.plugins.ksp)
     alias(libs.plugins.detekt)
     alias(libs.plugins.spotless)
     alias(libs.plugins.baselineprofile)
-}
-
-kotlin {
-    compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_17)
-    }
 }
 
 val localProperties = Properties()
@@ -32,16 +22,9 @@ val unsplashApiKey: String = (project.findProperty("UNSPLASH_API_KEY") as? Strin
 
 android {
     namespace = "com.example.composegallery"
-    compileSdk = 37
-
-    buildFeatures {
-        buildConfig = true
-    }
 
     defaultConfig {
         applicationId = "com.example.composegallery"
-        minSdk = 24
-        targetSdk = 37
         versionCode = 1
         versionName = "1.0"
 
@@ -58,17 +41,10 @@ android {
             )
         }
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
+    
     buildFeatures {
-        compose = true
+        buildConfig = true
     }
-}
-
-hilt {
-    enableAggregatingTask = false
 }
 
 spotless {
@@ -99,38 +75,15 @@ dependencies {
     implementation(project(":feature:profile"))
     implementation(project(":feature:photodetail"))
 
-    // Kotlin & Core Libraries
     implementation(libs.androidx.core.ktx)
     implementation(libs.kotlinx.serialization.json)
-
-    // Lifecycle & Activity
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
-
-    // Compose BOM
-    implementation(platform(libs.androidx.compose.bom))
-
-    // Compose UI
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.profileinstaller)
     "baselineProfile"(project(":baselineprofile"))
+    
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    // Material Design
-    implementation(libs.androidx.material3)
-
-    // Hilt & DI
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.android.compiler)
-    implementation(libs.androidx.hilt.navigation.compose)
-
-    // Coil (Image loading)
-    implementation(libs.coil.compose)
-
-    // Timber (Logging)
+    // Timber & OkHttp logging
     implementation(libs.jakewharton.timber)
     implementation(libs.okhttp.logging.interceptor)
 
@@ -144,7 +97,7 @@ dependencies {
     testImplementation(libs.mockito.kotlin)
     testImplementation(libs.kotlinx.coroutines.test)
 
-    androidTestImplementation(libs.ui.test.junit4)
+    androidTestImplementation(libs.androidx.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.truth)
     androidTestImplementation(libs.mockito.android)
