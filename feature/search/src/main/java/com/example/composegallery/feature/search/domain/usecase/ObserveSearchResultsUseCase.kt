@@ -23,8 +23,15 @@ class ObserveSearchResultsUseCase @Inject constructor(
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     operator fun invoke(filtersFlow: StateFlow<SearchFilters>): Flow<PagingData<Photo>> {
         return filtersFlow
-            .debounce(SEARCH_DEBOUNCE_MILLIS)
-            .distinctUntilChanged()
+            .debounce { filters ->
+                if (filters.query.isBlank()) 0L else SEARCH_DEBOUNCE_MILLIS
+            }
+            .distinctUntilChanged { old, new ->
+                old.query.trim() == new.query.trim() &&
+                    old.orientation == new.orientation &&
+                    old.color == new.color &&
+                    old.orderBy == new.orderBy
+            }
             .flatMapLatest { filters ->
                 if (filters.query.isBlank()) {
                     flowOf(PagingData.empty())

@@ -131,7 +131,7 @@ fun SearchScreen(
                 )
             } else {
                 SearchScreenContent(
-                    showWelcome = !firstSearchDone,
+                    showWelcome = filters.query.isEmpty(),
                     paddingValues = PaddingValues(top = 100.dp),
                     photos = pagedPhotos,
                     retryKeys = retryKeys,
@@ -339,6 +339,8 @@ private fun SearchScreenContent(
     animatedVisibilityScope: AnimatedContentScope
 ) {
     val loadState = photos.loadState
+    val isRefreshLoading = loadState.refresh is LoadState.Loading
+    val isRefreshError = loadState.refresh is LoadState.Error
     val isEmpty = photos.itemCount == 0 && loadState.refresh is LoadState.NotLoading
 
     Box(
@@ -355,11 +357,11 @@ private fun SearchScreenContent(
                 )
             }
 
-            loadState.refresh is LoadState.Loading -> {
+            isRefreshLoading && photos.itemCount == 0 -> {
                 ProgressIndicator(modifier = Modifier.fillMaxSize())
             }
 
-            loadState.refresh is LoadState.Error -> {
+            isRefreshError -> {
                 val error = (loadState.refresh as LoadState.Error).error
                 InfoMessageScreen(
                     imageRes = R.drawable.error_icon,
