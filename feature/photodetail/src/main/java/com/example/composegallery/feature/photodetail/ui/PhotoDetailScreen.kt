@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -115,12 +114,15 @@ fun PhotoDetailScreen(
         viewModel.loadPhoto(photoId)
     }
 
+    val successMessageFormat = stringResource(R.string.download_success_path)
+    val dismissLabel = stringResource(R.string.dismiss)
+
     LaunchedEffect(downloadStatus) {
         when (val status = downloadStatus) {
             is DownloadStatus.Success -> {
                 snackbarHostState.showSnackbar(
-                    message = context.getString(R.string.download_success_path, status.path),
-                    actionLabel = context.getString(R.string.dismiss),
+                    message = successMessageFormat.format(status.path),
+                    actionLabel = dismissLabel,
                     duration = SnackbarDuration.Indefinite
                 )
                 viewModel.resetDownloadStatus()
@@ -509,8 +511,7 @@ private fun PhotoDetailInfo(
                 Icon(Icons.Default.Share, contentDescription = stringResource(R.string.share))
             }
 
-            val currentStatus = downloadStatus
-            val isDownloading = currentStatus is DownloadStatus.Progress
+            val isDownloading = downloadStatus is DownloadStatus.Progress
 
             FilledTonalIconButton(
                 onClick = onDownloadClick,
@@ -518,8 +519,8 @@ private fun PhotoDetailInfo(
                 enabled = !isDownloading,
                 shape = RoundedCornerShape(16.dp)
             ) {
-                if (isDownloading && currentStatus is DownloadStatus.Progress) {
-                    val progress = currentStatus.percentage / 100f
+                if (downloadStatus is DownloadStatus.Progress) {
+                    val progress = downloadStatus.percentage / 100f
                     Box(contentAlignment = Alignment.Center) {
                         CircularProgressIndicator(
                             progress = { progress },
@@ -528,7 +529,7 @@ private fun PhotoDetailInfo(
                             color = LocalContentColor.current
                         )
                         Text(
-                            text = "${currentStatus.percentage}",
+                            text = downloadStatus.percentage.toString(),
                             style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.sp),
                             color = LocalContentColor.current
                         )
