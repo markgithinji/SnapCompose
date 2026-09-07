@@ -8,6 +8,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -51,50 +52,66 @@ fun ProgressIndicator(
     )
 
     Box(
-        modifier = modifier,
+        modifier = modifier.size(indicatorSize),
         contentAlignment = Alignment.Center
     ) {
         Canvas(
-            modifier = Modifier
-                .size(indicatorSize)
+            modifier = Modifier.fillMaxSize()
         ) {
-            val canvasSize = size.width
-            val squareSize = canvasSize / 3
+            val canvasSize = size.minDimension
+            val canvasCenter = Offset(size.width / 2, size.height / 2)
             
-            rotate(rotation) {
-                // Draw 4 "pixels" in a square formation that pulse
-                val padding = (canvasSize * 0.08f)
-                
+            // Reduced base sizes to ensure no clipping during 45-degree rotation + 1.2x scale
+            val squareSizeBase = canvasSize / 5f 
+            val currentSquareSize = squareSizeBase * scale
+            
+            // Distance from canvas center to square center
+            val distanceFromCenter = canvasSize / 5.5f
+
+            // CRITICAL: Explicitly set the pivot to the canvas center to avoid "oval" paths
+            rotate(degrees = rotation, pivot = canvasCenter) {
                 // Top Left
                 drawRoundRect(
                     color = color.copy(alpha = 0.9f),
-                    topLeft = Offset(padding, padding),
-                    size = Size(squareSize * scale, squareSize * scale),
-                    cornerRadius = CornerRadius(squareSize * 0.2f)
+                    topLeft = Offset(
+                        canvasCenter.x - distanceFromCenter - currentSquareSize / 2,
+                        canvasCenter.y - distanceFromCenter - currentSquareSize / 2
+                    ),
+                    size = Size(currentSquareSize, currentSquareSize),
+                    cornerRadius = CornerRadius(currentSquareSize * 0.25f)
                 )
                 
                 // Top Right
                 drawRoundRect(
                     color = color.copy(alpha = 0.6f),
-                    topLeft = Offset(canvasSize - squareSize * scale - padding, padding),
-                    size = Size(squareSize * scale, squareSize * scale),
-                    cornerRadius = CornerRadius(squareSize * 0.2f)
+                    topLeft = Offset(
+                        canvasCenter.x + distanceFromCenter - currentSquareSize / 2,
+                        canvasCenter.y - distanceFromCenter - currentSquareSize / 2
+                    ),
+                    size = Size(currentSquareSize, currentSquareSize),
+                    cornerRadius = CornerRadius(currentSquareSize * 0.25f)
                 )
                 
                 // Bottom Left
                 drawRoundRect(
                     color = color.copy(alpha = 0.4f),
-                    topLeft = Offset(padding, canvasSize - squareSize * scale - padding),
-                    size = Size(squareSize * scale, squareSize * scale),
-                    cornerRadius = CornerRadius(squareSize * 0.2f)
+                    topLeft = Offset(
+                        canvasCenter.x - distanceFromCenter - currentSquareSize / 2,
+                        canvasCenter.y + distanceFromCenter - currentSquareSize / 2
+                    ),
+                    size = Size(currentSquareSize, currentSquareSize),
+                    cornerRadius = CornerRadius(currentSquareSize * 0.25f)
                 )
                 
                 // Bottom Right
                 drawRoundRect(
                     color = color.copy(alpha = 0.2f),
-                    topLeft = Offset(canvasSize - squareSize * scale - padding, canvasSize - squareSize * scale - padding),
-                    size = Size(squareSize * scale, squareSize * scale),
-                    cornerRadius = CornerRadius(squareSize * 0.2f)
+                    topLeft = Offset(
+                        canvasCenter.x + distanceFromCenter - currentSquareSize / 2,
+                        canvasCenter.y + distanceFromCenter - currentSquareSize / 2
+                    ),
+                    size = Size(currentSquareSize, currentSquareSize),
+                    cornerRadius = CornerRadius(currentSquareSize * 0.25f)
                 )
             }
         }

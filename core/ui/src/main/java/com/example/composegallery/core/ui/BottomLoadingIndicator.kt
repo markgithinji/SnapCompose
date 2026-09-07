@@ -14,10 +14,10 @@ fun BottomLoadingIndicator() {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(80.dp) // Fixed height to prevent layout jumps
+            .height(64.dp)
             .navigationBarsPadding(),
         contentAlignment = Alignment.Center
     ) {
-        ProgressIndicator()
+        ProgressIndicator(indicatorSize = 28.dp)
     }
 }
