@@ -7,6 +7,7 @@ import androidx.paging.cachedIn
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import com.example.composegallery.core.ui.R
 import com.example.composegallery.core.common.Result
+import com.example.composegallery.core.common.message.MessageManager
 import com.example.composegallery.core.common.network.NetworkMonitor
 import com.example.composegallery.core.domain.model.DownloadStatus
 import com.example.composegallery.core.domain.model.Photo
@@ -22,12 +23,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import timber.log.Timber
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -44,7 +42,8 @@ class GalleryViewModel @Inject constructor(
     private val setWallpaperUseCase: SetWallpaperUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
     private val stringProvider: StringProvider,
-    networkMonitor: NetworkMonitor
+    networkMonitor: NetworkMonitor,
+    private val messageManager: MessageManager
 ) : ViewModel() {
 
     val isOnline: StateFlow<Boolean> = networkMonitor.isOnline
@@ -55,9 +54,6 @@ class GalleryViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow<UiState<Photo>>(UiState.Loading)
     val uiState: StateFlow<UiState<Photo>> = _uiState
-
-    private val _actionEvent = MutableSharedFlow<String>()
-    val actionEvent: SharedFlow<String> = _actionEvent.asSharedFlow()
 
     private val _isWallpaperLoading = MutableStateFlow(false)
     val isWallpaperLoading: StateFlow<Boolean> = _isWallpaperLoading
@@ -174,9 +170,9 @@ class GalleryViewModel @Inject constructor(
             _isWallpaperLoading.value = true
             when (val result = setWallpaperUseCase(photo)) {
                 is Result.Success<*> -> {
-                    _actionEvent.emit(stringProvider.get(R.string.wallpaper_set_success))
+                    messageManager.showMessage(stringProvider.get(R.string.wallpaper_set_success))
                 }
-                is Result.Error -> _actionEvent.emit(result.message)
+                is Result.Error -> messageManager.showMessage(result.message)
             }
             _isWallpaperLoading.value = false
         }

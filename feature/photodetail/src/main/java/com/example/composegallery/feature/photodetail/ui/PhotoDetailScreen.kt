@@ -105,34 +105,12 @@ fun PhotoDetailScreen(
     val downloadStatus by viewModel.downloadStatus.collectAsStateWithLifecycle()
     val isFavorite by viewModel.isFavorite.collectAsStateWithLifecycle()
     val retryKey = remember(photoId) { mutableIntStateOf(0) }
-    val snackbarHostState = remember { SnackbarHostState() }
 
     var pendingAction by remember { mutableStateOf<PhotoDetailAction?>(null) }
     val context = LocalContext.current
 
     LaunchedEffect(photoId) {
         viewModel.loadPhoto(photoId)
-    }
-
-    val successMessageFormat = stringResource(R.string.download_success_path)
-    val dismissLabel = stringResource(R.string.dismiss)
-
-    LaunchedEffect(downloadStatus) {
-        when (val status = downloadStatus) {
-            is DownloadStatus.Success -> {
-                snackbarHostState.showSnackbar(
-                    message = successMessageFormat.format(status.path),
-                    actionLabel = dismissLabel,
-                    duration = SnackbarDuration.Indefinite
-                )
-                viewModel.resetDownloadStatus()
-            }
-            is DownloadStatus.Error -> {
-                snackbarHostState.showSnackbar(status.message)
-                viewModel.resetDownloadStatus()
-            }
-            else -> {}
-        }
     }
 
     if (pendingAction != null && photoState is UiState.Content) {
@@ -197,7 +175,6 @@ fun PhotoDetailScreen(
 
     Scaffold(
         modifier = Modifier.testTag("PhotoDetailScreen"),
-        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = {
