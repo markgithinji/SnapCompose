@@ -1,5 +1,6 @@
 plugins {
     id("snap.android.library")
+    id("snap.android.hilt")
 }
 
 android {
