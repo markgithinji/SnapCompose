@@ -1,5 +1,6 @@
 package com.example.composegallery.feature.search.ui
 
+import androidx.compose.material3.SnackbarDuration
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
@@ -17,15 +18,26 @@ import com.example.composegallery.feature.search.domain.usecase.ObserveSearchRes
 import com.example.composegallery.feature.search.domain.usecase.SubmitSearchUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+sealed class SearchUiEvent {
+    data class ShowSnackbar(
+        val message: String,
+        val actionLabel: String? = null,
+        val duration: SnackbarDuration = SnackbarDuration.Short
+    ) : SearchUiEvent()
+}
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
@@ -34,6 +46,9 @@ class SearchViewModel @Inject constructor(
     private val searchRepository: SearchRepository,
     networkMonitor: NetworkMonitor
 ) : ViewModel() {
+
+    private val _uiEvent = MutableSharedFlow<SearchUiEvent>()
+    val uiEvent: SharedFlow<SearchUiEvent> = _uiEvent.asSharedFlow()
 
     private val _filters = MutableStateFlow(SearchFilters())
     val filters: StateFlow<SearchFilters> = _filters.asStateFlow()
@@ -90,7 +105,13 @@ class SearchViewModel @Inject constructor(
         _filters.update { it.copy(query = trimmed) }
 
         viewModelScope.launch {
-            submitSearchUseCase(trimmed)
+            when (val result = submitSearchUseCase(trimmed)) {
+                is Result.Success<*> -> { /* History saved */ }
+                is Result.Error -> {
+                    _uiEvent.emit(SearchUiEvent.ShowSnackbar(result.message))
+                }
+            }
+            _isSearching.value = false
         }
     }
 

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
@@ -40,12 +41,24 @@ fun GalleryScreen(
     animatedVisibilityScope: AnimatedContentScope,
     viewModel: GalleryViewModel = hiltViewModel(),
     onSearchNavigate: () -> Unit,
-    onPhotoClick: (Photo) -> Unit
+    onPhotoClick: (Photo) -> Unit,
+    onShowSnackbar: (String, String?, SnackbarDuration) -> Unit
 ) {
     val photos = viewModel.pagedPhotos.collectAsLazyPagingItems()
     val topicsState by viewModel.topicsState.collectAsStateWithLifecycle()
     val selectedTopicId by viewModel.selectedTopicId.collectAsStateWithLifecycle()
     val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        viewModel.uiEvent.collect { event ->
+            when (event) {
+                is GalleryUiEvent.ShowSnackbar -> {
+                    onShowSnackbar(event.message, event.actionLabel, event.duration)
+                }
+            }
+        }
+    }
+
     val pullRefreshState = rememberPullToRefreshState()
     val gridState = viewModel.gridState
     var isManualRefreshing by remember { mutableStateOf(false) }

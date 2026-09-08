@@ -29,9 +29,9 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -48,7 +48,6 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.composegallery.core.common.message.MessageDuration
 import com.example.composegallery.core.domain.model.FavoritesRoute
 import com.example.composegallery.core.domain.model.GalleryRoute
 import com.example.composegallery.core.domain.model.PhotoDetailRoute
@@ -56,33 +55,26 @@ import com.example.composegallery.core.domain.model.SearchRoute
 import com.example.composegallery.core.ui.R
 import com.example.composegallery.core.ui.component.SnapToast
 import com.example.composegallery.core.ui.theme.ComposeGalleryTheme
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun MainAppNavigation(
-    viewModel: MainViewModel = hiltViewModel()
-) {
+fun MainAppNavigation() {
     ComposeGalleryTheme {
         SharedTransitionLayout {
             val navController = rememberNavController()
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val currentDestination = navBackStackEntry?.destination
             val snackbarHostState = remember { SnackbarHostState() }
-            val messages by viewModel.messageManager.messages.collectAsStateWithLifecycle()
+            val scope = rememberCoroutineScope()
 
-            if (messages.isNotEmpty()) {
-                val message = messages.first()
-                LaunchedEffect(message) {
+            val onShowSnackbar: (String, String?, SnackbarDuration) -> Unit = { message, action, duration ->
+                scope.launch {
                     snackbarHostState.showSnackbar(
-                        message = message.message,
-                        actionLabel = message.actionLabel,
-                        duration = when (message.duration) {
-                            MessageDuration.Short -> SnackbarDuration.Short
-                            MessageDuration.Long -> SnackbarDuration.Long
-                            MessageDuration.Indefinite -> SnackbarDuration.Indefinite
-                        }
+                        message = message,
+                        actionLabel = action,
+                        duration = duration
                     )
-                    viewModel.messageManager.messageShown(message.id)
                 }
             }
 
@@ -203,7 +195,8 @@ fun MainAppNavigation(
                                         origin = origin
                                     )
                                 )
-                            }
+                            },
+                            onShowSnackbar = onShowSnackbar
                         )
 
                         searchRoute(
@@ -220,7 +213,8 @@ fun MainAppNavigation(
                                         origin = origin
                                     )
                                 )
-                            }
+                            },
+                            onShowSnackbar = onShowSnackbar
                         )
 
                         favoritesRoute(
@@ -241,7 +235,8 @@ fun MainAppNavigation(
 
                         photoDetailRoute(
                             sharedTransitionScope = this@SharedTransitionLayout,
-                            navController = navController
+                            navController = navController,
+                            onShowSnackbar = onShowSnackbar
                         )
                         fullscreenPhotoRoute()
                         userProfileRoute(

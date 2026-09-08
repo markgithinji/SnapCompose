@@ -43,6 +43,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -98,6 +99,7 @@ fun SearchScreen(
     animatedVisibilityScope: AnimatedContentScope,
     onBack: () -> Unit,
     onPhotoClick: (Photo) -> Unit,
+    onShowSnackbar: (String, String?, SnackbarDuration) -> Unit,
     viewModel: SearchViewModel = hiltViewModel()
 ) {
     val filters by viewModel.filters.collectAsStateWithLifecycle()
@@ -111,6 +113,16 @@ fun SearchScreen(
     val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
     var isFocused by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
+
+    LaunchedEffect(Unit) {
+        viewModel.uiEvent.collect { event ->
+            when (event) {
+                is SearchUiEvent.ShowSnackbar -> {
+                    onShowSnackbar(event.message, event.actionLabel, event.duration)
+                }
+            }
+        }
+    }
 
     LaunchedEffect(isOnline) {
         if (isOnline && pagedPhotos.loadState.refresh is LoadState.Error) {

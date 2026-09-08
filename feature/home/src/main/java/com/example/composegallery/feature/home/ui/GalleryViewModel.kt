@@ -5,9 +5,9 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
+import androidx.compose.material3.SnackbarDuration
 import com.example.composegallery.core.ui.R
 import com.example.composegallery.core.common.Result
-import com.example.composegallery.core.common.message.MessageManager
 import com.example.composegallery.core.common.network.NetworkMonitor
 import com.example.composegallery.core.domain.model.DownloadStatus
 import com.example.composegallery.core.domain.model.Photo
@@ -22,9 +22,12 @@ import com.example.composegallery.feature.photodetail.domain.usecase.ToggleFavor
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -32,6 +35,14 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+sealed class GalleryUiEvent {
+    data class ShowSnackbar(
+        val message: String,
+        val actionLabel: String? = null,
+        val duration: SnackbarDuration = SnackbarDuration.Short
+    ) : GalleryUiEvent()
+}
 
 @HiltViewModel
 class GalleryViewModel @Inject constructor(
@@ -41,9 +52,11 @@ class GalleryViewModel @Inject constructor(
     private val setWallpaperUseCase: SetWallpaperUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
     private val stringProvider: StringProvider,
-    networkMonitor: NetworkMonitor,
-    private val messageManager: MessageManager
+    networkMonitor: NetworkMonitor
 ) : ViewModel() {
+
+    private val _uiEvent = MutableSharedFlow<GalleryUiEvent>()
+    val uiEvent: SharedFlow<GalleryUiEvent> = _uiEvent.asSharedFlow()
 
     val isOnline: StateFlow<Boolean> = networkMonitor.isOnline
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
@@ -167,9 +180,9 @@ class GalleryViewModel @Inject constructor(
             _isWallpaperLoading.value = true
             when (val result = setWallpaperUseCase(photo)) {
                 is Result.Success<*> -> {
-                    messageManager.showMessage(stringProvider.get(R.string.wallpaper_set_success))
+                    _uiEvent.emit(GalleryUiEvent.ShowSnackbar(stringProvider.get(R.string.wallpaper_set_success)))
                 }
-                is Result.Error -> messageManager.showMessage(result.message)
+                is Result.Error -> _uiEvent.emit(GalleryUiEvent.ShowSnackbar(result.message))
             }
             _isWallpaperLoading.value = false
         }

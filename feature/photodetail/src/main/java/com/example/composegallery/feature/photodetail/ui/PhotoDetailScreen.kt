@@ -101,6 +101,7 @@ fun PhotoDetailScreen(
     onBack: () -> Unit,
     onExpandClick: (String) -> Unit,
     onUserClick: (Photo) -> Unit,
+    onShowSnackbar: (String, String?, SnackbarDuration) -> Unit,
     viewModel: PhotoDetailViewModel = hiltViewModel()
 ) {
     val photoState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -108,6 +109,16 @@ fun PhotoDetailScreen(
     val downloadStatus by viewModel.downloadStatus.collectAsStateWithLifecycle()
     val isFavorite by viewModel.isFavorite.collectAsStateWithLifecycle()
     val retryKey = remember(photoId) { mutableIntStateOf(0) }
+
+    LaunchedEffect(Unit) {
+        viewModel.uiEvent.collect { event ->
+            when (event) {
+                is PhotoDetailUiEvent.ShowSnackbar -> {
+                    onShowSnackbar(event.message, event.actionLabel, event.duration)
+                }
+            }
+        }
+    }
 
     var pendingAction by remember { mutableStateOf<PhotoDetailAction?>(null) }
     val context = LocalContext.current

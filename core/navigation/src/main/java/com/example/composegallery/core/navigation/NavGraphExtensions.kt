@@ -5,6 +5,7 @@ import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.material3.SnackbarDuration
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
@@ -29,7 +30,8 @@ import com.example.composegallery.feature.search.ui.SearchScreen
 fun NavGraphBuilder.galleryRoute(
     sharedTransitionScope: SharedTransitionScope,
     onSearchClick: () -> Unit,
-    onPhotoClick: (Photo, String) -> Unit
+    onPhotoClick: (Photo, String) -> Unit,
+    onShowSnackbar: (String, String?, SnackbarDuration) -> Unit
 ) {
     composable<GalleryRoute>(
         enterTransition = { fadeIn(animationSpec = tween(400)) },
@@ -41,7 +43,8 @@ fun NavGraphBuilder.galleryRoute(
             sharedTransitionScope = sharedTransitionScope,
             animatedVisibilityScope = this,
             onSearchNavigate = onSearchClick,
-            onPhotoClick = { photo -> onPhotoClick(photo, "gallery") }
+            onPhotoClick = { photo -> onPhotoClick(photo, "gallery") },
+            onShowSnackbar = onShowSnackbar
         )
     }
 }
@@ -69,14 +72,16 @@ fun NavGraphBuilder.favoritesRoute(
 fun NavGraphBuilder.searchRoute(
     sharedTransitionScope: SharedTransitionScope,
     onBack: () -> Unit,
-    onPhotoClick: (Photo, String) -> Unit
+    onPhotoClick: (Photo, String) -> Unit,
+    onShowSnackbar: (String, String?, SnackbarDuration) -> Unit
 ) {
     composable<SearchRoute> {
         SearchScreen(
             sharedTransitionScope = sharedTransitionScope,
             animatedVisibilityScope = this,
             onBack = onBack,
-            onPhotoClick = { photo -> onPhotoClick(photo, "search") }
+            onPhotoClick = { photo -> onPhotoClick(photo, "search") },
+            onShowSnackbar = onShowSnackbar
         )
     }
 }
@@ -84,7 +89,8 @@ fun NavGraphBuilder.searchRoute(
 @OptIn(ExperimentalSharedTransitionApi::class)
 fun NavGraphBuilder.photoDetailRoute(
     sharedTransitionScope: SharedTransitionScope,
-    navController: NavController
+    navController: NavController,
+    onShowSnackbar: (String, String?, SnackbarDuration) -> Unit
 ) {
     composable<PhotoDetailRoute> { backStackEntry ->
         val args = backStackEntry.toRoute<PhotoDetailRoute>()
@@ -109,7 +115,8 @@ fun NavGraphBuilder.photoDetailRoute(
                         profileImageUrl = user.authorProfileImageHighResUrl
                     )
                 )
-            }
+            },
+            onShowSnackbar = onShowSnackbar
         )
     }
 }
