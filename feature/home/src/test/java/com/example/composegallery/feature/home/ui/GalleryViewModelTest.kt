@@ -6,6 +6,7 @@ import com.example.composegallery.core.domain.model.DownloadStatus
 import com.example.composegallery.core.domain.model.Photo
 import com.example.composegallery.core.common.UiState
 import com.example.composegallery.core.common.StringProvider
+import com.example.composegallery.core.common.network.NetworkMonitor
 import com.example.composegallery.core.domain.repository.FavoriteRepository
 import com.example.composegallery.core.domain.repository.GalleryRepository
 import com.example.composegallery.feature.photodetail.domain.usecase.DownloadPhotoUseCase
@@ -28,7 +29,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
-import kotlinx.coroutines.runBlocking
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class GalleryViewModelTest {
@@ -42,14 +42,17 @@ class GalleryViewModelTest {
     private val setWallpaperUseCase: SetWallpaperUseCase = mock()
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase = mock()
     private val stringProvider: StringProvider = mock()
+    private val networkMonitor: NetworkMonitor = mock()
 
     private lateinit var viewModel: GalleryViewModel
 
     @Before
     fun setup() = runBlocking {
+        whenever(networkMonitor.isOnline).thenReturn(flowOf(true))
         whenever(favoriteRepository.getFavorites()).thenReturn(flowOf(emptyList()))
         whenever(galleryRepository.getPagedPhotos()).thenReturn(flowOf())
         whenever(galleryRepository.getTopics()).thenReturn(Result.Success(emptyList()))
+        whenever(stringProvider.get(any())).thenReturn("Mocked string")
         
         viewModel = GalleryViewModel(
             galleryRepository,
@@ -57,7 +60,8 @@ class GalleryViewModelTest {
             downloadPhotoUseCase,
             setWallpaperUseCase,
             toggleFavoriteUseCase,
-            stringProvider
+            stringProvider,
+            networkMonitor
         )
     }
 
@@ -65,7 +69,7 @@ class GalleryViewModelTest {
     fun loadPhoto_success_updatesUiState() = runTest {
         val photoId = "1"
         val photo = createFakePhoto(photoId)
-        whenever(runBlocking { galleryRepository.getPhoto(photoId) }).thenReturn(Result.Success(photo))
+        whenever(galleryRepository.getPhoto(photoId)).thenReturn(Result.Success(photo))
 
         viewModel.loadPhoto(photoId)
 
@@ -77,7 +81,7 @@ class GalleryViewModelTest {
     @Test
     fun loadPhoto_error_updatesUiStateWithError() = runTest {
         val photoId = "1"
-        whenever(runBlocking { galleryRepository.getPhoto(photoId) }).thenReturn(Result.Error("Failed"))
+        whenever(galleryRepository.getPhoto(photoId)).thenReturn(Result.Error("Failed"))
 
         viewModel.loadPhoto(photoId)
 
@@ -112,7 +116,7 @@ class GalleryViewModelTest {
         val photo = createFakePhoto(photoId)
         val favoriteFlow = MutableStateFlow(false)
         whenever(favoriteRepository.isFavorite(photoId)).thenReturn(favoriteFlow)
-        whenever(runBlocking { galleryRepository.getPhoto(photoId) }).thenReturn(Result.Success(photo))
+        whenever(galleryRepository.getPhoto(photoId)).thenReturn(Result.Success(photo))
 
         val favorites = mutableListOf<Boolean>()
         val job = launch(UnconfinedTestDispatcher()) {

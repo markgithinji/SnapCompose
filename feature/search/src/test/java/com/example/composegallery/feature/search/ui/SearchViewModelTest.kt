@@ -1,6 +1,7 @@
 package com.example.composegallery.feature.search.ui
 
 import com.example.composegallery.core.common.Result
+import com.example.composegallery.core.common.network.NetworkMonitor
 import com.example.composegallery.core.domain.model.ColorFilter
 import com.example.composegallery.core.domain.model.Orientation
 import com.example.composegallery.core.domain.model.OrderBy
@@ -20,7 +21,6 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import kotlinx.coroutines.runBlocking
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SearchViewModelTest {
@@ -31,26 +31,36 @@ class SearchViewModelTest {
     private val observeSearchResults: ObserveSearchResultsUseCase = mock()
     private val submitSearchUseCase: SubmitSearchUseCase = mock()
     private val searchRepository: SearchRepository = mock()
+    private val networkMonitor: NetworkMonitor = mock()
 
     private lateinit var viewModel: SearchViewModel
 
     @Before
     fun setup() {
+        whenever(networkMonitor.isOnline).thenReturn(flowOf(true))
         whenever(observeSearchResults(any())).thenReturn(flowOf())
         whenever(searchRepository.getRecentSearches(any())).thenReturn(flowOf(emptyList()))
         
         viewModel = SearchViewModel(
             observeSearchResults,
             submitSearchUseCase,
-            searchRepository
+            searchRepository,
+            networkMonitor
         )
     }
 
     @Test
-    fun updateQuery_updatesFilters() {
+    fun updateQuery_updatesSearchQuery() {
         val newQuery = "cats"
         viewModel.updateQuery(newQuery)
-        assertThat(viewModel.filters.value.query).isEqualTo(newQuery)
+        assertThat(viewModel.searchQuery.value).isEqualTo(newQuery)
+    }
+
+    @Test
+    fun updateQuery_empty_clearsFilters() {
+        viewModel.submitSearch("cats")
+        viewModel.updateQuery("")
+        assertThat(viewModel.filters.value.query).isEmpty()
     }
 
     @Test
@@ -79,18 +89,19 @@ class SearchViewModelTest {
     }
 
     @Test
-    fun submitSearch_callsUseCase() = runTest {
+    fun submitSearch_updatesFiltersAndCallsUseCase() = runTest {
         val query = "nature"
-        whenever(runBlocking { submitSearchUseCase(query) }).thenReturn(Result.Success(query))
+        whenever(submitSearchUseCase(query)).thenReturn(Result.Success(query))
 
         viewModel.submitSearch(query)
 
+        assertThat(viewModel.filters.value.query).isEqualTo(query)
         verify(submitSearchUseCase).invoke(query)
     }
 
     @Test
     fun clearRecentSearches_callsRepository() = runTest {
-        whenever(runBlocking { searchRepository.clearRecentSearches() }).thenReturn(Result.Success(Unit))
+        whenever(searchRepository.clearRecentSearches()).thenReturn(Result.Success(Unit))
 
         viewModel.clearRecentSearches()
 
