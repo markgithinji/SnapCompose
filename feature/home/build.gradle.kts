@@ -39,6 +39,6 @@ dependencies {
     androidTestImplementation(libs.mockito.kotlin)
     androidTestImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.test.core.lib)
+    androidTestImplementation(libs.androidx.test.core)
     androidTestImplementation(libs.androidx.paging.testing)
 }

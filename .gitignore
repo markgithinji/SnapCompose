@@ -2,7 +2,8 @@
 .gradle/
 .artifacts/
 /local.properties
-/.idea/*
+# IDE settings
+.idea/*
 !/.idea/runConfigurations/
 .DS_Store
 build/
