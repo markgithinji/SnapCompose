@@ -36,14 +36,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-sealed class GalleryUiEvent {
-    data class ShowSnackbar(
-        val message: String,
-        val actionLabel: String? = null,
-        val duration: SnackbarDuration = SnackbarDuration.Short
-    ) : GalleryUiEvent()
-}
-
 @HiltViewModel
 class GalleryViewModel @Inject constructor(
     private val galleryRepository: GalleryRepository,
@@ -157,12 +149,6 @@ class GalleryViewModel @Inject constructor(
         }
     }
 
-    fun reportDownload(downloadUrl: String) {
-        viewModelScope.launch {
-            galleryRepository.reportDownload(downloadUrl)
-        }
-    }
-
     fun downloadPhoto(photo: Photo) {
         viewModelScope.launch {
             downloadPhotoUseCase(photo).collect { status ->
@@ -171,9 +157,6 @@ class GalleryViewModel @Inject constructor(
         }
     }
 
-    fun resetDownloadStatus() {
-        _downloadStatus.value = DownloadStatus.Idle
-    }
 
     fun setWallpaper(photo: Photo) {
         viewModelScope.launch {
@@ -187,10 +170,12 @@ class GalleryViewModel @Inject constructor(
             _isWallpaperLoading.value = false
         }
     }
+}
 
-    fun toggleFavorite(photo: Photo) {
-        viewModelScope.launch {
-            toggleFavoriteUseCase(photo)
-        }
-    }
+sealed class GalleryUiEvent {
+    data class ShowSnackbar(
+        val message: String,
+        val actionLabel: String? = null,
+        val duration: SnackbarDuration = SnackbarDuration.Short
+    ) : GalleryUiEvent()
 }

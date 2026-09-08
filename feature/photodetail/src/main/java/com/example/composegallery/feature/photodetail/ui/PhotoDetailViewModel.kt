@@ -29,14 +29,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import com.example.composegallery.core.ui.R as UiR
 
-sealed class PhotoDetailUiEvent {
-    data class ShowSnackbar(
-        val message: String,
-        val actionLabel: String? = null,
-        val duration: SnackbarDuration = SnackbarDuration.Short
-    ) : PhotoDetailUiEvent()
-}
-
 @HiltViewModel
 class PhotoDetailViewModel @Inject constructor(
     private val galleryRepository: GalleryRepository,
@@ -133,4 +125,12 @@ class PhotoDetailViewModel @Inject constructor(
             toggleFavoriteUseCase(photo)
         }
     }
+}
+
+sealed class PhotoDetailUiEvent {
+    data class ShowSnackbar(
+        val message: String,
+        val actionLabel: String? = null,
+        val duration: SnackbarDuration = SnackbarDuration.Short
+    ) : PhotoDetailUiEvent()
 }
