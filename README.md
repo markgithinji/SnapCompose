@@ -39,6 +39,7 @@ A modern Android app built with **Jetpack Compose**, showcasing best practices a
 - **Local Storage**: Room Database (Caching, Favorites, Search History)
 - **Image Loading**: Coil
 - **Build System**: Gradle (KTS) with **Convention Plugins** for modular configuration
+- **Performance**: **Baseline Profiles** for improved startup and frame stability
 - **System Integration**: DownloadManager, MediaStore API, WallpaperManager
 - **Logging**: Timber  
 - **Code Quality**: Spotless (formatting), Detekt (static analysis)  
@@ -82,6 +83,7 @@ The project is organized into logical layers and features using a multi-module a
 ```plaintext
 java/
 ├── app/                                     # Main application entry point & DI configuration
+├── baselineProfile/                         # Baseline Profile generation & Macrobenchmark tests
 ├── build-logic/                             # Gradle convention plugins (reusable build logic)
 ├── core/                                    # Shared foundational modules
 │   ├── common/                              # Generic utilities, base classes, and Result types
@@ -100,6 +102,22 @@ java/
     ├── profile/                             # User profiles, statistics, and interactive charts
     └── search/                              # Search functionality with advanced filter options
 ```
+
+---
+
+## ⚡ Performance Optimization
+
+This project uses **Baseline Profiles** to ensure the best possible user experience from the first launch.
+
+- **Startup Latency**: Optimized to reduce "Time to Initial Display" (TTID) by pre-compiling critical code paths.
+- **Jank Reduction**: Smooth scrolling and transitions are achieved by capturing and optimizing frequently used UI paths.
+
+### Generating a new Profile:
+If you make significant changes to the UI or navigation logic, you should regenerate the profile using the provided run configuration:
+1. Select **`Generate Baseline Profile`** from the run configurations dropdown.
+2. Click **Run**.
+
+You can verify the performance gains by running the **`Run Startup Benchmarks`** configuration, which compares the app's startup time with and without the profile.
 
 ---
 
