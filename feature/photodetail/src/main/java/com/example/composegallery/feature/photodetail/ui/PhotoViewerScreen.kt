@@ -72,7 +72,7 @@ fun PhotoViewerScreen(
                 val maxZoom = 5f
 
                 val transformableState =
-                    rememberTransformableState { zoomChange, offsetChange, rotationChange ->
+                    rememberTransformableState { _, zoomChange, offsetChange, rotationChange ->
                         scale = (scale * zoomChange).coerceIn(
                             minZoom,
                             maxZoom
