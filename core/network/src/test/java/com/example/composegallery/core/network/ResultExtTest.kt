@@ -3,6 +3,8 @@ package com.example.composegallery.core.network
 import com.example.composegallery.core.common.R
 import com.example.composegallery.core.common.Result
 import com.example.composegallery.core.common.StringProvider
+import com.example.composegallery.core.common.safeApiCall
+import com.example.composegallery.core.common.safeDbCall
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CancellationException
 import org.junit.Test

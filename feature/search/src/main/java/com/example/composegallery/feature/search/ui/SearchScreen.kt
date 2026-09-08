@@ -237,7 +237,7 @@ private fun SearchScreenTopBar(
             if (targetState == EnterExitState.Visible) {
                 tween(durationMillis = 300, delayMillis = 100)
             } else {
-                tween(durationMillis = 80) // Faster exit to prevent ghosting
+                tween(durationMillis = 80)
             }
         }, label = "text_field_alpha"
     ) { state ->
@@ -403,7 +403,7 @@ private fun SearchScreenContent(
                 ProgressIndicator(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(top = 100.dp) // Offset from top bar
+                        .padding(top = 100.dp)
                 )
             }
 

@@ -31,14 +31,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-sealed class SearchUiEvent {
-    data class ShowSnackbar(
-        val message: String,
-        val actionLabel: String? = null,
-        val duration: SnackbarDuration = SnackbarDuration.Short
-    ) : SearchUiEvent()
-}
-
 @HiltViewModel
 class SearchViewModel @Inject constructor(
     observeSearchResults: ObserveSearchResultsUseCase,
@@ -126,4 +118,12 @@ class SearchViewModel @Inject constructor(
             searchRepository.deleteRecentSearch(query)
         }
     }
+}
+
+sealed class SearchUiEvent {
+    data class ShowSnackbar(
+        val message: String,
+        val actionLabel: String? = null,
+        val duration: SnackbarDuration = SnackbarDuration.Short
+    ) : SearchUiEvent()
 }
