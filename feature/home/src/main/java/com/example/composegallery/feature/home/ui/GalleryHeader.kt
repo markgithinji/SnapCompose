@@ -224,7 +224,7 @@ fun DummySearchBar(
         val contentAlpha by contentTransition.animateFloat(
             transitionSpec = {
                 if (targetState != EnterExitState.Visible) {
-                    tween(durationMillis = 150)
+                    tween(durationMillis = 80) // Faster exit
                 } else {
                     tween(durationMillis = 300, delayMillis = 100)
                 }
@@ -242,7 +242,6 @@ fun DummySearchBar(
                     sharedContentState = rememberSharedContentState(key = SharedTransitionKeys.SEARCH_BAR),
                     animatedVisibilityScope = animatedVisibilityScope
                 )
-                .renderInSharedTransitionScopeOverlay(zIndexInOverlay = 3f)
                 .clickable(
                     interactionSource = interactionSource,
                     indication = null,

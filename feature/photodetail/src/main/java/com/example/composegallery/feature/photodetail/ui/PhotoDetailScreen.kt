@@ -6,6 +6,9 @@ import android.icu.util.TimeZone
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -177,21 +180,28 @@ fun PhotoDetailScreen(
         modifier = Modifier.testTag("PhotoDetailScreen"),
         topBar = {
             with(sharedTransitionScope) {
-                TopAppBar(
-                    modifier = Modifier.renderInSharedTransitionScopeOverlay(zIndexInOverlay = 3f),
-                    title = {
-                        Text(
-                            text = stringResource(R.string.photo_details_title),
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = onBack) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                with(animatedVisibilityScope) {
+                    TopAppBar(
+                        modifier = Modifier
+                            .renderInSharedTransitionScopeOverlay(zIndexInOverlay = 3f)
+                            .animateEnterExit(
+                                enter = fadeIn(tween(300)),
+                                exit = fadeOut(tween(80))
+                            ),
+                        title = {
+                            Text(
+                                text = stringResource(R.string.photo_details_title),
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        },
+                        navigationIcon = {
+                            IconButton(onClick = onBack) {
+                                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                            }
                         }
-                    }
-                )
+                    )
+                }
             }
         }
     ) { padding ->

@@ -4,6 +4,8 @@ import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
@@ -36,6 +38,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -98,6 +101,8 @@ fun SearchScreen(
     viewModel: SearchViewModel = hiltViewModel()
 ) {
     val filters by viewModel.filters.collectAsStateWithLifecycle()
+    val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
+    val isSearching by viewModel.isSearching.collectAsStateWithLifecycle()
     var firstSearchDone by rememberSaveable { mutableStateOf(false) }
     val retryKeys = remember { mutableStateMapOf<String, Int>() }
     val pagedPhotos = viewModel.searchResults.collectAsLazyPagingItems()
@@ -147,18 +152,19 @@ fun SearchScreen(
                         onPhotoClick(photo)
                     },
                     sharedTransitionScope = sharedTransitionScope,
-                    animatedVisibilityScope = animatedVisibilityScope
+                    animatedVisibilityScope = animatedVisibilityScope,
+                    isSearching = isSearching
                 )
             }
 
             SearchScreenTopBar(
-                query = filters.query,
+                query = searchQuery,
                 activeFilters = filters.orientation != null || filters.color != null || filters.orderBy != OrderBy.RELEVANT,
                 onQueryChange = { viewModel.updateQuery(it) },
                 onFocusChange = { isFocused = it },
                 onClearQuery = { viewModel.updateQuery("") },
                 onSearchSubmit = {
-                    val trimmed = filters.query.trim()
+                    val trimmed = searchQuery.trim()
                     if (trimmed.isNotEmpty()) {
                         viewModel.submitSearch(trimmed)
                         firstSearchDone = true
@@ -219,7 +225,7 @@ private fun SearchScreenTopBar(
             if (targetState == EnterExitState.Visible) {
                 tween(durationMillis = 300, delayMillis = 100)
             } else {
-                tween(durationMillis = 150)
+                tween(durationMillis = 80) // Faster exit to prevent ghosting
             }
         }, label = "text_field_alpha"
     ) { state ->
@@ -227,108 +233,119 @@ private fun SearchScreenTopBar(
     }
 
     with(sharedTransitionScope) {
-        Row(
-            modifier = Modifier
-                .statusBarsPadding()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-                .fillMaxWidth()
-                .height(72.dp)
-                .renderInSharedTransitionScopeOverlay(zIndexInOverlay = 3f),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            val controlsAlpha by animatedVisibilityScope.transition.animateFloat(
-                transitionSpec = {
-                    if (targetState == EnterExitState.Visible) tween(300)
-                    else tween(150)
-                },
-                label = "controls_alpha"
-            ) { state ->
-                if (state == EnterExitState.Visible) 1f else 0f
-            }
-
-            IconButton(
-                onClick = onBack,
-                modifier = Modifier.alpha(controlsAlpha)
-            ) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-            }
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Surface(
+        with(animatedVisibilityScope) {
+            Row(
                 modifier = Modifier
-                    .weight(1f)
-                    .height(56.dp)
-                    .sharedElement(
-                        sharedContentState = rememberSharedContentState(key = SharedTransitionKeys.SEARCH_BAR),
-                        animatedVisibilityScope = animatedVisibilityScope
-                    ),
-                shape = MaterialTheme.shapes.searchBar,
-                color = MaterialTheme.colorScheme.primaryContainer
+                    .statusBarsPadding()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .fillMaxWidth()
+                    .height(72.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                TextField(
-                    value = query,
-                    onValueChange = onQueryChange,
-                    textStyle = MaterialTheme.typography.headlineSmall,
-                    placeholder = {
-                        Text(
-                            text = stringResource(R.string.search_unsplash),
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
-                            modifier = Modifier.alpha(textFieldInnerContentAlpha)
-                        )
-                    },
-                    singleLine = true,
+                IconButton(
+                    onClick = onBack,
                     modifier = Modifier
-                        .fillMaxSize()
-                        .alpha(textFieldInnerContentAlpha)
-                        .onFocusChanged { onFocusChange(it.isFocused) },
-                    trailingIcon = {
-                        if (query.isNotEmpty()) {
-                            IconButton(onClick = onClearQuery) {
-                                Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = stringResource(R.string.clear_search)
-                                )
+                        .renderInSharedTransitionScopeOverlay(zIndexInOverlay = 3f)
+                        .animateEnterExit(
+                            enter = fadeIn(tween(300)),
+                            exit = fadeOut(tween(80))
+                        )
+                ) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Surface(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(56.dp)
+                        .sharedElement(
+                            sharedContentState = rememberSharedContentState(key = SharedTransitionKeys.SEARCH_BAR),
+                            animatedVisibilityScope = animatedVisibilityScope
+                        ),
+                    shape = MaterialTheme.shapes.searchBar,
+                    color = MaterialTheme.colorScheme.primaryContainer
+                ) {
+                    TextField(
+                        value = query,
+                        onValueChange = onQueryChange,
+                        textStyle = MaterialTheme.typography.headlineSmall,
+                        placeholder = {
+                            Text(
+                                text = stringResource(R.string.search_unsplash),
+                                style = MaterialTheme.typography.headlineSmall,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
+                                modifier = Modifier.alpha(textFieldInnerContentAlpha)
+                            )
+                        },
+                        singleLine = true,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .alpha(textFieldInnerContentAlpha)
+                            .onFocusChanged { onFocusChange(it.isFocused) },
+                        trailingIcon = {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                if (query.isNotEmpty()) {
+                                    IconButton(onClick = onClearQuery) {
+                                        Icon(
+                                            imageVector = Icons.Default.Close,
+                                            contentDescription = stringResource(R.string.clear_search)
+                                        )
+                                    }
+                                }
+                                IconButton(onClick = onSearchSubmit) {
+                                    Icon(
+                                        imageVector = Icons.Default.Search,
+                                        contentDescription = stringResource(R.string.search_icon_description)
+                                    )
+                                }
                             }
-                        }
-                    },
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        disabledContainerColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
-                    ),
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                    keyboardActions = KeyboardActions(
-                        onSearch = {
-                            keyboardController?.hide()
-                            onSearchSubmit()
-                        }
-                    )
-                )
-            }
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Box(modifier = Modifier.alpha(controlsAlpha)) {
-                IconButton(onClick = onFilterClick) {
-                    Icon(
-                        Icons.Default.Tune,
-                        contentDescription = stringResource(R.string.filters),
-                        tint = if (activeFilters) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                        },
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            disabledContainerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
+                        ),
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                        keyboardActions = KeyboardActions(
+                            onSearch = {
+                                keyboardController?.hide()
+                                onSearchSubmit()
+                            }
+                        )
                     )
                 }
-                if (activeFilters) {
-                    Box(
-                        modifier = Modifier
-                            .size(8.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary)
-                            .align(Alignment.TopEnd)
-                            .padding(2.dp)
-                    )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Box(
+                    modifier = Modifier
+                        .renderInSharedTransitionScopeOverlay(zIndexInOverlay = 3f)
+                        .animateEnterExit(
+                            enter = fadeIn(tween(300)),
+                            exit = fadeOut(tween(80))
+                        )
+                ) {
+                    IconButton(onClick = onFilterClick) {
+                        Icon(
+                            Icons.Default.Tune,
+                            contentDescription = stringResource(R.string.filters),
+                            tint = if (activeFilters) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                    if (activeFilters) {
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primary)
+                                .align(Alignment.TopEnd)
+                                .padding(2.dp)
+                        )
+                    }
                 }
             }
         }
@@ -344,12 +361,16 @@ private fun SearchScreenContent(
     retryKeys: SnapshotStateMap<String, Int>,
     onPhotoClick: (Photo) -> Unit,
     sharedTransitionScope: SharedTransitionScope,
-    animatedVisibilityScope: AnimatedContentScope
+    animatedVisibilityScope: AnimatedContentScope,
+    isSearching: Boolean
 ) {
     val loadState = photos.loadState
     val isRefreshLoading = loadState.refresh is LoadState.Loading
     val isRefreshError = loadState.refresh is LoadState.Error
-    val isEmpty = photos.itemCount == 0 && loadState.refresh is LoadState.NotLoading
+    val isEmpty = loadState.refresh is LoadState.NotLoading && 
+            loadState.refresh.endOfPaginationReached && 
+            photos.itemCount == 0 &&
+            !showWelcome
 
     Box(
         modifier = Modifier
@@ -365,7 +386,8 @@ private fun SearchScreenContent(
                 )
             }
 
-            isRefreshLoading && photos.itemCount == 0 -> {
+            // Show loading if we are actively refreshing OR if we have a manual search trigger
+            (isRefreshLoading || isSearching || (photos.itemCount == 0 && !isEmpty && !isRefreshError && !showWelcome)) -> {
                 ProgressIndicator(
                     modifier = Modifier
                         .fillMaxSize()

@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -38,18 +39,30 @@ class SearchViewModel @Inject constructor(
     private val _filters = MutableStateFlow(SearchFilters())
     val filters: StateFlow<SearchFilters> = _filters.asStateFlow()
 
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
+    private val _isSearching = MutableStateFlow(false)
+    val isSearching: StateFlow<Boolean> = _isSearching.asStateFlow()
+
     val isOnline: StateFlow<Boolean> = networkMonitor.isOnline
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
 
     val searchResults: Flow<PagingData<Photo>> =
-        observeSearchResults(filters).cachedIn(viewModelScope)
+        observeSearchResults(filters)
+            .onEach { _isSearching.value = false }
+            .cachedIn(viewModelScope)
 
     val recentSearches: StateFlow<List<RecentSearch>> =
         searchRepository.getRecentSearches(limit = 10)
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     fun updateQuery(query: String) {
-        _filters.update { it.copy(query = query) }
+        _searchQuery.value = query
+        // If the query is cleared, immediately clear results as well
+        if (query.isBlank()) {
+            _filters.update { it.copy(query = "") }
+        }
     }
 
     fun updateOrientation(orientation: Orientation?) {
@@ -65,13 +78,21 @@ class SearchViewModel @Inject constructor(
     }
 
     fun applyFilters(newFilters: SearchFilters) {
+        _searchQuery.value = newFilters.query
         _filters.value = newFilters
     }
 
     fun submitSearch(query: String) {
+        val trimmed = query.trim()
+        if (trimmed.isEmpty()) return
+        
+        _isSearching.value = true
+        _searchQuery.value = trimmed
+        _filters.update { it.copy(query = trimmed) }
+
         viewModelScope.launch {
-            when (val result = submitSearchUseCase(query)) {
-                is Result.Success<*> -> updateQuery(result.data as String)
+            when (val result = submitSearchUseCase(trimmed)) {
+                is Result.Success<*> -> { /* History saved */ }
                 is Result.Error -> {
                     Timber.w("Search submission failed: ${result.message}")
                 }

@@ -20,12 +20,9 @@ import javax.inject.Inject
 class ObserveSearchResultsUseCase @Inject constructor(
     private val searchRepository: SearchRepository
 ) {
-    @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
+    @OptIn(ExperimentalCoroutinesApi::class)
     operator fun invoke(filtersFlow: StateFlow<SearchFilters>): Flow<PagingData<Photo>> {
         return filtersFlow
-            .debounce { filters ->
-                if (filters.query.isBlank()) 0L else SEARCH_DEBOUNCE_MILLIS
-            }
             .distinctUntilChanged { old, new ->
                 old.query.trim() == new.query.trim() &&
                     old.orientation == new.orientation &&
@@ -39,9 +36,5 @@ class ObserveSearchResultsUseCase @Inject constructor(
                     searchRepository.searchPagedPhotos(filters)
                 }
             }
-    }
-
-    companion object {
-        private const val SEARCH_DEBOUNCE_MILLIS = 600L
     }
 }
