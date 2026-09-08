@@ -20,7 +20,6 @@ import com.example.composegallery.feature.photodetail.domain.usecase.DownloadPho
 import com.example.composegallery.feature.photodetail.domain.usecase.SetWallpaperUseCase
 import com.example.composegallery.feature.photodetail.domain.usecase.ToggleFavoriteUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import timber.log.Timber
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -70,7 +69,6 @@ class GalleryViewModel @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     val pagedPhotos: Flow<PagingData<Photo>> = _selectedTopicId
         .flatMapLatest { topicId ->
-            Timber.tag("GalleryViewModel").d("Switching to topic: %s", topicId ?: "Editorial")
             if (topicId == null) {
                 galleryRepository.getPagedPhotos()
             } else {
@@ -114,7 +112,6 @@ class GalleryViewModel @Inject constructor(
                     is Result.Error -> _topicsState.value = UiState.Error(result.message)
                 }
             } catch (e: Exception) {
-                Timber.tag("GalleryViewModel").e(e, "fetchTopics: Unexpected exception")
                 _topicsState.value = UiState.Error(stringProvider.get(com.example.composegallery.core.common.R.string.error_unexpected))
             }
         }

@@ -15,7 +15,6 @@ import com.example.composegallery.core.database.local.home.entity.PhotoEntity
 import com.example.composegallery.core.database.local.home.entity.PhotoRemoteKeyEntity
 import com.example.composegallery.core.database.local.home.entity.TopicCacheMetadataEntity
 import com.example.composegallery.core.database.local.home.entity.toEntity
-import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalPagingApi::class)
@@ -117,7 +116,6 @@ class PhotoRemoteMediator(
             }
 
             is Result.Error -> {
-                Timber.tag("PhotoRemoteMediator").e("load: ERROR topic=$topicId for page $page: ${result.message}")
                 MediatorResult.Error(result.throwable ?: Exception(result.message))
             }
         }

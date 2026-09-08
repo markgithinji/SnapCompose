@@ -1,6 +1,5 @@
 package com.example.composegallery.core.ui
 
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
@@ -49,7 +48,6 @@ fun PhotoCard(
     origin: String = "gallery",
     onClick: (() -> Unit)? = null,
 ) {
-    Log.d("PhotoCard", "id=$photoId, ratio=$aspectRatio")
     val cardModifier = modifier
         .clip(RoundedCornerShape(16.dp))
         .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier)

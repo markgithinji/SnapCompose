@@ -25,7 +25,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -91,12 +90,7 @@ class SearchViewModel @Inject constructor(
         _filters.update { it.copy(query = trimmed) }
 
         viewModelScope.launch {
-            when (val result = submitSearchUseCase(trimmed)) {
-                is Result.Success<*> -> { /* History saved */ }
-                is Result.Error -> {
-                    Timber.w("Search submission failed: ${result.message}")
-                }
-            }
+            submitSearchUseCase(trimmed)
         }
     }
 

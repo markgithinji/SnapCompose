@@ -19,7 +19,6 @@ import com.example.composegallery.core.domain.model.Topic
 import com.example.composegallery.core.domain.repository.GalleryRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import timber.log.Timber
 import javax.inject.Inject
 
 class DefaultGalleryRepository @Inject constructor(
@@ -61,10 +60,6 @@ class DefaultGalleryRepository @Inject constructor(
         return safeApiCall(stringProvider) {
             val response = api.getTopics()
             response.map { it.toDomainModel() }
-        }.also {
-            if (it is Result.Error) {
-                Timber.tag("GalleryRepository").e("getTopics: Error: %s", it.message)
-            }
         }
     }
 
@@ -76,7 +71,6 @@ class DefaultGalleryRepository @Inject constructor(
 
     override suspend fun getPhoto(photoId: String): Result<Photo> {
         database.photoDao().getPhotoById(photoId)?.let {
-            Timber.tag("GalleryRepository").d("getPhoto: Returning cached version from DB for %s", photoId)
             return Result.Success(it.toDomainModel())
         }
 
