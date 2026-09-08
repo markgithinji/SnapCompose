@@ -110,7 +110,9 @@ fun MainAppNavigation(
                 snackbarHost = {
                     SnackbarHost(
                         hostState = snackbarHostState,
-                        modifier = Modifier.zIndex(1f) // Ensure snackbar is above transitions
+                        modifier = Modifier
+                            .renderInSharedTransitionScopeOverlay(zIndexInOverlay = 5f)
+                            .zIndex(1f) // Ensure snackbar is above transitions
                     ) { data ->
                         SnapToast(snackbarData = data)
                     }
@@ -120,7 +122,9 @@ fun MainAppNavigation(
                         visible = showBottomBar,
                         enter = fadeIn() + expandVertically(expandFrom = Alignment.Bottom),
                         exit = fadeOut() + shrinkVertically(shrinkTowards = Alignment.Bottom),
-                        modifier = Modifier.zIndex(2f) // Higher Z-index to prevent shared elements from overlapping during exit
+                        modifier = Modifier
+                            .renderInSharedTransitionScopeOverlay(zIndexInOverlay = 4f)
+                            .zIndex(2f)
                     ) {
                         Column(
                             modifier = Modifier.background(MaterialTheme.colorScheme.background)

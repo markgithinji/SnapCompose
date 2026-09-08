@@ -242,6 +242,7 @@ fun DummySearchBar(
                     sharedContentState = rememberSharedContentState(key = SharedTransitionKeys.SEARCH_BAR),
                     animatedVisibilityScope = animatedVisibilityScope
                 )
+                .renderInSharedTransitionScopeOverlay(zIndexInOverlay = 3f)
                 .clickable(
                     interactionSource = interactionSource,
                     indication = null,

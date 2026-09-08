@@ -176,20 +176,23 @@ fun PhotoDetailScreen(
     Scaffold(
         modifier = Modifier.testTag("PhotoDetailScreen"),
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(R.string.photo_details_title),
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+            with(sharedTransitionScope) {
+                TopAppBar(
+                    modifier = Modifier.renderInSharedTransitionScopeOverlay(zIndexInOverlay = 3f),
+                    title = {
+                        Text(
+                            text = stringResource(R.string.photo_details_title),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        }
                     }
-                }
-            )
+                )
+            }
         }
     ) { padding ->
         val detailShape = RoundedCornerShape(24.dp)

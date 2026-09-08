@@ -226,34 +226,35 @@ private fun SearchScreenTopBar(
         if (state == EnterExitState.Visible) 1f else 0f
     }
 
-    Row(
-        modifier = Modifier
-            .statusBarsPadding()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .fillMaxWidth()
-            .height(72.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        val controlsAlpha by animatedVisibilityScope.transition.animateFloat(
-            transitionSpec = { 
-                if (targetState == EnterExitState.Visible) tween(300) 
-                else tween(150) 
-            },
-            label = "controls_alpha"
-        ) { state ->
-            if (state == EnterExitState.Visible) 1f else 0f
-        }
-
-        IconButton(
-            onClick = onBack,
-            modifier = Modifier.alpha(controlsAlpha)
+    with(sharedTransitionScope) {
+        Row(
+            modifier = Modifier
+                .statusBarsPadding()
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .fillMaxWidth()
+                .height(72.dp)
+                .renderInSharedTransitionScopeOverlay(zIndexInOverlay = 3f),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-        }
+            val controlsAlpha by animatedVisibilityScope.transition.animateFloat(
+                transitionSpec = {
+                    if (targetState == EnterExitState.Visible) tween(300)
+                    else tween(150)
+                },
+                label = "controls_alpha"
+            ) { state ->
+                if (state == EnterExitState.Visible) 1f else 0f
+            }
 
-        Spacer(modifier = Modifier.width(8.dp))
+            IconButton(
+                onClick = onBack,
+                modifier = Modifier.alpha(controlsAlpha)
+            ) {
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+            }
 
-        with(sharedTransitionScope) {
+            Spacer(modifier = Modifier.width(8.dp))
+
             Surface(
                 modifier = Modifier
                     .weight(1f)
@@ -308,27 +309,27 @@ private fun SearchScreenTopBar(
                     )
                 )
             }
-        }
 
-        Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(8.dp))
 
-        Box(modifier = Modifier.alpha(controlsAlpha)) {
-            IconButton(onClick = onFilterClick) {
-                Icon(
-                    Icons.Default.Tune,
-                    contentDescription = stringResource(R.string.filters),
-                    tint = if (activeFilters) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                )
-            }
-            if (activeFilters) {
-                Box(
-                    modifier = Modifier
-                        .size(8.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary)
-                        .align(Alignment.TopEnd)
-                        .padding(2.dp)
-                )
+            Box(modifier = Modifier.alpha(controlsAlpha)) {
+                IconButton(onClick = onFilterClick) {
+                    Icon(
+                        Icons.Default.Tune,
+                        contentDescription = stringResource(R.string.filters),
+                        tint = if (activeFilters) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                    )
+                }
+                if (activeFilters) {
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary)
+                            .align(Alignment.TopEnd)
+                            .padding(2.dp)
+                    )
+                }
             }
         }
     }
