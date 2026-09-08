@@ -57,10 +57,9 @@ class PhotoRemoteMediator(
             }
             LoadType.APPEND -> {
                 val remoteKey = getRemoteKeyForLastItem(state)
-                val nextPage = remoteKey?.nextPage
-                if (nextPage == null) {
-                    return MediatorResult.Success(endOfPaginationReached = remoteKey != null)
-                }
+                val nextPage = remoteKey?.nextPage ?: return MediatorResult.Success(
+                    endOfPaginationReached = remoteKey != null
+                )
                 nextPage
             }
         }

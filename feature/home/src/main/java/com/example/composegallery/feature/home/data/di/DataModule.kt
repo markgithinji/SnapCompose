@@ -1,4 +1,4 @@
-package com.example.composegallery.feature.home.data
+package com.example.composegallery.feature.home.data.di
 
 import com.example.composegallery.core.domain.repository.FavoriteRepository
 import com.example.composegallery.core.domain.repository.GalleryRepository

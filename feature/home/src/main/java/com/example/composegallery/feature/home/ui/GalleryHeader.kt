@@ -224,7 +224,7 @@ fun DummySearchBar(
         val contentAlpha by contentTransition.animateFloat(
             transitionSpec = {
                 if (targetState != EnterExitState.Visible) {
-                    tween(durationMillis = 80) // Faster exit
+                    tween(durationMillis = 80)
                 } else {
                     tween(durationMillis = 300, delayMillis = 100)
                 }

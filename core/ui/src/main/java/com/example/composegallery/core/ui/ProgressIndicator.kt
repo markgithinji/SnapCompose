@@ -60,15 +60,12 @@ fun ProgressIndicator(
         ) {
             val canvasSize = size.minDimension
             val canvasCenter = Offset(size.width / 2, size.height / 2)
-            
-            // Reduced base sizes to ensure no clipping during 45-degree rotation + 1.2x scale
+
             val squareSizeBase = canvasSize / 5f 
             val currentSquareSize = squareSizeBase * scale
-            
-            // Distance from canvas center to square center
+
             val distanceFromCenter = canvasSize / 5.5f
 
-            // CRITICAL: Explicitly set the pivot to the canvas center to avoid "oval" paths
             rotate(degrees = rotation, pivot = canvasCenter) {
                 // Top Left
                 drawRoundRect(
