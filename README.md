@@ -1,12 +1,14 @@
 # 📸 ComposeGallery
 
+![CI](https://github.com/markgithinji/SnapCompose/actions/workflows/main.yml/badge.svg)
+
 A modern Android app built with **Jetpack Compose**, showcasing best practices and clean architecture while consuming the **Unsplash API**. This project highlights a robust **multi-module architecture**, advanced UI, pagination, and dependency injection.
 
 ---
 
 ## 📷 Screenshots
 
-![App Preview](assets/snap_preview.png)
+![App Preview](./assets/snap_preview.png)
 
 ---
 
@@ -26,6 +28,7 @@ A modern Android app built with **Jetpack Compose**, showcasing best practices a
 - 🌑 **Jetpack Compose UI** with Material 3 styling
 - 💉 **Hilt Dependency Injection**
 - 🌐 **Retrofit-based API integration**
+- 🤖 **Continuous Integration**: Automated quality checks and testing via **GitHub Actions**
 - 🧪 **Unit & Instrumented tests** covering all layers
 - 🎯 **Built for performance and readability**
 
@@ -120,6 +123,17 @@ If you make significant changes to the UI or navigation logic, you should regene
 2. Click **Run**.
 
 You can verify the performance gains by running the **`Run Startup Benchmarks`** configuration, which compares the app's startup time with and without the profile.
+
+---
+
+## 🤖 Continuous Integration
+
+This project uses **GitHub Actions** to ensure code quality and stability through an automated CI pipeline.
+
+The following checks are executed on every **Pull Request** and **Push** to the `main` branch:
+- **Spotless**: Enforces consistent code formatting (ktlint).
+- **Detekt**: Runs static analysis to catch potential code smells and bugs.
+- **Unit Tests**: Runs all local JVM tests across all modules.
 
 ---
 
