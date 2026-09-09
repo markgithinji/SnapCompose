@@ -3,9 +3,9 @@ package com.example.composegallery.feature.search.data.repository
 import com.example.composegallery.core.common.Result
 import com.example.composegallery.core.database.local.search.entity.RecentSearchEntity
 import com.example.composegallery.feature.search.data.DefaultSearchRepository
-import com.example.composegallery.feature.search.fakes.FakeRecentSearchDao
-import com.example.composegallery.feature.search.fakes.FakeStringProvider
-import com.example.composegallery.feature.search.fakes.FakeUnsplashApi
+import com.example.composegallery.core.testing.FakeRecentSearchDao
+import com.example.composegallery.core.testing.FakeStringProvider
+import com.example.composegallery.core.testing.FakeUnsplashApi
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest

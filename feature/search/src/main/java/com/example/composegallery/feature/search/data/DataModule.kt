@@ -1,7 +1,7 @@
 package com.example.composegallery.feature.search.data
 
+import com.example.composegallery.core.domain.repository.SearchRepository
 import com.example.composegallery.feature.search.data.DefaultSearchRepository
-import com.example.composegallery.feature.search.domain.repository.SearchRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

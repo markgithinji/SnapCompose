@@ -10,9 +10,9 @@ import com.example.composegallery.core.domain.model.Photo
 import com.example.composegallery.core.database.local.AppDatabase
 import com.example.composegallery.core.database.local.home.entity.PhotoEntity
 import com.example.composegallery.feature.home.data.DefaultGalleryRepository
-import com.example.composegallery.feature.home.fakes.FakePhotoDao
-import com.example.composegallery.feature.home.fakes.FakeStringProvider
-import com.example.composegallery.feature.home.fakes.FakeUnsplashApi
+import com.example.composegallery.core.testing.FakePhotoDao
+import com.example.composegallery.core.testing.FakeStringProvider
+import com.example.composegallery.core.testing.FakeUnsplashApi
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -77,7 +77,7 @@ class DefaultGalleryRepositoryTest {
 
     @Test
     fun getPhoto_apiThrowsException_returnsError() = runTest {
-        api.setPhotoException(RuntimeException("timeout"))
+        api.setException(RuntimeException("timeout"))
 
         val result = repository.getPhoto("boom")
 

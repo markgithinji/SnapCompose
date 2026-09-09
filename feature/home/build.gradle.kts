@@ -33,6 +33,7 @@ dependencies {
     implementation(libs.androidx.hilt.work)
     ksp(libs.hilt.work.compiler)
 
+    testImplementation(project(":core:testing"))
     testImplementation(libs.truth)
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.kotlin)
@@ -43,6 +44,7 @@ dependencies {
     androidTestImplementation(libs.mockito.android)
     androidTestImplementation(libs.mockito.kotlin)
     androidTestImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(project(":core:testing"))
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.test.core)
     androidTestImplementation(libs.androidx.paging.testing)

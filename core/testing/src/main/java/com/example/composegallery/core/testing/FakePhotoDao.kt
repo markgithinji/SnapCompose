@@ -1,4 +1,4 @@
-package com.example.composegallery.feature.home.fakes
+package com.example.composegallery.core.testing
 
 import androidx.paging.PagingSource
 import com.example.composegallery.core.database.local.home.dao.PhotoDao
@@ -22,7 +22,6 @@ class FakePhotoDao : PhotoDao {
     }
 
     override suspend fun clearAll(topicId: String) {
-        // Simple fake: clear everything for now
         photos.clear()
     }
 

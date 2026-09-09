@@ -7,7 +7,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.composegallery.core.database.local.AppDatabase
 import com.example.composegallery.core.database.local.home.entity.PhotoEntity
 import com.example.composegallery.feature.home.data.PhotoRemoteMediator
-import com.example.composegallery.feature.home.fakes.FakeGalleryRepository
+import com.example.composegallery.core.testing.FakeGalleryRepository
 import com.example.composegallery.core.common.Result
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest

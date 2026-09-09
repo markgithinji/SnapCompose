@@ -56,6 +56,7 @@ dependencies {
     // Timber
     implementation(libs.jakewharton.timber)
 
+    testImplementation(project(":core:testing"))
     testImplementation(libs.truth)
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.kotlin)

@@ -2,7 +2,7 @@ package com.example.composegallery.core.network
 
 import com.example.composegallery.core.common.Result
 import com.example.composegallery.core.common.safeApiCall
-import com.example.composegallery.core.network.fakes.FakeStringProvider
+import com.example.composegallery.core.testing.FakeStringProvider
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 

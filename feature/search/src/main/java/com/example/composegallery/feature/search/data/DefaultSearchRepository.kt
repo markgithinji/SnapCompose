@@ -12,7 +12,7 @@ import com.example.composegallery.core.common.StringProvider
 import com.example.composegallery.core.database.local.search.dao.RecentSearchDao
 import com.example.composegallery.core.domain.model.RecentSearch
 import com.example.composegallery.core.domain.model.SearchFilters
-import com.example.composegallery.feature.search.domain.repository.SearchRepository
+import com.example.composegallery.core.domain.repository.SearchRepository
 import com.example.composegallery.core.database.local.search.entity.toDomainModel
 import com.example.composegallery.core.database.local.search.entity.toEntity
 import kotlinx.coroutines.flow.Flow

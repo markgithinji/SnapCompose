@@ -4,10 +4,10 @@ import com.example.composegallery.core.domain.model.ColorFilter
 import com.example.composegallery.core.domain.model.Orientation
 import com.example.composegallery.core.domain.model.OrderBy
 import com.example.composegallery.core.domain.model.SearchFilters
-import com.example.composegallery.feature.search.data.repository.FakeSearchRepository
+import com.example.composegallery.core.testing.FakeSearchRepository
 import com.example.composegallery.feature.search.domain.usecase.ObserveSearchResultsUseCase
 import com.example.composegallery.feature.search.domain.usecase.SubmitSearchUseCase
-import com.example.composegallery.feature.search.fakes.FakeNetworkMonitor
+import com.example.composegallery.core.testing.FakeNetworkMonitor
 import com.example.composegallery.core.util.MainDispatcherRule
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi

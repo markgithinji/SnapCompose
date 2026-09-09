@@ -1,7 +1,7 @@
 package com.example.composegallery.feature.photodetail.domain.usecase
 
 import com.example.composegallery.core.domain.model.Photo
-import com.example.composegallery.feature.photodetail.fakes.FakeFavoriteRepository
+import com.example.composegallery.core.testing.FakeFavoriteRepository
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Before

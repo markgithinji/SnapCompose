@@ -1,4 +1,4 @@
-package com.example.composegallery.feature.search.fakes
+package com.example.composegallery.core.testing
 
 import com.example.composegallery.core.common.network.NetworkMonitor
 import kotlinx.coroutines.flow.Flow

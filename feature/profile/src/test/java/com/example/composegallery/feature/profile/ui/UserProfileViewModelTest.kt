@@ -3,7 +3,7 @@ package com.example.composegallery.feature.profile.ui
 import com.example.composegallery.core.common.Result
 import com.example.composegallery.core.domain.model.UnsplashUser
 import com.example.composegallery.core.common.UiState
-import com.example.composegallery.feature.profile.fakes.FakeUserRepository
+import com.example.composegallery.core.testing.FakeUserRepository
 import com.example.composegallery.core.util.MainDispatcherRule
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi

@@ -34,6 +34,7 @@ include(":core:ui")
 include(":core:database")
 include(":core:common")
 include(":core:navigation")
+include(":core:testing")
 
 // Feature Modules
 include(":feature:home")

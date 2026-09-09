@@ -18,6 +18,7 @@ dependencies {
     // Coil
     implementation(libs.coil.compose)
 
+    testImplementation(project(":core:testing"))
     // Paging
     testImplementation(libs.androidx.paging.common)
 

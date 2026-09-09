@@ -1,4 +1,4 @@
-package com.example.composegallery.feature.home.fakes
+package com.example.composegallery.core.testing
 
 import androidx.paging.PagingData
 import com.example.composegallery.core.common.Result
@@ -6,7 +6,6 @@ import com.example.composegallery.core.domain.model.Photo
 import com.example.composegallery.core.domain.model.Topic
 import com.example.composegallery.core.domain.repository.GalleryRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 
 class FakeGalleryRepository : GalleryRepository {
@@ -15,6 +14,10 @@ class FakeGalleryRepository : GalleryRepository {
     private val topics = mutableListOf<Topic>()
     private var pagedPhotosFlow = flowOf<PagingData<Photo>>()
     private var topicPagedPhotosFlow = flowOf<PagingData<Photo>>()
+    private var syncResult: Result<Boolean> = Result.Success(true)
+    
+    var lastReportedDownloadUrl: String? = null
+        private set
 
     fun setPhotos(photoList: List<Photo>) {
         photos.clear()
@@ -30,6 +33,14 @@ class FakeGalleryRepository : GalleryRepository {
         pagedPhotosFlow = flow
     }
 
+    fun setTopicPagedPhotos(flow: Flow<PagingData<Photo>>) {
+        topicPagedPhotosFlow = flow
+    }
+
+    fun setSyncResult(result: Result<Boolean>) {
+        syncResult = result
+    }
+
     override fun getPagedPhotos(): Flow<PagingData<Photo>> = pagedPhotosFlow
 
     override fun getTopicPagedPhotos(topicIdOrSlug: String): Flow<PagingData<Photo>> = topicPagedPhotosFlow
@@ -41,7 +52,7 @@ class FakeGalleryRepository : GalleryRepository {
     }
 
     override suspend fun reportDownload(downloadUrl: String) {
-        // No-op
+        lastReportedDownloadUrl = downloadUrl
     }
 
     override suspend fun syncPhotos(
@@ -49,5 +60,5 @@ class FakeGalleryRepository : GalleryRepository {
         page: Int,
         pageSize: Int,
         isRefresh: Boolean
-    ): Result<Boolean> = Result.Success(true)
+    ): Result<Boolean> = syncResult
 }

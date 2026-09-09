@@ -1,4 +1,4 @@
-package com.example.composegallery.feature.home.fakes
+package com.example.composegallery.core.testing
 
 import com.example.composegallery.core.network.model.SearchResponseDto
 import com.example.composegallery.core.network.model.UnsplashCollectionDto
@@ -11,14 +11,29 @@ import com.example.composegallery.core.network.remote.UnsplashApi
 class FakeUnsplashApi : UnsplashApi {
 
     private var photoResult: UnsplashPhotoDto? = null
-    private var photoException: Exception? = null
+    private var userResult: UnsplashUserDto? = null
+    private var statsResult: UserStatisticsDto? = null
+    private var topicPhotos: List<UnsplashPhotoDto> = emptyList()
+    private var exception: Exception? = null
 
     fun setPhotoResult(photo: UnsplashPhotoDto?) {
         photoResult = photo
     }
 
-    fun setPhotoException(exception: Exception) {
-        photoException = exception
+    fun setUserResult(user: UnsplashUserDto?) {
+        userResult = user
+    }
+
+    fun setUserStatisticsResult(stats: UserStatisticsDto?) {
+        statsResult = stats
+    }
+
+    fun setTopicPhotos(photos: List<UnsplashPhotoDto>) {
+        topicPhotos = photos
+    }
+
+    fun setException(e: Exception) {
+        exception = e
     }
 
     override suspend fun getPhotos(page: Int, perPage: Int): List<UnsplashPhotoDto> = emptyList()
@@ -29,7 +44,10 @@ class FakeUnsplashApi : UnsplashApi {
         topicIdOrSlug: String,
         page: Int,
         perPage: Int
-    ): List<UnsplashPhotoDto> = emptyList()
+    ): List<UnsplashPhotoDto> {
+        exception?.let { throw it }
+        return topicPhotos
+    }
 
     override suspend fun searchPhotos(
         query: String,
@@ -41,11 +59,14 @@ class FakeUnsplashApi : UnsplashApi {
     ): SearchResponseDto = SearchResponseDto(0, 0, emptyList())
 
     override suspend fun getPhoto(photoId: String): UnsplashPhotoDto {
-        photoException?.let { throw it }
+        exception?.let { throw it }
         return photoResult ?: throw IllegalStateException("Photo result not set")
     }
 
-    override suspend fun getUser(username: String): UnsplashUserDto = throw NotImplementedError()
+    override suspend fun getUser(username: String): UnsplashUserDto {
+        exception?.let { throw it }
+        return userResult ?: throw IllegalStateException("User result not set")
+    }
 
     override suspend fun getUserPhotos(username: String, page: Int, perPage: Int): List<UnsplashPhotoDto> = emptyList()
 
@@ -55,7 +76,10 @@ class FakeUnsplashApi : UnsplashApi {
 
     override suspend fun getCollectionPhotos(collectionId: String, page: Int, perPage: Int): List<UnsplashPhotoDto> = emptyList()
 
-    override suspend fun getUserStatistics(username: String): UserStatisticsDto = throw NotImplementedError()
+    override suspend fun getUserStatistics(username: String): UserStatisticsDto {
+        exception?.let { throw it }
+        return statsResult ?: throw IllegalStateException("Stats result not set")
+    }
 
     override suspend fun triggerDownload(url: String) {
         // No-op

@@ -1,4 +1,4 @@
-package com.example.composegallery.feature.home.fakes
+package com.example.composegallery.core.testing
 
 import com.example.composegallery.core.common.StringProvider
 

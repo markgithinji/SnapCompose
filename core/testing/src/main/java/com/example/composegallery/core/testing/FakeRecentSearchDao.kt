@@ -1,4 +1,4 @@
-package com.example.composegallery.feature.search.fakes
+package com.example.composegallery.core.testing
 
 import com.example.composegallery.core.database.local.search.dao.RecentSearchDao
 import com.example.composegallery.core.database.local.search.entity.RecentSearchEntity

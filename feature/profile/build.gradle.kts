@@ -20,6 +20,7 @@ dependencies {
     // Shimmer
     implementation(libs.compose.shimmer)
 
+    testImplementation(project(":core:testing"))
     testImplementation(libs.androidx.paging.common)
     testImplementation(libs.truth)
     testImplementation(libs.mockito.core)

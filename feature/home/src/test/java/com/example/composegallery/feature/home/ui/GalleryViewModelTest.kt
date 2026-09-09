@@ -13,11 +13,11 @@ import com.example.composegallery.feature.photodetail.domain.usecase.DownloadPho
 import com.example.composegallery.feature.photodetail.domain.usecase.SetWallpaperUseCase
 import com.example.composegallery.feature.photodetail.domain.usecase.ToggleFavoriteUseCase
 import com.example.composegallery.core.util.MainDispatcherRule
-import com.example.composegallery.feature.home.fakes.FakeFavoriteRepository
-import com.example.composegallery.feature.home.fakes.FakeGalleryRepository
-import com.example.composegallery.feature.home.fakes.FakeNetworkMonitor
-import com.example.composegallery.feature.home.fakes.FakePhotoActionService
-import com.example.composegallery.feature.home.fakes.FakeStringProvider
+import com.example.composegallery.core.testing.FakeFavoriteRepository
+import com.example.composegallery.core.testing.FakeGalleryRepository
+import com.example.composegallery.core.testing.FakeNetworkMonitor
+import com.example.composegallery.core.testing.FakePhotoActionService
+import com.example.composegallery.core.testing.FakeStringProvider
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf

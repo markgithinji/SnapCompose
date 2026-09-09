@@ -1,4 +1,4 @@
-package com.example.composegallery.feature.search.domain.repository
+package com.example.composegallery.core.domain.repository
 
 import androidx.paging.PagingData
 import com.example.composegallery.core.domain.model.Photo

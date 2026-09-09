@@ -1,4 +1,4 @@
-package com.example.composegallery.feature.photodetail.fakes
+package com.example.composegallery.core.testing
 
 import com.example.composegallery.core.domain.model.Photo
 import com.example.composegallery.core.domain.repository.FavoriteRepository

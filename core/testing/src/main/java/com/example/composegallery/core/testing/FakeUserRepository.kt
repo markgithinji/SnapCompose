@@ -1,4 +1,4 @@
-package com.example.composegallery.feature.profile.fakes
+package com.example.composegallery.core.testing
 
 import androidx.paging.PagingData
 import com.example.composegallery.core.common.Result

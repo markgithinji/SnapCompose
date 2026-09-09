@@ -2,8 +2,8 @@ package com.example.composegallery.feature.photodetail.domain.usecase
 
 import com.example.composegallery.core.common.Result
 import com.example.composegallery.core.domain.model.Photo
-import com.example.composegallery.feature.photodetail.fakes.FakeGalleryRepository
-import com.example.composegallery.feature.photodetail.fakes.FakePhotoActionService
+import com.example.composegallery.core.testing.FakeGalleryRepository
+import com.example.composegallery.core.testing.FakePhotoActionService
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Before

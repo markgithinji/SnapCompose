@@ -10,8 +10,8 @@ import com.example.composegallery.core.network.model.StatsDto
 import com.example.composegallery.core.network.model.UnsplashUserDto
 import com.example.composegallery.core.network.model.UserStatisticsDto
 import com.example.composegallery.feature.profile.data.DefaultUserRepository
-import com.example.composegallery.feature.profile.fakes.FakeStringProvider
-import com.example.composegallery.feature.profile.fakes.FakeUnsplashApi
+import com.example.composegallery.core.testing.FakeStringProvider
+import com.example.composegallery.core.testing.FakeUnsplashApi
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
