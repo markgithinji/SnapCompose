@@ -19,6 +19,7 @@ A modern Android app built with **Jetpack Compose**, showcasing best practices a
 - 📥 **Photo Download**: High-quality photo downloads with **real-time progress tracking** and MediaStore integration
 - 🖼️ **Set Wallpaper**: Quickly set any Unsplash photo as your device wallpaper
 - 🕒 **Recent Searches**: Persistent search history management (view, reuse, or clear)
+- 📤 **Photo Sharing**: Share high-resolution images directly to other apps (WhatsApp, Instagram, etc.) with secure **FileProvider** integration
 - 📷 **Photo details** with metadata, exif, and location info
 - 👥 **User profile** with statistics, photos, liked images & collections
 - 🌑 **Jetpack Compose UI** with Material 3 styling
@@ -40,7 +41,7 @@ A modern Android app built with **Jetpack Compose**, showcasing best practices a
 - **Image Loading**: Coil
 - **Build System**: Gradle (KTS) with **Convention Plugins** for modular configuration
 - **Performance**: **Baseline Profiles** for improved startup and frame stability
-- **System Integration**: DownloadManager, MediaStore API, WallpaperManager
+- **System Integration**: DownloadManager, MediaStore API, WallpaperManager, FileProvider
 - **Logging**: Timber  
 - **Code Quality**: Spotless (formatting), Detekt (static analysis)  
 - **Testing**: JUnit, Mockito, Turbine, Truth, Compose UI Testing
@@ -98,7 +99,7 @@ java/
     │   ├── domain/                          #   - Feature-specific use cases (where applicable)
     │   └── ui/                              #   - Compose screens, components, and ViewModels
     ├── home/                                # Main gallery feed, topics, and favorites management
-    ├── photodetail/                         # Detailed photo view, metadata, and high-res download actions
+    ├── photodetail/                         # Detailed photo view, metadata, high-res download, and sharing actions
     ├── profile/                             # User profiles, statistics, and interactive charts
     └── search/                              # Search functionality with advanced filter options
 ```
