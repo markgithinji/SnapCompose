@@ -92,6 +92,8 @@
     <string name="reset_filters">Reset</string>
     <string name="download">Download</string>
     <string name="share">Share</string>
+    <string name="share_error">Failed to prepare photo for sharing.</string>
+    <string name="sharing_photo">Preparing photo for sharing…</string>
     <string name="set_as_wallpaper">Set as Wallpaper</string>
     <string name="wallpaper_set_success">Wallpaper set successfully!</string>
     <string name="wallpaper_set_error">Failed to set wallpaper.</string>

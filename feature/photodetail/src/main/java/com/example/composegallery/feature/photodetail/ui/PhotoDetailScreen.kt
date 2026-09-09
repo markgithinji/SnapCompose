@@ -8,6 +8,7 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.icu.text.SimpleDateFormat
 import android.icu.util.TimeZone
+import android.net.Uri
 import android.view.HapticFeedbackConstants
 import android.view.View
 import androidx.compose.animation.AnimatedContentScope
@@ -100,6 +101,7 @@ import com.example.composegallery.core.ui.UserProfileImage
 import com.example.composegallery.core.common.UiState
 import kotlinx.coroutines.launch
 import java.util.Locale
+import androidx.core.net.toUri
 
 @SuppressLint("MissingPermission")
 private fun performHapticFeedback(view: View, context: Context, constant: Int) {
@@ -139,9 +141,12 @@ fun PhotoDetailScreen(
 ) {
     val photoState by viewModel.uiState.collectAsStateWithLifecycle()
     val isWallpaperLoading by viewModel.isWallpaperLoading.collectAsStateWithLifecycle()
+    val isSharing by viewModel.isSharing.collectAsStateWithLifecycle()
     val downloadStatus by viewModel.downloadStatus.collectAsStateWithLifecycle()
     val isFavorite by viewModel.isFavorite.collectAsStateWithLifecycle()
     val retryKey = remember(photoId) { mutableIntStateOf(0) }
+
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         viewModel.uiEvent.collect { event ->
@@ -149,12 +154,20 @@ fun PhotoDetailScreen(
                 is PhotoDetailUiEvent.ShowSnackbar -> {
                     onShowSnackbar(event.message, event.actionLabel, event.duration)
                 }
+                is PhotoDetailUiEvent.SharePhoto -> {
+                    val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                        type = "image/jpeg"
+                        putExtra(Intent.EXTRA_STREAM, event.uri.toUri())
+                        putExtra(Intent.EXTRA_TEXT, context.getString(R.string.attribution_format, event.authorName))
+                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    }
+                    context.startActivity(Intent.createChooser(shareIntent, context.getString(R.string.share)))
+                }
             }
         }
     }
 
     var pendingAction by remember { mutableStateOf<PhotoDetailAction?>(null) }
-    val context = LocalContext.current
     val view = LocalView.current
 
     SideEffect {
@@ -203,12 +216,7 @@ fun PhotoDetailScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        val hapticConstant = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                            HapticFeedbackConstants.CONFIRM
-                        } else {
-                            HapticFeedbackConstants.VIRTUAL_KEY
-                        }
-                        performHapticFeedback(view, context, hapticConstant)
+                        performHapticFeedback(view, context, HapticFeedbackConstants.VIRTUAL_KEY)
                         if (pendingAction == PhotoDetailAction.DOWNLOAD) {
                             viewModel.downloadPhoto(photo)
                         } else {
@@ -279,7 +287,6 @@ fun PhotoDetailScreen(
 
             else -> {
                 val photo = (state as? UiState.Content)?.data
-                val shareTitle = stringResource(R.string.share)
                 PhotoDetailContent(
                     photo = photo,
                     photoId = photoId,
@@ -292,6 +299,7 @@ fun PhotoDetailScreen(
                     animatedVisibilityScope = animatedVisibilityScope,
                     retryKey = retryKey.intValue,
                     isWallpaperLoading = isWallpaperLoading,
+                    isSharing = isSharing,
                     downloadStatus = downloadStatus,
                     isFavorite = isFavorite,
                     onRetry = { retryKey.intValue++ },
@@ -301,16 +309,7 @@ fun PhotoDetailScreen(
                     onDownloadClick = { pendingAction = PhotoDetailAction.DOWNLOAD },
                     onWallpaperClick = { pendingAction = PhotoDetailAction.WALLPAPER },
                     onFavoriteClick = { viewModel.toggleFavorite(it) },
-                    onShareClick = {
-                        val intent = Intent(Intent.ACTION_SEND).apply {
-                            type = "text/plain"
-                            putExtra(
-                                Intent.EXTRA_TEXT,
-                                photo?.authorUnsplashUrl ?: photo?.regularUrl
-                            )
-                        }
-                        context.startActivity(Intent.createChooser(intent, shareTitle))
-                    },
+                    onShareClick = { photo?.let { viewModel.sharePhoto(it) } },
                     shape = detailShape,
                     onImageLoad = {
                         photo?.downloadLocationUrl?.let { url ->
@@ -339,6 +338,7 @@ private fun PhotoDetailContent(
     animatedVisibilityScope: AnimatedContentScope,
     retryKey: Int,
     isWallpaperLoading: Boolean,
+    isSharing: Boolean,
     downloadStatus: DownloadStatus,
     isFavorite: Boolean,
     onRetry: () -> Unit,
@@ -438,6 +438,7 @@ private fun PhotoDetailContent(
                     PhotoDetailInfo(
                         photo = photo,
                         isWallpaperLoading = isWallpaperLoading,
+                        isSharing = isSharing,
                         downloadStatus = downloadStatus,
                         isFavorite = isFavorite,
                         onUserClick = onUserClick,
@@ -459,6 +460,7 @@ private fun PhotoDetailContent(
 private fun PhotoDetailInfo(
     photo: Photo,
     isWallpaperLoading: Boolean,
+    isSharing: Boolean,
     downloadStatus: DownloadStatus,
     isFavorite: Boolean,
     onUserClick: (Photo) -> Unit,
@@ -548,12 +550,7 @@ private fun PhotoDetailInfo(
         ) {
             FilledTonalIconButton(
                 onClick = {
-                    val hapticConstant = if (!isFavorite && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                        HapticFeedbackConstants.CONFIRM
-                    } else {
-                        HapticFeedbackConstants.VIRTUAL_KEY
-                    }
-                    performHapticFeedback(view, context, hapticConstant)
+                    performHapticFeedback(view, context, HapticFeedbackConstants.VIRTUAL_KEY)
                     coroutineScope.launch {
                         scale.animateTo(
                             targetValue = 1.3f,
@@ -597,9 +594,18 @@ private fun PhotoDetailInfo(
                     onShareClick()
                 },
                 modifier = Modifier.size(56.dp),
+                enabled = !isSharing,
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Icon(Icons.Default.Share, contentDescription = stringResource(R.string.share))
+                if (isSharing) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        strokeWidth = 2.dp,
+                        color = LocalContentColor.current
+                    )
+                } else {
+                    Icon(Icons.Default.Share, contentDescription = stringResource(R.string.share))
+                }
             }
 
             val isDownloading = downloadStatus is DownloadStatus.Progress

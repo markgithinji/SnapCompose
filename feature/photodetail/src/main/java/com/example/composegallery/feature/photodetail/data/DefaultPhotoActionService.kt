@@ -3,9 +3,11 @@ package com.example.composegallery.feature.photodetail.data
 import android.app.WallpaperManager
 import android.content.ContentValues
 import android.content.Context
+import android.graphics.Bitmap
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
+import androidx.core.content.FileProvider
 import androidx.core.graphics.drawable.toBitmap
 import coil.ImageLoader
 import coil.request.ImageRequest
@@ -24,6 +26,8 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import java.io.File
+import java.io.FileOutputStream
 import javax.inject.Inject
 
 class DefaultPhotoActionService @Inject constructor(
@@ -122,6 +126,45 @@ class DefaultPhotoActionService @Inject constructor(
             }
         } catch (e: Exception) {
             val message = stringProvider.get(R.string.wallpaper_set_error)
+            Result.Error(message, AppException(message, e))
+        }
+    }
+
+    override suspend fun getPhotoForSharing(url: String): Result<String> = withContext(Dispatchers.IO) {
+        try {
+            val loader = ImageLoader(context)
+            val request = ImageRequest.Builder(context)
+                .data(url)
+                .allowHardware(false)
+                .build()
+
+            val result = loader.execute(request)
+            if (result is SuccessResult) {
+                val bitmap = result.drawable.toBitmap()
+
+                val cachePath = File(context.cacheDir, "shared_images")
+                cachePath.mkdirs()
+
+                // Cleanup old images
+                cachePath.listFiles()?.forEach { it.delete() }
+
+                val file = File(cachePath, "shared_photo_${System.currentTimeMillis()}.jpg")
+                FileOutputStream(file).use { out ->
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
+                }
+
+                val uri = FileProvider.getUriForFile(
+                    context,
+                    "${context.packageName}.fileprovider",
+                    file
+                )
+                Result.Success(uri.toString())
+            } else {
+                val message = stringProvider.get(R.string.share_error)
+                Result.Error(message, AppException(message))
+            }
+        } catch (e: Exception) {
+            val message = stringProvider.get(R.string.share_error)
             Result.Error(message, AppException(message, e))
         }
     }

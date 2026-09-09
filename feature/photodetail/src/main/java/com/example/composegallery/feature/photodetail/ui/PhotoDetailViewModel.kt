@@ -10,6 +10,7 @@ import com.example.composegallery.core.common.UiState
 import com.example.composegallery.core.common.StringProvider
 import com.example.composegallery.core.domain.repository.FavoriteRepository
 import com.example.composegallery.core.domain.repository.GalleryRepository
+import com.example.composegallery.core.domain.repository.PhotoActionService
 import com.example.composegallery.feature.photodetail.domain.usecase.DownloadPhotoUseCase
 import com.example.composegallery.feature.photodetail.domain.usecase.SetWallpaperUseCase
 import com.example.composegallery.feature.photodetail.domain.usecase.ToggleFavoriteUseCase
@@ -34,6 +35,7 @@ class PhotoDetailViewModel @Inject constructor(
     private val galleryRepository: GalleryRepository,
     private val favoriteRepository: FavoriteRepository,
     private val downloadPhotoUseCase: DownloadPhotoUseCase,
+    private val photoActionService: PhotoActionService,
     private val setWallpaperUseCase: SetWallpaperUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
     private val stringProvider: StringProvider
@@ -50,6 +52,9 @@ class PhotoDetailViewModel @Inject constructor(
 
     private val _downloadStatus = MutableStateFlow<DownloadStatus>(DownloadStatus.Idle)
     val downloadStatus: StateFlow<DownloadStatus> = _downloadStatus.asStateFlow()
+
+    private val _isSharing = MutableStateFlow(false)
+    val isSharing: StateFlow<Boolean> = _isSharing.asStateFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val isFavorite: StateFlow<Boolean> = _uiState
@@ -125,6 +130,19 @@ class PhotoDetailViewModel @Inject constructor(
             toggleFavoriteUseCase(photo)
         }
     }
+
+    fun sharePhoto(photo: Photo) {
+        viewModelScope.launch {
+            _isSharing.value = true
+            when (val result = photoActionService.getPhotoForSharing(photo.fullUrl)) {
+                is Result.Success -> {
+                    _uiEvent.emit(PhotoDetailUiEvent.SharePhoto(result.data, photo.authorName))
+                }
+                is Result.Error -> _uiEvent.emit(PhotoDetailUiEvent.ShowSnackbar(result.message))
+            }
+            _isSharing.value = false
+        }
+    }
 }
 
 sealed class PhotoDetailUiEvent {
@@ -132,5 +150,10 @@ sealed class PhotoDetailUiEvent {
         val message: String,
         val actionLabel: String? = null,
         val duration: SnackbarDuration = SnackbarDuration.Short
+    ) : PhotoDetailUiEvent()
+
+    data class SharePhoto(
+        val uri: String,
+        val authorName: String
     ) : PhotoDetailUiEvent()
 }

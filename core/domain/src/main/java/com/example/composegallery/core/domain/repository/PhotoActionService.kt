@@ -7,4 +7,5 @@ import kotlinx.coroutines.flow.Flow
 interface PhotoActionService {
     fun downloadPhoto(url: String, fileName: String): Flow<DownloadStatus>
     suspend fun setWallpaper(url: String): Result<Unit>
+    suspend fun getPhotoForSharing(url: String): Result<String>
 }
