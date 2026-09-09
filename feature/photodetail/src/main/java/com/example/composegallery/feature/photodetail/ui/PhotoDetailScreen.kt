@@ -147,6 +147,8 @@ fun PhotoDetailScreen(
     val retryKey = remember(photoId) { mutableIntStateOf(0) }
 
     val context = LocalContext.current
+    val shareTitle = stringResource(R.string.share)
+    val attributionFormat = stringResource(R.string.attribution_format)
 
     LaunchedEffect(Unit) {
         viewModel.uiEvent.collect { event ->
@@ -158,10 +160,10 @@ fun PhotoDetailScreen(
                     val shareIntent = Intent(Intent.ACTION_SEND).apply {
                         type = "image/jpeg"
                         putExtra(Intent.EXTRA_STREAM, event.uri.toUri())
-                        putExtra(Intent.EXTRA_TEXT, context.getString(R.string.attribution_format, event.authorName))
+                        putExtra(Intent.EXTRA_TEXT, attributionFormat.format(event.authorName))
                         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                     }
-                    context.startActivity(Intent.createChooser(shareIntent, context.getString(R.string.share)))
+                    context.startActivity(Intent.createChooser(shareIntent, shareTitle))
                 }
             }
         }
