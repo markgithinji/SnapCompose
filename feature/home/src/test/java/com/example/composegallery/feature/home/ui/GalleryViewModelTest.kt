@@ -1,18 +1,13 @@
 package com.example.composegallery.feature.home.ui
 
-import com.example.composegallery.core.ui.R
 import com.example.composegallery.core.common.Result
 import com.example.composegallery.core.domain.model.DownloadStatus
 import com.example.composegallery.core.domain.model.Photo
 import com.example.composegallery.core.common.UiState
-import com.example.composegallery.core.common.StringProvider
-import com.example.composegallery.core.common.network.NetworkMonitor
-import com.example.composegallery.core.domain.repository.FavoriteRepository
-import com.example.composegallery.core.domain.repository.GalleryRepository
 import com.example.composegallery.feature.photodetail.domain.usecase.DownloadPhotoUseCase
 import com.example.composegallery.feature.photodetail.domain.usecase.SetWallpaperUseCase
 import com.example.composegallery.feature.photodetail.domain.usecase.ToggleFavoriteUseCase
-import com.example.composegallery.core.util.MainDispatcherRule
+import com.example.composegallery.core.testing.util.MainDispatcherRule
 import com.example.composegallery.core.testing.FakeFavoriteRepository
 import com.example.composegallery.core.testing.FakeGalleryRepository
 import com.example.composegallery.core.testing.FakeNetworkMonitor
@@ -21,19 +16,12 @@ import com.example.composegallery.core.testing.FakeStringProvider
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
-import org.mockito.kotlin.any
-import org.mockito.kotlin.doReturn
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class GalleryViewModelTest {

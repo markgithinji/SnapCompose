@@ -8,7 +8,7 @@ import com.example.composegallery.core.testing.FakeSearchRepository
 import com.example.composegallery.feature.search.domain.usecase.ObserveSearchResultsUseCase
 import com.example.composegallery.feature.search.domain.usecase.SubmitSearchUseCase
 import com.example.composegallery.core.testing.FakeNetworkMonitor
-import com.example.composegallery.core.util.MainDispatcherRule
+import com.example.composegallery.core.testing.util.MainDispatcherRule
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first

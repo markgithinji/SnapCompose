@@ -7,29 +7,27 @@ import com.example.composegallery.core.network.model.UnsplashPhotoDto
 import com.example.composegallery.core.network.model.UrlsDto
 import com.example.composegallery.core.network.model.UserDto
 import com.example.composegallery.core.domain.model.Photo
-import com.example.composegallery.core.database.local.AppDatabase
 import com.example.composegallery.core.database.local.home.entity.PhotoEntity
 import com.example.composegallery.feature.home.data.DefaultGalleryRepository
 import com.example.composegallery.core.testing.FakePhotoDao
 import com.example.composegallery.core.testing.FakeStringProvider
 import com.example.composegallery.core.testing.FakeUnsplashApi
+import com.example.composegallery.core.testing.createFakeAppDatabase
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
-import org.mockito.kotlin.*
 
 class DefaultGalleryRepositoryTest {
 
     private val api = FakeUnsplashApi()
-    private val database: AppDatabase = mock()
     private val photoDao = FakePhotoDao()
+    private val database = createFakeAppDatabase(photoDao = photoDao)
     private val stringProvider = FakeStringProvider()
     private lateinit var repository: DefaultGalleryRepository
 
     @Before
     fun setup() {
-        whenever(database.photoDao()).thenReturn(photoDao)
         repository = DefaultGalleryRepository(api, database, stringProvider)
     }
 

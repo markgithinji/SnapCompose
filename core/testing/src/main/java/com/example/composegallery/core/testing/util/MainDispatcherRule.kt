@@ -1,4 +1,4 @@
-package com.example.composegallery.utils
+package com.example.composegallery.core.testing.util
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -9,6 +9,10 @@ import kotlinx.coroutines.test.setMain
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 
+/**
+ * A JUnit [TestRule] that sets the Main dispatcher to a [TestDispatcher]
+ * for unit testing.
+ */
 @OptIn(ExperimentalCoroutinesApi::class)
 class MainDispatcherRule(
     val testDispatcher: TestDispatcher = UnconfinedTestDispatcher(),

@@ -2,7 +2,7 @@ package com.example.composegallery.feature.search.domain.usecase
 
 import androidx.recyclerview.widget.DiffUtil
 import com.example.composegallery.core.domain.model.Photo
-import com.example.composegallery.core.util.collectItemsForTest
+import com.example.composegallery.core.testing.util.collectItemsForTest
 import com.example.composegallery.core.testing.FakeSearchRepository
 import com.example.composegallery.core.domain.model.SearchFilters
 import com.google.common.truth.Truth.assertThat

@@ -4,19 +4,16 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.example.composegallery.core.common.AppException
-import com.example.composegallery.core.common.StringProvider
+import com.example.composegallery.core.testing.FakeStringProvider
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
-import org.mockito.kotlin.any
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 
 class BaseUnsplashPagingSourceTest {
 
     private lateinit var pagingSource: BaseUnsplashPagingSource<String>
-    private val stringProvider = mock<StringProvider>()
+    private val stringProvider = FakeStringProvider()
 
     private val fakeDataPage1 = listOf("item1", "item2", "item3")
     private val fakeDataPage2 = listOf("item4", "item5")
@@ -56,8 +53,6 @@ class BaseUnsplashPagingSourceTest {
 
     @Test
     fun load_returnsErrorOnException() = runTest {
-        whenever(stringProvider.get(any())).thenReturn("Something went wrong")
-
         apiMock = { _, _ -> throw RuntimeException("Unexpected error") }
         pagingSource = object : BaseUnsplashPagingSource<String>(stringProvider, apiMock) {}
 
@@ -72,7 +67,8 @@ class BaseUnsplashPagingSourceTest {
         assertThat(result).isInstanceOf(PagingSource.LoadResult.Error::class.java)
         val error = result as PagingSource.LoadResult.Error
         assertThat(error.throwable).isInstanceOf(AppException::class.java)
-        assertThat(error.throwable.message).isEqualTo("Something went wrong")
+        // FakeStringProvider returns "Fake string" for any key
+        assertThat(error.throwable.message).isEqualTo("Fake string")
         assertThat(error.throwable.cause).hasMessageThat().contains("Unexpected error")
     }
 

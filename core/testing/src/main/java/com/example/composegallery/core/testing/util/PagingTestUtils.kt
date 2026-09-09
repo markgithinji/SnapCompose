@@ -1,4 +1,4 @@
-package com.example.composegallery.core.util
+package com.example.composegallery.core.testing.util
 
 import androidx.paging.AsyncPagingDataDiffer
 import androidx.paging.PagingData
@@ -37,6 +37,7 @@ suspend fun <T : Any> Flow<PagingData<T>>.collectItemsForTest(
         differ.submitData(pagingData)
     }
 
+    // Give time for the data to be processed
     repeat(10) { yield() }
 
     val items = differ.snapshot().items
