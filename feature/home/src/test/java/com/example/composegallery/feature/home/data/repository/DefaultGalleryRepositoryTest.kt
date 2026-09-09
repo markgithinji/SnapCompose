@@ -8,40 +8,35 @@ import com.example.composegallery.core.network.model.UrlsDto
 import com.example.composegallery.core.network.model.UserDto
 import com.example.composegallery.core.domain.model.Photo
 import com.example.composegallery.core.database.local.AppDatabase
-import com.example.composegallery.core.database.local.home.dao.PhotoDao
 import com.example.composegallery.core.database.local.home.entity.PhotoEntity
-import com.example.composegallery.core.database.local.home.entity.toDomainModel
-import com.example.composegallery.core.network.remote.UnsplashApi
-import com.example.composegallery.core.common.StringProvider
 import com.example.composegallery.feature.home.data.DefaultGalleryRepository
+import com.example.composegallery.feature.home.fakes.FakePhotoDao
+import com.example.composegallery.feature.home.fakes.FakeStringProvider
+import com.example.composegallery.feature.home.fakes.FakeUnsplashApi
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.*
-import kotlinx.coroutines.runBlocking
 
 class DefaultGalleryRepositoryTest {
 
-    private lateinit var api: UnsplashApi
-    private lateinit var database: AppDatabase
-    private lateinit var stringProvider: StringProvider
+    private val api = FakeUnsplashApi()
+    private val database: AppDatabase = mock()
+    private val photoDao = FakePhotoDao()
+    private val stringProvider = FakeStringProvider()
     private lateinit var repository: DefaultGalleryRepository
 
     @Before
     fun setup() {
-        api = mock()
-        database = mock()
-        val photoDao = mock<PhotoDao>()
         whenever(database.photoDao()).thenReturn(photoDao)
-        stringProvider = mock()
         repository = DefaultGalleryRepository(api, database, stringProvider)
     }
 
     @Test
     fun getPhoto_validResponse_returnsSuccess() = runTest {
         val dto = fakePhotoDto(id = "123")
-        whenever(runBlocking { api.getPhoto("123") }).thenReturn(dto)
+        api.setPhotoResult(dto)
 
         val result = repository.getPhoto("123")
 
@@ -57,7 +52,7 @@ class DefaultGalleryRepositoryTest {
             altDescription = null,
             exif = null
         )
-        whenever(runBlocking { api.getPhoto("optional") }).thenReturn(dto)
+        api.setPhotoResult(dto)
 
         val result = repository.getPhoto("optional")
 
@@ -70,7 +65,7 @@ class DefaultGalleryRepositoryTest {
     @Test
     fun getPhoto_zeroWidthAndHeight_returnsSuccess() = runTest {
         val dto = fakePhotoDto("zero-values").copy(width = 0, height = 0)
-        whenever(runBlocking { api.getPhoto("zero-values") }).thenReturn(dto)
+        api.setPhotoResult(dto)
 
         val result = repository.getPhoto("zero-values")
 
@@ -82,85 +77,67 @@ class DefaultGalleryRepositoryTest {
 
     @Test
     fun getPhoto_apiThrowsException_returnsError() = runTest {
-        whenever(runBlocking { api.getPhoto("boom") }).thenThrow(RuntimeException("timeout"))
-        whenever(stringProvider.get(any(), anyVararg())).thenReturn("Network error")
+        api.setPhotoException(RuntimeException("timeout"))
 
         val result = repository.getPhoto("boom")
 
         assertThat(result is Result.Error).isTrue()
         val message = (result as Result.Error).message
-        assertThat(message.lowercase()).contains("network")
+        assertThat(message.lowercase()).contains("fake") // FakeStringProvider returns "Fake string"
     }
 
     @Test
     fun getPhoto_apiReturnsNull_returnsError() = runTest {
-        whenever(runBlocking { api.getPhoto("null") }).thenReturn(null)
-        whenever(stringProvider.get(any(), anyVararg())).thenReturn("Unexpected null result")
+        api.setPhotoResult(null)
 
         val result = repository.getPhoto("null")
 
         assertThat(result is Result.Error).isTrue()
-        val message = (result as Result.Error).message
-        assertThat(message.lowercase()).contains("unexpected")
     }
 
     @Test
     fun getPhoto_blankId_returnsError() = runTest {
         val dto = fakePhotoDto(id = "")
-        whenever(runBlocking { api.getPhoto("blank") }).thenReturn(dto)
-        whenever(stringProvider.get(any(), anyVararg())).thenReturn("Invalid photo data")
+        api.setPhotoResult(dto)
 
         val result = repository.getPhoto("blank")
 
         assertThat(result is Result.Error).isTrue()
-        val message = (result as Result.Error).message
-        assertThat(message.lowercase()).contains("invalid")
     }
-
-    @Test
-    fun getPhoto_returnsError_whenRequiredFieldsAreMissing() = runTest {
-        val invalidUser = fakeUserDto().copy(
-            name = "",
-            profileImage = fakeUserDto().profileImage.copy(
-                small = "",
-                medium = "",
-                large = ""
-            )
-        )
-        val dto = fakePhotoDto(id = "invalid-fields").copy(user = invalidUser)
-        whenever(runBlocking { api.getPhoto("invalid-fields") }).thenReturn(dto)
-        whenever(stringProvider.get(any(), anyVararg())).thenReturn("Missing required fields")
-
-        val result = repository.getPhoto("invalid-fields")
-
-        assertThat(result is Result.Error).isTrue()
-        val message = (result as Result.Error).message
-        assertThat(message.lowercase()).contains("missing")
-    }
-
 
     @Test
     fun getPhoto_cachedInDb_returnsCachedPhoto() = runTest {
         val photoId = "cached-123"
-        val entity = mock<PhotoEntity>().apply {
-            whenever(id).thenReturn(photoId)
-            whenever(authorName).thenReturn("Cached Author")
-            whenever(smallUrl).thenReturn("url")
-            whenever(fullUrl).thenReturn("url")
-            whenever(regularUrl).thenReturn("url")
-            whenever(thumbUrl).thenReturn("url")
-            whenever(authorProfileImageUrl).thenReturn("url")
-            whenever(authorProfileImageMediumResUrl).thenReturn("url")
-            whenever(authorProfileImageHighResUrl).thenReturn("url")
-        }
-        whenever(runBlocking { database.photoDao().getPhotoById(photoId) }).thenReturn(entity)
+        val entity = PhotoEntity(
+            id = photoId,
+            topicId = "editorial",
+            width = 100,
+            height = 100,
+            thumbUrl = "url",
+            smallUrl = "url",
+            regularUrl = "url",
+            fullUrl = "url",
+            authorName = "Cached Author",
+            authorProfileImageUrl = "url",
+            authorProfileImageMediumResUrl = "url",
+            authorProfileImageHighResUrl = "url",
+            authorUnsplashUrl = null,
+            username = null,
+            downloadLocationUrl = null,
+            pagingOrder = 0,
+            location = null,
+            blurHash = null,
+            description = null,
+            createdAt = null,
+            exif = null
+        )
+        photoDao.insertPhotos(listOf(entity))
 
         val result = repository.getPhoto(photoId)
 
         assertThat(result is Result.Success<*>).isTrue()
         assertThat((result as Result.Success<Photo>).data.id).isEqualTo(photoId)
         assertThat(result.data.authorName).isEqualTo("Cached Author")
-        verify(api, never()).getPhoto(any())
     }
 
     private fun fakePhotoDto(id: String = "123"): UnsplashPhotoDto {

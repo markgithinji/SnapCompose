@@ -1,18 +1,15 @@
 package com.example.composegallery.feature.photodetail.domain.usecase
 
 import com.example.composegallery.core.domain.model.Photo
-import com.example.composegallery.core.domain.repository.FavoriteRepository
+import com.example.composegallery.feature.photodetail.fakes.FakeFavoriteRepository
+import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
-import kotlinx.coroutines.runBlocking
 
 class ToggleFavoriteUseCaseTest {
 
-    private val favoriteRepository: FavoriteRepository = mock()
+    private val favoriteRepository = FakeFavoriteRepository()
     private lateinit var useCase: ToggleFavoriteUseCase
 
     @Before
@@ -23,21 +20,20 @@ class ToggleFavoriteUseCaseTest {
     @Test
     fun invoke_whenIsFavorite_removesFavorite() = runTest {
         val photo = createFakePhoto("1")
-        whenever(runBlocking { favoriteRepository.isFavoriteOneShot("1") }).thenReturn(true)
+        favoriteRepository.addFavorite(photo)
 
         useCase(photo)
 
-        verify(favoriteRepository).removeFavorite("1")
+        assertThat(favoriteRepository.isFavoriteOneShot("1")).isFalse()
     }
 
     @Test
     fun invoke_whenIsNotFavorite_addsFavorite() = runTest {
         val photo = createFakePhoto("1")
-        whenever(runBlocking { favoriteRepository.isFavoriteOneShot("1") }).thenReturn(false)
 
         useCase(photo)
 
-        verify(favoriteRepository).addFavorite(photo)
+        assertThat(favoriteRepository.isFavoriteOneShot("1")).isTrue()
     }
 
     private fun createFakePhoto(id: String) = Photo(

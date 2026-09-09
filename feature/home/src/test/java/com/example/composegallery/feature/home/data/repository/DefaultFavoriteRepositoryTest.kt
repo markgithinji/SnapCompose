@@ -1,23 +1,18 @@
 package com.example.composegallery.feature.home.data.repository
 
 import com.example.composegallery.core.domain.model.Photo
-import com.example.composegallery.core.database.local.home.dao.FavoritePhotoDao
-import com.example.composegallery.core.database.local.home.entity.FavoritePhotoEntity
 import com.example.composegallery.feature.home.data.DefaultFavoriteRepository
+import com.example.composegallery.feature.home.fakes.FakeFavoritePhotoDao
+import com.example.composegallery.core.database.local.home.entity.FavoritePhotoEntity
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
-import org.mockito.kotlin.any
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 
 class DefaultFavoriteRepositoryTest {
 
-    private val favoritePhotoDao: FavoritePhotoDao = mock()
+    private val favoritePhotoDao = FakeFavoritePhotoDao()
     private lateinit var repository: DefaultFavoriteRepository
 
     @Before
@@ -28,7 +23,7 @@ class DefaultFavoriteRepositoryTest {
     @Test
     fun getFavorites_mapsEntitiesToDomainModels() = runTest {
         val entity = createFakeFavoriteEntity("1")
-        whenever(favoritePhotoDao.getAllFavorites()).thenReturn(flowOf(listOf(entity)))
+        favoritePhotoDao.insertFavorite(entity)
 
         val favorites = repository.getFavorites().first()
 
@@ -42,14 +37,17 @@ class DefaultFavoriteRepositoryTest {
 
         repository.addFavorite(photo)
 
-        verify(favoritePhotoDao).insertFavorite(any())
+        assertThat(favoritePhotoDao.isFavoriteOneShot("1")).isTrue()
     }
 
     @Test
     fun removeFavorite_callsDao() = runTest {
+        val entity = createFakeFavoriteEntity("1")
+        favoritePhotoDao.insertFavorite(entity)
+        
         repository.removeFavorite("1")
 
-        verify(favoritePhotoDao).deleteFavorite("1")
+        assertThat(favoritePhotoDao.isFavoriteOneShot("1")).isFalse()
     }
 
     private fun createFakeFavoriteEntity(id: String) = FavoritePhotoEntity(

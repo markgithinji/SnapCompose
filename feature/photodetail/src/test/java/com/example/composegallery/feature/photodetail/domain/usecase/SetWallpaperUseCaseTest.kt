@@ -2,19 +2,17 @@ package com.example.composegallery.feature.photodetail.domain.usecase
 
 import com.example.composegallery.core.common.Result
 import com.example.composegallery.core.domain.model.Photo
-import com.example.composegallery.core.domain.repository.GalleryRepository
-import com.example.composegallery.core.domain.repository.PhotoActionService
+import com.example.composegallery.feature.photodetail.fakes.FakeGalleryRepository
+import com.example.composegallery.feature.photodetail.fakes.FakePhotoActionService
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
-import org.mockito.kotlin.*
-import kotlinx.coroutines.runBlocking
 
 class SetWallpaperUseCaseTest {
 
-    private val photoActionService: PhotoActionService = mock()
-    private val galleryRepository: GalleryRepository = mock()
+    private val photoActionService = FakePhotoActionService()
+    private val galleryRepository = FakeGalleryRepository()
     private lateinit var useCase: SetWallpaperUseCase
 
     @Before
@@ -25,24 +23,24 @@ class SetWallpaperUseCaseTest {
     @Test
     fun invoke_success_returnsSuccessAndReportsDownload() = runTest {
         val photo = createFakePhoto("1")
-        whenever(runBlocking { photoActionService.setWallpaper(photo.fullUrl) }).thenReturn(Result.Success(Unit))
+        photoActionService.setWallpaperResult(Result.Success(Unit))
 
         val result = useCase(photo)
 
         assertThat(result).isInstanceOf(Result.Success::class.java)
-        verify(galleryRepository).reportDownload("https://example.com/download")
+        assertThat(galleryRepository.lastReportedDownloadUrl).isEqualTo("https://example.com/download")
     }
 
     @Test
     fun invoke_error_returnsErrorAndDoesNotReport() = runTest {
         val photo = createFakePhoto("1")
-        whenever(runBlocking { photoActionService.setWallpaper(photo.fullUrl) }).thenReturn(Result.Error("Failed"))
+        photoActionService.setWallpaperResult(Result.Error("Failed"))
 
         val result = useCase(photo)
 
         assertThat(result).isInstanceOf(Result.Error::class.java)
         assertThat((result as Result.Error).message).isEqualTo("Failed")
-        verify(galleryRepository, never()).reportDownload(any())
+        assertThat(galleryRepository.lastReportedDownloadUrl).isNull()
     }
 
     private fun createFakePhoto(id: String) = Photo(

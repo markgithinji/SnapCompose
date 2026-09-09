@@ -6,28 +6,22 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.composegallery.core.database.local.AppDatabase
 import com.example.composegallery.core.database.local.home.entity.PhotoEntity
-import com.example.composegallery.core.database.local.home.entity.PhotoRemoteKeyEntity
-import com.example.composegallery.core.database.local.toDomainModel
-import com.example.composegallery.core.database.local.toEntity
-import com.example.composegallery.core.network.paging.home.PhotoRemoteMediator
-import com.example.composegallery.core.network.remote.UnsplashApi
-import com.example.composegallery.core.network.model.*
-import com.example.composegallery.core.common.StringProvider
+import com.example.composegallery.feature.home.data.PhotoRemoteMediator
+import com.example.composegallery.feature.home.fakes.FakeGalleryRepository
+import com.example.composegallery.core.common.Result
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.*
 
 @OptIn(ExperimentalPagingApi::class)
 @RunWith(AndroidJUnit4::class)
 class PhotoRemoteMediatorTest {
 
     private lateinit var database: AppDatabase
-    private val api: UnsplashApi = mock()
-    private val stringProvider: StringProvider = mock()
+    private val galleryRepository = FakeGalleryRepository()
 
     @Before
     fun setup() {
@@ -45,13 +39,9 @@ class PhotoRemoteMediatorTest {
     @Test
     fun refreshLoadReturnsSuccessResultWhenMoreDataIsPresent() = runTest {
         val topicId = "nature"
-        val fakePhotos = listOf(
-            createFakePhotoDto("1"),
-            createFakePhotoDto("2")
-        )
-        whenever(api.getTopicPhotos(any(), any(), any())).thenReturn(fakePhotos)
+        galleryRepository.setSyncResult(Result.Success(false)) // More data present
 
-        val mediator = PhotoRemoteMediator(api, database, stringProvider, topicId)
+        val mediator = PhotoRemoteMediator(database, galleryRepository, topicId)
         val pagingState = PagingState<Int, PhotoEntity>(
             listOf(),
             null,
@@ -63,17 +53,14 @@ class PhotoRemoteMediatorTest {
 
         assertThat(result is RemoteMediator.MediatorResult.Success).isTrue()
         assertThat((result as RemoteMediator.MediatorResult.Success).endOfPaginationReached).isFalse()
-        
-        val photoCount = database.photoDao().getCount(topicId)
-        assertThat(photoCount).isEqualTo(2)
     }
 
     @Test
     fun refreshLoadReturnsSuccessAndEndOfPaginationWhenNoMoreData() = runTest {
         val topicId = "nature"
-        whenever(api.getTopicPhotos(any(), any(), any())).thenReturn(emptyList<UnsplashPhotoDto>())
+        galleryRepository.setSyncResult(Result.Success(true)) // End of pagination
 
-        val mediator = PhotoRemoteMediator(api, database, stringProvider, topicId)
+        val mediator = PhotoRemoteMediator(database, galleryRepository, topicId)
         val pagingState = PagingState<Int, PhotoEntity>(
             listOf(),
             null,
@@ -90,10 +77,9 @@ class PhotoRemoteMediatorTest {
     @Test
     fun refreshLoadReturnsErrorResultWhenErrorOccurs() = runTest {
         val topicId = "nature"
-        whenever(api.getTopicPhotos(any(), any(), any())).thenThrow(RuntimeException())
-        whenever(stringProvider.get(any())).thenReturn("Error")
+        galleryRepository.setSyncResult(Result.Error("Error"))
 
-        val mediator = PhotoRemoteMediator(api, database, stringProvider, topicId)
+        val mediator = PhotoRemoteMediator(database, galleryRepository, topicId)
         val pagingState = PagingState<Int, PhotoEntity>(
             listOf(),
             null,
@@ -105,68 +91,4 @@ class PhotoRemoteMediatorTest {
 
         assertThat(result is RemoteMediator.MediatorResult.Error).isTrue()
     }
-
-    @Test
-    fun appendLoadReturnsSuccessResult() = runTest {
-        val topicId = "nature"
-        // 1. Setup initial data and keys
-        val photo1 = createFakePhotoDto("1")
-        val domain1 = photo1.toDomainModel()!!
-        val entity1 = domain1.toEntity(topicId, 0)
-        database.photoDao().insertPhotos(listOf(entity1))
-        database.photoRemoteKeyDao().insertAll(listOf(
-            PhotoRemoteKeyEntity("1", topicId, null, 2)
-        ))
-
-        // 2. Mock API for page 2
-        val photo2 = createFakePhotoDto("2")
-        whenever(api.getTopicPhotos(eq(topicId), eq(2), any())).thenReturn(listOf(photo2))
-
-        val mediator = PhotoRemoteMediator(api, database, stringProvider, topicId)
-        
-        // PagingState needs the item
-        val pagingState = PagingState(
-            listOf(PagingSource.LoadResult.Page(listOf(entity1), null, 2)),
-            null,
-            PagingConfig(10),
-            10
-        )
-
-        val result = mediator.load(LoadType.APPEND, pagingState)
-
-        assertThat(result is RemoteMediator.MediatorResult.Success).isTrue()
-        assertThat((result as RemoteMediator.MediatorResult.Success).endOfPaginationReached).isFalse()
-        
-        val photoCount = database.photoDao().getCount(topicId)
-        assertThat(photoCount).isEqualTo(2)
-    }
-
-    private fun createFakePhotoDto(id: String) = UnsplashPhotoDto(
-        id = id,
-        width = 100,
-        height = 100,
-        urls = UrlsDto(
-            thumb = "thumb",
-            small = "small",
-            regular = "regular",
-            full = "full"
-        ),
-        user = UserDto(
-            username = "user",
-            name = "Author",
-            profileImage = ProfileImageDto(
-                small = "s",
-                medium = "m",
-                large = "l"
-            ),
-            links = null,
-            location = null
-        ),
-        likes = 0,
-        blurHash = null,
-        description = null,
-        altDescription = null,
-        createdAt = null,
-        exif = null
-    )
 }

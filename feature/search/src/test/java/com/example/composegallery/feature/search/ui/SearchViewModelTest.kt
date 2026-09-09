@@ -1,26 +1,21 @@
 package com.example.composegallery.feature.search.ui
 
-import com.example.composegallery.core.common.Result
-import com.example.composegallery.core.common.network.NetworkMonitor
 import com.example.composegallery.core.domain.model.ColorFilter
 import com.example.composegallery.core.domain.model.Orientation
 import com.example.composegallery.core.domain.model.OrderBy
 import com.example.composegallery.core.domain.model.SearchFilters
-import com.example.composegallery.feature.search.domain.repository.SearchRepository
+import com.example.composegallery.feature.search.data.repository.FakeSearchRepository
 import com.example.composegallery.feature.search.domain.usecase.ObserveSearchResultsUseCase
 import com.example.composegallery.feature.search.domain.usecase.SubmitSearchUseCase
+import com.example.composegallery.feature.search.fakes.FakeNetworkMonitor
 import com.example.composegallery.core.util.MainDispatcherRule
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.kotlin.any
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SearchViewModelTest {
@@ -28,19 +23,15 @@ class SearchViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private val observeSearchResults: ObserveSearchResultsUseCase = mock()
-    private val submitSearchUseCase: SubmitSearchUseCase = mock()
-    private val searchRepository: SearchRepository = mock()
-    private val networkMonitor: NetworkMonitor = mock()
+    private val searchRepository = FakeSearchRepository()
+    private val observeSearchResults = ObserveSearchResultsUseCase(searchRepository)
+    private val submitSearchUseCase = SubmitSearchUseCase(searchRepository)
+    private val networkMonitor = FakeNetworkMonitor()
 
     private lateinit var viewModel: SearchViewModel
 
     @Before
     fun setup() {
-        whenever(networkMonitor.isOnline).thenReturn(flowOf(true))
-        whenever(observeSearchResults(any())).thenReturn(flowOf())
-        whenever(searchRepository.getRecentSearches(any())).thenReturn(flowOf(emptyList()))
-        
         viewModel = SearchViewModel(
             observeSearchResults,
             submitSearchUseCase,
@@ -89,22 +80,24 @@ class SearchViewModelTest {
     }
 
     @Test
-    fun submitSearch_updatesFiltersAndCallsUseCase() = runTest {
+    fun submitSearch_updatesFiltersAndSavesRecentSearch() = runTest {
         val query = "nature"
-        whenever(submitSearchUseCase(query)).thenReturn(Result.Success(query))
 
         viewModel.submitSearch(query)
 
         assertThat(viewModel.filters.value.query).isEqualTo(query)
-        verify(submitSearchUseCase).invoke(query)
+        
+        val recentSearches = searchRepository.getRecentSearches(10).first()
+        assertThat(recentSearches.map { it.query }).contains(query)
     }
 
     @Test
-    fun clearRecentSearches_callsRepository() = runTest {
-        whenever(searchRepository.clearRecentSearches()).thenReturn(Result.Success(Unit))
-
+    fun clearRecentSearches_clearsRepository() = runTest {
+        searchRepository.saveRecentSearch("cats")
+        
         viewModel.clearRecentSearches()
 
-        verify(searchRepository).clearRecentSearches()
+        val recentSearches = searchRepository.getRecentSearches(10).first()
+        assertThat(recentSearches).isEmpty()
     }
 }

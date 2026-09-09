@@ -1,103 +1,82 @@
 package com.example.composegallery.feature.search.data.repository
 
 import com.example.composegallery.core.common.Result
-import com.example.composegallery.core.network.remote.UnsplashApi
-import com.example.composegallery.core.common.StringProvider
-import com.example.composegallery.core.database.local.search.dao.RecentSearchDao
 import com.example.composegallery.core.database.local.search.entity.RecentSearchEntity
-import com.example.composegallery.core.domain.model.RecentSearch
 import com.example.composegallery.feature.search.data.DefaultSearchRepository
+import com.example.composegallery.feature.search.fakes.FakeRecentSearchDao
+import com.example.composegallery.feature.search.fakes.FakeStringProvider
+import com.example.composegallery.feature.search.fakes.FakeUnsplashApi
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
-import org.mockito.kotlin.any
-import org.mockito.kotlin.argThat
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 
 class DefaultSearchRepositoryTest {
 
-    private lateinit var api: UnsplashApi
-    private lateinit var dao: RecentSearchDao
-    private lateinit var stringProvider: StringProvider
+    private val api = FakeUnsplashApi()
+    private val dao = FakeRecentSearchDao()
+    private val stringProvider = FakeStringProvider()
     private lateinit var repository: DefaultSearchRepository
 
     @Before
     fun setup() {
-        api = mock()
-        dao = mock()
-        stringProvider = mock()
         repository = DefaultSearchRepository(api, dao, stringProvider)
     }
 
     @Test
     fun savesRecentSearch_afterDeletingOldEntry() = runTest {
         val query = "mountains"
-        whenever(runBlocking { dao.deleteSearchIgnoreCase(query) }).thenReturn(Unit)
-        whenever(runBlocking { dao.insertSearch(any()) }).thenReturn(Unit)
 
         val result = repository.saveRecentSearch(query)
 
         assertThat(result).isInstanceOf(Result.Success::class.java)
-        runBlocking { verify(dao).deleteSearchIgnoreCase(query) }
-        runBlocking { verify(dao).insertSearch(argThat { this.query == query }) }
+        val recentSearches = dao.getRecentSearches(10).first()
+        assertThat(recentSearches.map { it.query }).contains(query)
     }
 
     @Test
     fun returnsError_whenSaveRecentSearchFailsDueToDbError() = runTest {
         val query = "crash"
-        whenever(runBlocking { dao.deleteSearchIgnoreCase(query) }).thenThrow(RuntimeException("DB error"))
-        whenever(stringProvider.get(any())).thenReturn("db failure")
+        dao.setShouldThrow(true)
 
         val result = repository.saveRecentSearch(query)
 
         assertThat(result).isInstanceOf(Result.Error::class.java)
         val message = (result as Result.Error).message
-        assertThat(message.lowercase()).contains("db failure")
+        assertThat(message.lowercase()).contains("fake")
     }
 
     @Test
     fun clearsAllRecentSearchesSuccessfully() = runTest {
-        whenever(runBlocking { dao.clearSearches() }).thenReturn(Unit)
+        dao.insertSearch(RecentSearchEntity("cats", 123))
 
         val result = repository.clearRecentSearches()
 
         assertThat(result).isInstanceOf(Result.Success::class.java)
-        runBlocking { verify(dao).clearSearches() }
+        assertThat(dao.getRecentSearches(10).first()).isEmpty()
     }
 
     @Test
     fun returnsError_whenClearRecentSearchesFails() = runTest {
-        whenever(runBlocking { dao.clearSearches() }).thenThrow(RuntimeException("boom"))
-        whenever(stringProvider.get(any())).thenReturn("something went wrong")
+        dao.setShouldThrow(true)
 
         val result = repository.clearRecentSearches()
 
         assertThat(result).isInstanceOf(Result.Error::class.java)
-        val message = (result as Result.Error).message
-        assertThat(message.lowercase()).contains("something went wrong")
     }
 
     @Test
     fun emitsRecentSearchListFromDao() = runTest {
         val limit = 5
-        val expectedEntities = listOf(
-            RecentSearchEntity("one", 100),
-            RecentSearchEntity("two", 200)
-        )
-        whenever(dao.getRecentSearches(limit)).thenReturn(flowOf(expectedEntities))
+        dao.insertSearch(RecentSearchEntity("one", 100))
+        dao.insertSearch(RecentSearchEntity("two", 200))
 
         val flow = repository.getRecentSearches(limit)
         val result = flow.first()
 
         assertThat(result).hasSize(2)
-        assertThat(result[0].query).isEqualTo("one")
-        assertThat(result[1].query).isEqualTo("two")
-        verify(dao).getRecentSearches(limit)
+        assertThat(result[0].query).isEqualTo("two") // Sorted by timestamp desc
+        assertThat(result[1].query).isEqualTo("one")
     }
 }

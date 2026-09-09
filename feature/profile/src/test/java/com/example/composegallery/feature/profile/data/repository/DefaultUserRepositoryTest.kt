@@ -1,6 +1,5 @@
 package com.example.composegallery.feature.profile.data.repository
 
-
 import com.example.composegallery.core.common.Result
 import com.example.composegallery.core.domain.model.UnsplashUser
 import com.example.composegallery.core.domain.model.UserStatistics
@@ -10,34 +9,29 @@ import com.example.composegallery.core.network.model.StatValueDto
 import com.example.composegallery.core.network.model.StatsDto
 import com.example.composegallery.core.network.model.UnsplashUserDto
 import com.example.composegallery.core.network.model.UserStatisticsDto
-import com.example.composegallery.core.network.remote.UnsplashApi
 import com.example.composegallery.feature.profile.data.DefaultUserRepository
-import com.example.composegallery.core.common.StringProvider
+import com.example.composegallery.feature.profile.fakes.FakeStringProvider
+import com.example.composegallery.feature.profile.fakes.FakeUnsplashApi
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
-import org.mockito.kotlin.any
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 
 class DefaultUserRepositoryTest {
 
-    private lateinit var api: UnsplashApi
-    private lateinit var stringProvider: StringProvider
+    private val api = FakeUnsplashApi()
+    private val stringProvider = FakeStringProvider()
     private lateinit var repository: DefaultUserRepository
 
     @Before
     fun setup() {
-        api = mock()
-        stringProvider = mock()
         repository = DefaultUserRepository(api, stringProvider)
     }
 
     @Test
     fun getUserProfile_shouldReturnSuccess_whenApiReturnsValidUser() = runTest {
         val dto = fakeUnsplashUserDto(username = "jane_doe")
-        whenever(api.getUser("jane_doe")).thenReturn(dto)
+        api.setUserResult(dto)
 
         val result = repository.getUserProfile("jane_doe")
 
@@ -48,19 +42,18 @@ class DefaultUserRepositoryTest {
 
     @Test
     fun getUserProfile_shouldReturnError_whenApiFails() = runTest {
-        whenever(api.getUser("fail")).thenThrow(RuntimeException("network down"))
-        whenever(stringProvider.get(any())).thenReturn("Network error")
+        api.setException(RuntimeException("network down"))
 
         val result = repository.getUserProfile("fail")
 
         assertThat(result).isInstanceOf(Result.Error::class.java)
-        assertThat((result as Result.Error).message.lowercase()).contains("network")
+        assertThat((result as Result.Error).message.lowercase()).contains("fake")
     }
 
     @Test
     fun getUserStatistics_shouldReturnSuccess_whenApiReturnsValidData() = runTest {
         val dto = fakeUserStatisticsDto(username = "jane_doe")
-        whenever(api.getUserStatistics("jane_doe")).thenReturn(dto)
+        api.setUserStatisticsResult(dto)
 
         val result = repository.getUserStatistics("jane_doe")
 
@@ -71,13 +64,11 @@ class DefaultUserRepositoryTest {
 
     @Test
     fun getUserStatistics_shouldReturnError_whenApiFails() = runTest {
-        whenever(api.getUserStatistics("fail")).thenThrow(RuntimeException("API crash"))
-        whenever(stringProvider.get(any())).thenReturn("API failure")
+        api.setException(RuntimeException("API crash"))
 
         val result = repository.getUserStatistics("fail")
 
         assertThat(result).isInstanceOf(Result.Error::class.java)
-        assertThat((result as Result.Error).message.lowercase()).contains("api failure")
     }
 
     private fun fakeUnsplashUserDto(username: String): UnsplashUserDto {

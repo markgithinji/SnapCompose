@@ -18,6 +18,9 @@ dependencies {
     // Coil
     implementation(libs.coil.compose)
 
+    // Paging
+    testImplementation(libs.androidx.paging.common)
+
     testImplementation(libs.truth)
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.kotlin)
