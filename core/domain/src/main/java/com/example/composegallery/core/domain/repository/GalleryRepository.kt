@@ -12,4 +12,5 @@ interface GalleryRepository {
     suspend fun getTopics(): Result<List<Topic>>
     suspend fun getPhoto(photoId: String): Result<Photo>
     suspend fun reportDownload(downloadUrl: String)
+    suspend fun syncPhotos(topicId: String, page: Int, pageSize: Int, isRefresh: Boolean): Result<Boolean>
 }

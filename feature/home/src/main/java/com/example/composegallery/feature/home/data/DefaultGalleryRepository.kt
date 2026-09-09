@@ -5,6 +5,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
+import androidx.room.withTransaction
 import com.example.composegallery.core.common.R
 import com.example.composegallery.core.common.Result
 import com.example.composegallery.core.common.safeApiCall
@@ -13,7 +14,10 @@ import com.example.composegallery.core.network.paging.PagingDefaults
 import com.example.composegallery.core.network.remote.UnsplashApi
 import com.example.composegallery.core.common.StringProvider
 import com.example.composegallery.core.database.local.AppDatabase
+import com.example.composegallery.core.database.local.home.entity.PhotoRemoteKeyEntity
+import com.example.composegallery.core.database.local.home.entity.TopicCacheMetadataEntity
 import com.example.composegallery.core.database.local.home.entity.toDomainModel
+import com.example.composegallery.core.database.local.home.entity.toEntity
 import com.example.composegallery.core.domain.model.Photo
 import com.example.composegallery.core.domain.model.Topic
 import com.example.composegallery.core.domain.repository.GalleryRepository
@@ -46,7 +50,7 @@ class DefaultGalleryRepository @Inject constructor(
                 prefetchDistance = PagingDefaults.PREFETCH_DISTANCE,
                 enablePlaceholders = true
             ),
-            remoteMediator = PhotoRemoteMediator(api, database, stringProvider, topicId),
+            remoteMediator = PhotoRemoteMediator(database, this, topicId),
             pagingSourceFactory = { 
                 database.photoDao().getPagedPhotos(topicId) 
             }
@@ -80,6 +84,64 @@ class DefaultGalleryRepository @Inject constructor(
                 ?: throw IllegalStateException(stringProvider.get(R.string.error_invalid_data_received))
             
             photo
+        }
+    }
+
+    override suspend fun syncPhotos(
+        topicId: String,
+        page: Int,
+        pageSize: Int,
+        isRefresh: Boolean
+    ): Result<Boolean> {
+        return safeApiCall(stringProvider) {
+            val response = if (topicId == PhotoRemoteMediator.EDITORIAL) {
+                api.getPhotos(page = page, perPage = pageSize)
+            } else {
+                api.getTopicPhotos(topicIdOrSlug = topicId, page = page, perPage = pageSize)
+            }
+
+            val photos = response.mapNotNull { it.toDomainModel() }
+            val endOfPaginationReached = photos.isEmpty()
+
+            database.withTransaction {
+                if (isRefresh) {
+                    database.photoRemoteKeyDao().clearRemoteKeys(topicId)
+                    database.photoDao().clearAll(topicId)
+                    database.topicCacheMetadataDao().insertMetadata(
+                        TopicCacheMetadataEntity(topicId = topicId, lastUpdated = System.currentTimeMillis())
+                    )
+                }
+
+                val prevPage = if (page == 1) null else page - 1
+                val nextPage = if (endOfPaginationReached) null else page + 1
+
+                val keys = photos.map {
+                    PhotoRemoteKeyEntity(
+                        photoId = it.id,
+                        topicId = topicId,
+                        prevPage = prevPage,
+                        nextPage = nextPage
+                    )
+                }
+                database.photoRemoteKeyDao().insertAll(keys)
+
+                val entities = photos.mapIndexed { index, photo ->
+                    val order = (page - 1) * pageSize + index
+                    photo.toEntity(topicId = topicId, pagingOrder = order)
+                }
+
+                val insertResults = database.photoDao().insertPhotos(entities)
+
+                if (isRefresh) {
+                    insertResults.forEachIndexed { index, resultId ->
+                        if (resultId == -1L) {
+                            val entity = entities[index]
+                            database.photoDao().updatePagingOrder(entity.id, topicId, entity.pagingOrder)
+                        }
+                    }
+                }
+            }
+            endOfPaginationReached
         }
     }
 }

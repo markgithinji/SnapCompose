@@ -19,6 +19,7 @@ composeShimmer = "1.5.0"
 pagingCommon = "3.5.1"
 pagingRuntime = "3.5.1"
 roomRuntime = "2.8.4"
+workRuntime = "2.10.0"
 
 # Coil
 coilCompose = "2.7.0"
@@ -116,6 +117,11 @@ androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRunt
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
 androidx-room-paging = { module = "androidx.room:room-paging", version.ref = "roomRuntime" }
 androidx-room-testing = { module = "androidx.room:room-testing", version.ref = "roomRuntime" }
+
+# WorkManager
+androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workRuntime" }
+androidx-hilt-work = { group = "androidx.hilt", name = "hilt-work", version.ref = "hiltNavigationCompose" }
+hilt-work-compiler = { group = "androidx.hilt", name = "hilt-compiler", version.ref = "hiltNavigationCompose" }
 
 # Networking & Serialization
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }

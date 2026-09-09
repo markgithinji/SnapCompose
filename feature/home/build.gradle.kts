@@ -28,6 +28,11 @@ dependencies {
     // Timber
     implementation(libs.jakewharton.timber)
 
+    // WorkManager
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.hilt.work)
+    ksp(libs.hilt.work.compiler)
+
     testImplementation(libs.truth)
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.kotlin)
