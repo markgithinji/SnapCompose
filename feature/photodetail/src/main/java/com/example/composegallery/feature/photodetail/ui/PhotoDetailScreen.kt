@@ -1,13 +1,23 @@
 package com.example.composegallery.feature.photodetail.ui
 
+import android.content.Context
 import android.content.Intent
+import android.annotation.SuppressLint
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.icu.text.SimpleDateFormat
 import android.icu.util.TimeZone
+import android.view.HapticFeedbackConstants
+import android.view.View
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -48,25 +58,28 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -85,7 +98,27 @@ import com.example.composegallery.core.ui.ProgressIndicator
 import com.example.composegallery.core.ui.SharedTransitionKeys
 import com.example.composegallery.core.ui.UserProfileImage
 import com.example.composegallery.core.common.UiState
+import kotlinx.coroutines.launch
 import java.util.Locale
+
+@SuppressLint("MissingPermission")
+private fun performHapticFeedback(view: View, context: Context, constant: Int) {
+    val success = view.performHapticFeedback(
+        constant,
+        HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING
+    )
+    if (!success) {
+        val vibrator = context.getSystemService(Vibrator::class.java)
+        if (vibrator != null && vibrator.hasVibrator()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator.vibrate(VibrationEffect.createOneShot(10, VibrationEffect.DEFAULT_AMPLITUDE))
+            } else {
+                @Suppress("DEPRECATION")
+                vibrator.vibrate(10)
+            }
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
@@ -122,6 +155,11 @@ fun PhotoDetailScreen(
 
     var pendingAction by remember { mutableStateOf<PhotoDetailAction?>(null) }
     val context = LocalContext.current
+    val view = LocalView.current
+
+    SideEffect {
+        view.isHapticFeedbackEnabled = true
+    }
 
     LaunchedEffect(photoId) {
         viewModel.loadPhoto(photoId)
@@ -165,6 +203,12 @@ fun PhotoDetailScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
+                        val hapticConstant = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                            HapticFeedbackConstants.CONFIRM
+                        } else {
+                            HapticFeedbackConstants.VIRTUAL_KEY
+                        }
+                        performHapticFeedback(view, context, hapticConstant)
                         if (pendingAction == PhotoDetailAction.DOWNLOAD) {
                             viewModel.downloadPhoto(photo)
                         } else {
@@ -207,7 +251,12 @@ fun PhotoDetailScreen(
                             )
                         },
                         navigationIcon = {
-                            IconButton(onClick = onBack) {
+                            IconButton(
+                                onClick = {
+                                    performHapticFeedback(view, context, HapticFeedbackConstants.VIRTUAL_KEY)
+                                    onBack()
+                                }
+                            ) {
                                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                             }
                         }
@@ -307,6 +356,8 @@ private fun PhotoDetailContent(
     val density = LocalDensity.current
     val halfScreenHeightDp = with(density) { (containerSize.height * 0.5f).toDp() }
     var isImageLoading by remember { mutableStateOf(true) }
+    val view = LocalView.current
+    val context = LocalContext.current
 
     Column(modifier = modifier.fillMaxSize()) {
         Box(
@@ -356,7 +407,10 @@ private fun PhotoDetailContent(
 
             if (photo != null) {
                 IconButton(
-                    onClick = { onExpandClick(photo.id) },
+                    onClick = {
+                        performHapticFeedback(view, context, HapticFeedbackConstants.VIRTUAL_KEY)
+                        onExpandClick(photo.id)
+                    },
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .padding(12.dp)
@@ -416,6 +470,11 @@ private fun PhotoDetailInfo(
     val formattedDate by remember(photo.createdAt) {
         derivedStateOf { photo.createdAt?.formatToReadableDate() }
     }
+
+    val coroutineScope = rememberCoroutineScope()
+    val scale = remember { Animatable(1f) }
+    val view = LocalView.current
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -488,24 +547,55 @@ private fun PhotoDetailInfo(
             verticalAlignment = Alignment.CenterVertically
         ) {
             FilledTonalIconButton(
-                onClick = onFavoriteClick,
+                onClick = {
+                    val hapticConstant = if (!isFavorite && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        HapticFeedbackConstants.CONFIRM
+                    } else {
+                        HapticFeedbackConstants.VIRTUAL_KEY
+                    }
+                    performHapticFeedback(view, context, hapticConstant)
+                    coroutineScope.launch {
+                        scale.animateTo(
+                            targetValue = 1.3f,
+                            animationSpec = spring(
+                                dampingRatio = Spring.DampingRatioMediumBouncy,
+                                stiffness = Spring.StiffnessLow
+                            )
+                        )
+                        scale.animateTo(
+                            targetValue = 1f,
+                            animationSpec = spring(
+                                dampingRatio = Spring.DampingRatioMediumBouncy,
+                                stiffness = Spring.StiffnessLow
+                            )
+                        )
+                    }
+                    onFavoriteClick()
+                },
                 modifier = Modifier.size(56.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = IconButtonDefaults.filledTonalIconButtonColors(
                     containerColor = if (isFavorite) MaterialTheme.colorScheme.primaryContainer 
                     else MaterialTheme.colorScheme.secondaryContainer,
-                    contentColor = if (isFavorite) MaterialTheme.colorScheme.primary 
+                    contentColor = if (isFavorite) Color.Red 
                     else MaterialTheme.colorScheme.onSecondaryContainer
                 )
             ) {
                 Icon(
                     imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                    contentDescription = null
+                    contentDescription = null,
+                    modifier = Modifier.graphicsLayer {
+                        scaleX = scale.value
+                        scaleY = scale.value
+                    }
                 )
             }
 
             FilledTonalIconButton(
-                onClick = onShareClick,
+                onClick = {
+                    performHapticFeedback(view, context, HapticFeedbackConstants.VIRTUAL_KEY)
+                    onShareClick()
+                },
                 modifier = Modifier.size(56.dp),
                 shape = RoundedCornerShape(16.dp)
             ) {
@@ -515,7 +605,10 @@ private fun PhotoDetailInfo(
             val isDownloading = downloadStatus is DownloadStatus.Progress
 
             FilledTonalIconButton(
-                onClick = onDownloadClick,
+                onClick = {
+                    performHapticFeedback(view, context, HapticFeedbackConstants.VIRTUAL_KEY)
+                    onDownloadClick()
+                },
                 modifier = Modifier.size(56.dp),
                 enabled = !isDownloading,
                 shape = RoundedCornerShape(16.dp)
@@ -541,7 +634,10 @@ private fun PhotoDetailInfo(
             }
 
             FilledIconButton(
-                onClick = onWallpaperClick,
+                onClick = {
+                    performHapticFeedback(view, context, HapticFeedbackConstants.VIRTUAL_KEY)
+                    onWallpaperClick()
+                },
                 modifier = Modifier.size(56.dp),
                 enabled = !isWallpaperLoading,
                 shape = RoundedCornerShape(16.dp)

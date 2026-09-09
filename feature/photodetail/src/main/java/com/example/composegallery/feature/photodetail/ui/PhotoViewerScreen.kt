@@ -1,5 +1,12 @@
 package com.example.composegallery.feature.photodetail.ui
 
+import android.annotation.SuppressLint
+import android.content.Context
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.view.HapticFeedbackConstants
+import android.view.View
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.rememberTransformableState
@@ -9,11 +16,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -24,6 +31,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -39,6 +48,12 @@ fun PhotoViewerScreen(
     viewModel: PhotoDetailViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
+    val view = LocalView.current
+    val context = LocalContext.current
+
+    SideEffect {
+        view.isHapticFeedbackEnabled = true
+    }
 
     LaunchedEffect(photoId) {
         viewModel.loadPhoto(photoId)
@@ -116,6 +131,7 @@ fun PhotoViewerScreen(
                         }
                         .pointerInput(Unit) {
                             detectTapGestures(onDoubleTap = {
+                                performHapticFeedback(view, context, HapticFeedbackConstants.VIRTUAL_KEY)
                                 scale = 1f
                                 rotation = 0f
                                 offset = Offset.Zero
@@ -140,6 +156,25 @@ fun PhotoViewerScreen(
                 imageRes = R.drawable.error_icon,
                 titleColor = MaterialTheme.colorScheme.error
             )
+        }
+    }
+}
+
+@SuppressLint("MissingPermission")
+private fun performHapticFeedback(view: View, context: Context, constant: Int) {
+    val success = view.performHapticFeedback(
+        constant,
+        HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING
+    )
+    if (!success) {
+        val vibrator = context.getSystemService(Vibrator::class.java)
+        if (vibrator != null && vibrator.hasVibrator()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator.vibrate(VibrationEffect.createOneShot(10, VibrationEffect.DEFAULT_AMPLITUDE))
+            } else {
+                @Suppress("DEPRECATION")
+                vibrator.vibrate(10)
+            }
         }
     }
 }
