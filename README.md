@@ -15,7 +15,7 @@ A modern Android app built with **Jetpack Compose**, showcasing best practices a
 - 🏗️ **Multi-Module Architecture**: Scalable, decoupled structure separating features and core logic for better build performance and maintainability.
 - 🔍 **Search Unsplash photos** with infinite scroll and **advanced filters** (Orientation, Color, Sorting)
 - ❤️ **Favorites System**: Save your favorite photos locally with persistent storage
-- 🔄 **Daily Pre-fetch**: Background background task to keep "Editorial" photos up-to-date using **WorkManager**
+- 🔄 **Daily Pre-fetch**: Background task to keep "Editorial" photos up-to-date using **WorkManager**
 - ☁️ **Offline-First**: Robust caching strategy using Room and Paging 3 Mediator for seamless offline viewing
 - 📥 **Photo Download**: High-quality photo downloads with **real-time progress tracking** and MediaStore integration
 - 🖼️ **Set Wallpaper**: Quickly set any Unsplash photo as your device wallpaper
@@ -42,7 +42,7 @@ A modern Android app built with **Jetpack Compose**, showcasing best practices a
 - **Image Loading**: Coil
 - **Build System**: Gradle (KTS) with **Convention Plugins** for modular configuration
 - **Performance**: **Baseline Profiles** for improved startup and frame stability
-- **System Integration**: DownloadManager, MediaStore API, WallpaperManager, FileProvider
+- **System Integration**: DownloadManager, MediaStore API, WallpaperManager, FileProvider, WorkManager
 - **Logging**: Timber  
 - **Code Quality**: Spotless (formatting), Detekt (static analysis)  
 - **Testing**: JUnit, Mockito, Turbine, Truth, Compose UI Testing
