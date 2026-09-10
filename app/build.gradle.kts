@@ -90,6 +90,11 @@ dependencies {
     // Misc UI Utilities
     implementation(libs.androidx.core.splashscreen)
 
+    // WorkManager & Hilt Work
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.hilt.work)
+    ksp(libs.hilt.work.compiler)
+
     // Testing
     testImplementation(libs.junit)
     testImplementation(libs.truth)
